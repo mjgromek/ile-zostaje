@@ -213,28 +213,34 @@ assert_allowed 10 "$d" "chore: add notes"
 
 printf '\nverify-deploy.sh and probe.sh\n'
 
-good_port=8731
-bad_port=8732
-redirect_port=8733
+# Ports come from the OS, never from a constant. A fixed port silently tests
+# whatever else already holds it. See docs/RUN-001-FINDINGS.md, F6.
+started_port=""
 
-start_server() { # mode port
-	python3 "$script_dir/fakeserver.py" "$1" "$2" /api/me rev-good &
+start_server() { # mode -> sets started_port to the port the OS assigned
+	portfile="$tmp/port.$1.$$"
+	python3 "$script_dir/fakeserver.py" "$1" 0 /api/me rev-good >"$portfile" &
 	pids="$pids $!"
 	tries=0
 	while [ "$tries" -lt 20 ]; do
-		if curl --max-time 2 -sS -o /dev/null "http://127.0.0.1:$2/version" 2>/dev/null; then
+		started_port=$(tr -d '[:space:]' <"$portfile" 2>/dev/null || printf '')
+		if [ -n "$started_port" ] &&
+			curl --max-time 2 -sS -o /dev/null "http://127.0.0.1:$started_port/version" 2>/dev/null; then
 			return 0
 		fi
 		sleep 1
 		tries=$((tries + 1))
 	done
-	printf 'FATAL  the %s fake server never came up on port %s\n' "$1" "$2" >&2
+	printf 'FATAL  the %s fake server never came up (port %s)\n' "$1" "${started_port:-unassigned}" >&2
 	exit 1
 }
 
-start_server GOOD "$good_port"
-start_server BAD "$bad_port"
-start_server REDIRECT "$redirect_port"
+start_server GOOD
+good_port=$started_port
+start_server BAD
+bad_port=$started_port
+start_server REDIRECT
+redirect_port=$started_port
 
 # 11  verify-deploy against a stale build serving the wrong revision
 assert_script 11 FAIL "revision gate" env \
