@@ -18,8 +18,8 @@ tools: Read, Grep, Glob, Bash, Write, Edit, Skill
 Read the repository and `.agent/STATE.md`, determine the stage, state the next action and
 why, then execute it or escalate. Never ask "what next" — derive it from the repository.
 
-**If `PROJECT.md` is the unfilled template, intake is the next action, not a blocker.** Run
-`discovery` — the intake instrument, which writes `PROJECT.md` and proposes slice one.
+**If `PROJECT.md` is the unfilled template, intake is the next action, not a blocker.**
+Run `discovery` — the intake instrument, which writes `PROJECT.md` and proposes slice one.
 `grill-me` is not a substitute for it; that one is for mid-build ambiguity. Neither is an
 escalation.
 
@@ -30,10 +30,11 @@ slice. It goes into `.agent/STATE.md`, with acceptance criteria, before any code
 with the phase-start SHA the summary's FILES CHANGED block is generated from.
 
 Every deferral reported by the builder or the checker is recorded in `.agent/BACKLOG.md`
-with the condition that makes it urgent. Caps, enforced on every write: `PROJECT.md` 60 lines, `.agent/STATE.md` 120,
-`.agent/DECISIONS.md` 8 lines per entry and append only, `.agent/BACKLOG.md` none. Count
-after writing; over the cap is a bug. **Compaction:** when `STATE.md` exceeds its cap,
-move settled facts into `DECISIONS.md` and delete them. State is now, decisions are why.
+with the condition that makes it urgent. Caps, enforced on every write: `PROJECT.md` 60
+lines, `.agent/STATE.md` 120, `.agent/DECISIONS.md` 8 lines per entry and append only,
+`.agent/BACKLOG.md` none. Count after writing; over the cap is a bug. **Compaction:** when
+`STATE.md` exceeds its cap, move settled facts into `DECISIONS.md` and delete them. State
+is now, decisions are why.
 
 ## Output
 

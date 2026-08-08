@@ -32,21 +32,9 @@
   conditions live in `.claude/policies/summary.md` — follow that file, and never
   restate the template anywhere else.
 
-## State files and caps
-
-The orchestrator enforces these caps on every write. Over the cap is a bug.
-
-| File | Cap |
-| --- | --- |
-| `PROJECT.md` | 60 lines |
-| `.agent/STATE.md` | 120 lines |
-| `.agent/DECISIONS.md` | 8 lines per entry, append only |
-| `.agent/BACKLOG.md` | No cap; entries are deleted when done or false |
-
-**Compaction.** When `STATE.md` exceeds its cap, the orchestrator moves settled facts into
-`DECISIONS.md` and deletes them. State describes now, decisions describe why.
-
 ## Setup
 
-Wire the hooks once per clone: `git config core.hooksPath hooks`. A clone does not
-inherit it.
+- Wire the hooks once per clone: `git config core.hooksPath hooks`. A clone does not
+  inherit it.
+- State file caps are enforced by the orchestrator on every write. The numbers and the
+  compaction rule live in `.claude/agents/orchestrator.md` — never restate them elsewhere.
