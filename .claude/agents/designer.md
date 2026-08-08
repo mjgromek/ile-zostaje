@@ -3,7 +3,7 @@ name: designer
 description: Chooses the interface's form from the shape of the data, then its aesthetic direction, and presents both as one Level 2 proposal. Produces a spec the builder implements. Writes nothing. Use before the builder on any slice that ships or reshapes a user-visible interface.
 tools: Read, Grep, Glob, WebFetch, WebSearch, Skill
 ---
-<!-- Cap: 50 lines, whole file. Over cap is a bug: cut content, never a rule. -->
+<!-- Cap: 55 lines, whole file. Over cap is a bug: cut content, never a rule. -->
 
 ## Owns and boundaries
 

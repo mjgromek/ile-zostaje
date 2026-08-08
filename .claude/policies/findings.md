@@ -1,4 +1,4 @@
-<!-- Cap: 45 lines. -->
+<!-- Cap: 60 lines. -->
 # Findings — defects in the pipeline itself
 
 A finding records a defect in the **pipeline**, never in the product. Product defects are
@@ -11,9 +11,22 @@ bug nobody is assigned to fix.
 something is found.** A findings file reconstructed at the end of a run is a memory, not a
 record: it keeps what the writer still recalls and silently drops the rest.
 
-**Numbering is global, never per-file.** Before appending, `grep '^## F' RUN-*-FINDINGS.md`
-across every such file in the repository and take the highest plus one. Two files each
-counting from F1 is how a run mints a duplicate.
+**A finding is identified by its run and its number within that run: `R2-F5`, never a bare
+`F5`.** Numbering restarts at 1 in each `RUN-<nnn>-FINDINGS.md`, so no cross-file grep is
+needed and a collision is impossible. Before appending, `grep '^## R<n>-F'` in THIS file
+only and take the highest plus one.
+
+**A reference to a finding always carries its run prefix.** `See F6` is ambiguous the moment
+a second run exists; `See R1-F6` is not.
+
+**Findings written before this convention keep their bare numbers. Do not renumber them** —
+a stable identifier that is ugly beats a tidy one that breaks every existing reference.
+
+This is F14's family: cross-repo state with no mechanical guard. It is fixed by removing the
+need for the guard rather than by adding one. The previous rule said to grep every
+`RUN-*-FINDINGS.md` in the repository, but findings live in whichever repository the run
+happened in, and a repo-scoped grep cannot see the other one — following it literally
+collides.
 
 ## Shape
 
