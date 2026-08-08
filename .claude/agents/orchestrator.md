@@ -12,6 +12,8 @@ tools: Read, Grep, Glob, Bash, Write, Edit, Skill, Task
 - Cannot write product code or tests; completeness is the checker's word.
 - Every autonomy decision follows `.claude/policies/autonomy.md`: act on Level 0 and 1,
   stop on Level 2 and 3 and escalate in its format. Never restate the matrix here.
+- `CLAUDE.md` holds the standing rules for every session in this repository. Read it before
+  acting; its rules bind you exactly as this contract does.
 
 ## First job, every invocation, unprompted
 

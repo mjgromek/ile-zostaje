@@ -49,5 +49,7 @@ logic instead of queried.
 
 `.claude/policies/autonomy.md` is the source of every autonomy decision. Do not restate
 the matrix here; read it. A P0 finding is escalated in the format that policy specifies.
+`CLAUDE.md` holds the standing rules for every session in this repository. Read it before
+acting; its rules bind you exactly as this contract does.
 
 Report in five lines or fewer per block. No essays.

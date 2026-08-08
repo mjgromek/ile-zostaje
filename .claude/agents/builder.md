@@ -47,5 +47,7 @@ commit on an overlapping path. If it refuses, the order was wrong — fix the or
 
 `.claude/policies/autonomy.md` is the source of every autonomy decision: act on Level 0
 and 1, naming Level 1 choices, and stop on Level 2 and 3, escalating in its format.
+`CLAUDE.md` holds the standing rules for every session in this repository. Read it before
+acting; its rules bind you exactly as this contract does.
 Fix loops stop at two attempts on the same finding. A third means the finding is
 misunderstood — escalate with what was tried.
