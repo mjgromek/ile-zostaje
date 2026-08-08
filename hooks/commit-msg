@@ -1,0 +1,99 @@
+#!/bin/sh
+# Two rules that need the commit message, which pre-commit cannot see:
+#   A. test-first ordering — a feat: commit follows a test: commit on an overlapping path
+#   B. decision record    — a feat: commit, or an ADR change, stages .agent/DECISIONS.md
+set -eu
+
+msg_file=$1
+subject=$(head -n 1 "$msg_file")
+staged=$(git diff --cached --name-only)
+
+is_feat=0
+case "$subject" in
+feat:* | feat\(*\):*) is_feat=1 ;;
+esac
+
+# Stem: basename, extension stripped, then a leading test_/test- and a
+# trailing _test/-test/.test/.spec stripped. src/auth.py ~ tests/test_auth.py
+stem() {
+	s=${1##*/}
+	s=${s%.*}
+	case "$s" in
+	test_*) s=${s#test_} ;;
+	test-*) s=${s#test-} ;;
+	esac
+	case "$s" in
+	*_test) s=${s%_test} ;;
+	*-test) s=${s%-test} ;;
+	*.test) s=${s%.test} ;;
+	*.spec) s=${s%.spec} ;;
+	esac
+	printf '%s\n' "$s"
+}
+
+dirof() {
+	case "$1" in
+	*/*) printf '%s\n' "${1%/*}" ;;
+	*) printf '%s\n' "." ;;
+	esac
+}
+
+if [ "$is_feat" -eq 1 ]; then
+	test_sha=""
+	for sha in $(git rev-list -n 10 HEAD 2>/dev/null || true); do
+		case "$(git show -s --format=%s "$sha")" in
+		test:* | test\(*\):*)
+			test_sha=$sha
+			break
+			;;
+		esac
+	done
+
+	if [ -z "$test_sha" ]; then
+		printf 'REFUSED  rule A, test-first ordering\n' >&2
+		printf '  No test: commit in the last 10 commits.\n' >&2
+		printf '  Satisfy it: commit the failing test as test: first, then this feat:.\n' >&2
+		exit 1
+	fi
+
+	test_paths=$(git show --name-only --format= "$test_sha")
+	overlap=0
+	for sp in $staged; do
+		for tp in $test_paths; do
+			[ "$(dirof "$sp")" = "$(dirof "$tp")" ] && overlap=1
+			[ "$(stem "$sp")" = "$(stem "$tp")" ] && overlap=1
+		done
+	done
+
+	if [ "$overlap" -eq 0 ]; then
+		printf 'REFUSED  rule A, test-first ordering\n' >&2
+		printf '  Nearest test: commit %s touches no overlapping path.\n' "$(git rev-parse --short "$test_sha")" >&2
+		printf '  staged:      %s\n' $staged >&2
+		printf '  test commit: %s\n' $test_paths >&2
+		printf '  Satisfy it: the test must share a directory or a filename stem with the code.\n' >&2
+		exit 1
+	fi
+fi
+
+needs_record=$is_feat
+for sp in $staged; do
+	case "$sp" in
+	docs/adr/*) needs_record=1 ;;
+	esac
+done
+
+if [ "$needs_record" -eq 1 ]; then
+	staged_record=0
+	for sp in $staged; do
+		[ "$sp" = ".agent/DECISIONS.md" ] && staged_record=1
+	done
+	if [ "$staged_record" -eq 0 ]; then
+		printf 'REFUSED  rule B, decision record\n' >&2
+		printf '  A feat: commit or an ADR change must stage .agent/DECISIONS.md.\n' >&2
+		printf '  staged: %s\n' $staged >&2
+		printf '  Satisfy it: append the what / why / what-it-rules-out entry, then git add it.\n' >&2
+		exit 1
+	fi
+fi
+
+exit 0

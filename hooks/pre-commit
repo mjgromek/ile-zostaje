@@ -1,0 +1,64 @@
+#!/bin/sh
+# Secret scan over the added lines of the staged diff.
+# Message-independent by design: git runs pre-commit before a message exists,
+# so the test-first and decision-record rules live in hooks/commit-msg.
+set -eu
+
+TAB=$(printf '\t')
+
+patterns() {
+	cat <<'PATTERNS'
+aws-access-key	AKIA[0-9A-Z]{16}
+private-key	-----BEGIN [A-Z ]*PRIVATE KEY-----
+slack-token	xox[abprs]-[0-9A-Za-z-]{10,}
+github-token	gh[pousr]_[0-9A-Za-z]{20,}
+google-api-key	AIza[0-9A-Za-z_-]{35}
+gcp-sa-json	"private_key_id"
+generic-secret	(api[_-]?key|secret|password|passwd|token)["'[:space:]]*[:=]["'[:space:]]*[A-Za-z0-9/+=_-]{20,}
+PATTERNS
+}
+
+found=0
+file=""
+lineno=0
+
+git diff --cached -U0 | while IFS= read -r line; do
+	case "$line" in
+	'+++ /dev/null') file="" ;;
+	'+++ b/'*) file=${line#+++ b/} ;;
+	'@@ '*)
+		hunk=${line#*+}
+		hunk=${hunk%% *}
+		lineno=${hunk%%,*}
+		;;
+	'+'*)
+		[ -n "$file" ] || continue
+		added=${line#+}
+		while IFS="$TAB" read -r name re; do
+			[ -n "$name" ] || continue
+			# -e matters: a pattern starting with - is otherwise read as options.
+			if printf '%s\n' "$added" | grep -Eq -e "$re"; then
+				printf 'REFUSED  secret-scan [%s]  %s:%s\n' "$name" "$file" "$lineno" >&2
+				printf '  %s\n' "$added" >&2
+				found=1
+			fi
+		done <<PATLIST
+$(patterns)
+PATLIST
+		lineno=$((lineno + 1))
+		;;
+	esac
+	# The pipeline runs this loop in a subshell, so the verdict travels by file.
+	[ "$found" -eq 0 ] || : >"$(git rev-parse --git-dir)/SECRET_SCAN_FAILED"
+done
+
+verdict="$(git rev-parse --git-dir)/SECRET_SCAN_FAILED"
+if [ -e "$verdict" ]; then
+	rm -f "$verdict"
+	printf '\nCommit refused: a staged line matches a secret pattern.\n' >&2
+	printf 'Remove the secret, or move it to an untracked env file.\n' >&2
+	printf 'Override with git commit --no-verify. It leaves no trace in history.\n' >&2
+	exit 1
+fi
+
+exit 0
