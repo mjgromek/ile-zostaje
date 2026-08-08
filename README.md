@@ -24,10 +24,22 @@ Every rule in this repository traces to one of those.
 
 ```bash
 git clone https://github.com/mjgromek/easydev-agentic-pipeline.git my-project
-cd my-project
+cd my-project   # the session's working directory must be INSIDE the clone
 git config core.hooksPath hooks
 claude   # then ask for the orchestrator: it reads the repo and states the next action
 ```
+
+**Start the session with its working directory inside the clone.** Agents and skills are
+enumerated once, when the session starts, from that directory. Clone into a subdirectory and
+start the session in the parent, and `.claude/` sits one level below the root: none of the
+three agents and none of the eight skills exist, and nothing warns you. Definitions added
+after a session has started are not picked up either — restart.
+
+**Preflight — the first thing to do in any new session, before any work.** Ask for the list
+of available agent types and confirm `orchestrator`, `builder` and `checker` are in it. If
+they are not, the session is rooted outside the clone or was started before the files
+existed: restart inside the clone. Skip this check and a request for the orchestrator falls
+through to `general-purpose`, which holds every tool and will appear to work.
 
 **A clone does not wire the hooks — that `core.hooksPath` line is required, once per
 clone.** This repository deliberately does not wire its own: it has no tests and no product

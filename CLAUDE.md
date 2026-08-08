@@ -36,5 +36,7 @@
 
 - Wire the hooks once per clone: `git config core.hooksPath hooks`. A clone does not
   inherit it.
+- **If `orchestrator`, `builder` and `checker` are not in the available agent types, stop
+  and say so** — the session is rooted outside the clone. Never proceed under `general-purpose`.
 - State file caps are enforced by the orchestrator on every write. The numbers and the
   compaction rule live in `.claude/agents/orchestrator.md` — never restate them elsewhere.
