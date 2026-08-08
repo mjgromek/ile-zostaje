@@ -7,7 +7,9 @@ description: Test-driven development. Use when the user wants to build features 
 
 TDD is the red → green loop. This skill is the reference that makes that loop produce tests worth keeping: what a good test is, where tests go, the anti-patterns, and the rules of the loop. Every section applies on every cycle — consult them before and during the loop, not after.
 
-When exploring the codebase, read `CONTEXT.md` (if it exists) so test names and interface vocabulary match the project's domain language, and respect ADRs in the area you're touching.
+Work from the acceptance criteria at the top of `.agent/STATE.md`. If they are missing, stop and say so — do not infer them from the code.
+
+When exploring the codebase, read `CONTEXT.md` if present and `docs/adr/` if present, so test names and interface vocabulary match the project's domain language; neither is required by this template.
 
 ## What a good test is
 
@@ -23,7 +25,7 @@ A **seam** is the public boundary you test at: the interface where you observe b
 
 Ask: "What's the public interface, and which seams should we test?"
 
-When the shape of that interface is itself in question — how deep the module is, where the seam belongs, what the interface should expose — use the `/codebase-design` skill for the vocabulary. It is the shared source of the module, interface, depth, seam, adapter, leverage and locality terms, and it is a reference to consult, not a session to run.
+When the shape of that interface is itself in question — how deep the module is, where the seam belongs, what the interface should expose — that is a design question, not a test question. Settle it against `PROJECT.md` and the acceptance criteria before writing the test.
 
 ## Anti-patterns
 
@@ -34,5 +36,14 @@ When the shape of that interface is itself in question — how deep the module i
 ## Rules of the loop
 
 - **Red before green.** Write the failing test first, then only enough code to pass it. Don't anticipate future tests or add speculative features.
+- **Confirm it fails for its own reason.** Run it and read the failure: the assertion, not an import error, a typo, a missing fixture or a collection error. A test that fails for the wrong reason has verified nothing.
 - **One slice at a time.** One seam, one test, one minimal implementation per cycle.
 - **Refactoring is not part of the loop.** It belongs to the review stage (see the `code-review` skill), not the red → green implementation cycle.
+
+## Cap
+
+**The named acceptance criteria from `.agent/STATE.md`, plus at most two implied guards.** An implied guard is written only with a stated reason, and the report says which two and why.
+
+**At a third implied guard, refuse.** Do not write it. Report it as a deferral with the condition that would make it urgent, and let the orchestrator record it. No speculative tests, and no test for behaviour nobody asked for: a test that exists because it seemed thorough is scope expansion wearing a test's clothes.
+
+Adapted from https://github.com/mattpocock/skills. Tightened per PIPELINE_FINAL_PLAN.md section 6.

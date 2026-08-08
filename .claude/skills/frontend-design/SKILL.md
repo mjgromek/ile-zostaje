@@ -6,6 +6,10 @@ license: Complete terms in LICENSE.txt
 
 # Frontend Design
 
+## Trigger
+
+**Runs only when UI is in scope.** Never on a backend-only slice. If invoked on one, say so in one line and stop — there is no partial run and no pre-emptive styling of a UI that does not exist yet.
+
 Approach this as the design lead at a small studio known for giving every client a visual identity that could not be mistaken for anyone else's. This client has already rejected proposals that felt templated, and is paying for a distinctive point of view: make deliberate, opinionated choices about palette, typography, and layout that are specific to this brief, and take one real aesthetic risk you can justify.
 
 ## Ground it in the subject
@@ -36,7 +40,7 @@ Then review that plan against the brief before building: if any part of it reads
 
 When writing the code, be careful of structuring your CSS selector specificities. It's easy to generate CSS classes that cancel each other out (especially with a type-based selector like .section and a element-based selector like .cta). This can happen often with paddings/margins between sections.
 
-Try to do a lot of this planning and iteration in your thinking, and only show ideas to the user when you have higher confidence it'll delight them.
+**Present the design plan — palette, type, layout, signature — to the human and get a decision before writing any CSS.** User-visible design direction is Level 2 under `.claude/policies/autonomy.md`: propose and wait. Do the exploration in your thinking, but the direction itself is not yours to settle silently; one recommendation, what each option costs, what is blocked until it is answered. A direction reversed mid-build costs a full cycle, and this one reversed three times.
 
 ## Restraint and self-critique
 
@@ -52,4 +56,4 @@ Use active voice as default. A control should say exactly what happens when it's
 
 Treat failure and emptiness as moments for direction, not mood. Explain what went wrong and how to fix it, in the interface's voice rather than a person's. Errors don't apologize, and they are never vague about what happened. An empty screen is an invitation to act.
 
-Keep the register conversational and tuned: plain verbs, sentence case, no filler, with tone matched to the brand and the audience. Let each element do exactly one job. A label labels, an example demonstrates, and nothing quietly does double duty.
+Adapted from https://github.com/anthropics/skills. Tightened per PIPELINE_FINAL_PLAN.md section 6.
