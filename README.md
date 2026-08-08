@@ -157,6 +157,10 @@ V0 is cut. Nine of the ten definition-of-done items are evidenced, and the four 
 proven by eleven fail-on-purpose tests. **The builder and checker loop has not yet run end
 to end on a real project**, so nothing here should be read as a proven result.
 
+The original design specification is in `docs/DESIGN.md`. It is a historical record, not a
+runtime dependency — nothing reads it, and the implementation wins wherever the two
+disagree.
+
 ## 📜 Credits
 
 `tdd` and `grill-me` are adapted from

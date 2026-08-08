@@ -21,4 +21,4 @@ Finding _facts_ is your job, never the user's. When a question needs a fact from
 
 **"Use defaults" ends the skill immediately.** No follow-up, no confirmation round. Apply every stated default, name them, and hand back.
 
-Adapted from https://github.com/mattpocock/skills. Tightened per PIPELINE_FINAL_PLAN.md section 6.
+Adapted from https://github.com/mattpocock/skills. Tightened per `docs/DESIGN.md` section 6.

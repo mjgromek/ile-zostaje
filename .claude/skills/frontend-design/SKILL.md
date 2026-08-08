@@ -57,4 +57,4 @@ Use active voice as default. A control should say exactly what happens when it's
 
 Treat failure and emptiness as moments for direction, not mood. Explain what went wrong and how to fix it, in the interface's voice rather than a person's. Errors don't apologize, and they are never vague about what happened. An empty screen is an invitation to act.
 
-Adapted from https://github.com/anthropics/skills. Tightened per PIPELINE_FINAL_PLAN.md section 6.
+Adapted from https://github.com/anthropics/skills. Tightened per `docs/DESIGN.md` section 6.

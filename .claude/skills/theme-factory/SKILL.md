@@ -42,4 +42,4 @@ instructions ("2, but darker, lose the rounded corners"); apply those to the cho
 variant, re-render, show again. **At most two re-render rounds**, then apply what it has
 and say so. On acceptance, write the palette, fonts and instructions into `PROJECT.md`.
 
-Adapted from https://github.com/anthropics/skills. Tightened per PIPELINE_FINAL_PLAN.md.
+Adapted from https://github.com/anthropics/skills. Tightened per `docs/DESIGN.md` section 9, which makes user-visible design direction Level 2; it postdates the plan's six skills.

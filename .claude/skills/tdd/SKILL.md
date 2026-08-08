@@ -46,4 +46,4 @@ When the shape of that interface is itself in question — how deep the module i
 
 **At a third implied guard, refuse.** Do not write it. Report it as a deferral with the condition that would make it urgent, and let the orchestrator record it. No speculative tests, and no test for behaviour nobody asked for: a test that exists because it seemed thorough is scope expansion wearing a test's clothes.
 
-Adapted from https://github.com/mattpocock/skills. Tightened per PIPELINE_FINAL_PLAN.md section 6.
+Adapted from https://github.com/mattpocock/skills. Tightened per `docs/DESIGN.md` section 6.
