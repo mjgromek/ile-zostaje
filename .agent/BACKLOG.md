@@ -38,14 +38,6 @@ Format:
   message, so a fresh orchestrator cannot read it. RUN-001 lost three of four P2s that way,
   and the orchestrator correctly refused to invent replacements — Urgent when: a run loses a
   checker report again, or a P1 or P0 is the thing lost.
-- F8 — `theme-factory` writes the settled theme into `PROJECT.md`, which is capped at 60
-  lines, and relies on reading it back to refuse reopening the decision. Compaction would
-  move it out and make the theme renegotiable — the one thing the skill exists to prevent —
-  Urgent when: `PROJECT.md` reaches its cap on any project that has settled a theme.
-- F9 — `theme-factory` has no branch for delegated design authority: told "you choose", it
-  must improvise on a Level 2 decision, which is the pipeline's most-audited class. RUN-001
-  had to invent the path — Urgent when: a stakeholder again delegates a design decision, or
-  any Level 2 gate is handed to an agent to settle.
 - F1's design question — whether the orchestrator should "delegate" at all, given the runtime
   model is flat and the main session spawns every subagent. Its allowlist now carries `Task`,
   but line 3's wording was deliberately left alone — Urgent when: the description and the
@@ -55,3 +47,13 @@ Format:
   root. The CLAUDE.md preflight added since is a guard, not a confirmation, and this entry
   must not be read as fixed — Urgent when: anyone reports agents missing, or a run reports
   falling through to `general-purpose`.
+- F13 — `commit-msg` rule A gates on the message prefix, not on the staged paths, so product
+  code committed as `chore:`, `refactor:` or `docs:` bypasses test-first leaving no trace at
+  all — unlike `--no-verify`, which at least signals. The fix needs per-project source paths,
+  so it is configuration, not a clause — Urgent when: a run commits product code under a
+  non-gated prefix, or a target project can enumerate its source paths reliably.
+- F6 — the hook suite's fake server hardcoded port 8731, so a running app made the suite
+  report false failures. FIXED: `fakeserver.py` binds port 0 and announces the chosen port,
+  and `8731` appears nowhere in `hooks/`. Kept as a watch item, not a deferral — Urgent when:
+  the suite reports a spurious pass or failure again, particularly with two runs on one
+  machine.

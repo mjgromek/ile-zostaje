@@ -8,7 +8,8 @@ license: Complete terms in LICENSE.txt
 
 **Runs only when a slice ships a user-visible interface, and only ONCE per project.** A
 theme is settled once, never renegotiated per slice. On a backend-only slice it declines in
-one line and stops, and **it refuses to reopen a theme already recorded in `PROJECT.md`**.
+one line and stops, and **it refuses to reopen a theme already recorded in
+`.agent/DECISIONS.md`**.
 
 ## The ten themes
 
@@ -40,6 +41,15 @@ direction is Level 2 under `.claude/policies/autonomy.md`: the one place in this
 where a default is not allowed. The user replies with a variant and may add free-form
 instructions ("2, but darker, lose the rounded corners"); apply those to the chosen
 variant, re-render, show again. **At most two re-render rounds**, then apply what it has
-and say so. On acceptance, write the palette, fonts and instructions into `PROJECT.md`.
+and say so.
+
+On acceptance, record the palette, fonts and instructions in `.agent/DECISIONS.md`, which is
+append-only and uncapped, and read the refusal check from there. `PROJECT.md` carries a
+one-line pointer only. Recorded in `PROJECT.md` alone, the theme vanishes from the check the
+moment compaction moves it — and the one thing this skill exists to prevent becomes possible.
+
+**Third branch: on EXPLICIT delegation, pick** — and require a `DECISIONS.md` entry naming
+what was picked, what it beat, and that no variant round was shown. Silence is still not
+delegation and still never proceeds.
 
 Adapted from https://github.com/anthropics/skills. Tightened per `docs/DESIGN.md` section 9, which makes user-visible design direction Level 2; it postdates the plan's six skills.
