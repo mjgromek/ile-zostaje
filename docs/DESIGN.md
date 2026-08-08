@@ -113,7 +113,7 @@ project.
     grill-me/
     tdd/
     ponytail/
-    security-review/
+    security-gate/
     architecture-check/
     frontend-design/
   policies/
