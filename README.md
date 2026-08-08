@@ -1,54 +1,140 @@
-<!-- No line cap. No PROSE section longer than 18 lines. Tables and reproduced
-formats are exempt: each is one thing, and splitting it makes it wrong. -->
+<p align="center">
+  <img src="assets/easydev-logo.png" alt="EasyDev — Agentic Engineering Pipeline" width="760" />
+</p>
 
-# EasyDev — Agentic Engineering Pipeline
+<h1 align="center">EasyDev</h1>
 
-A bounded-autonomy operating system for Claude Code: three agents, eight skills, four
-deterministic hooks.
+<p align="center">
+  <strong>A bounded-autonomy engineering pipeline for Claude Code.</strong><br />
+  Plan → Build → Review → Verify → Ship.
+</p>
 
-*You describe the problem. It builds and verifies vertical slices, and interrupts you only
-for the decisions you alone can make.*
+<p align="center">
+  <img alt="Status" src="https://img.shields.io/badge/status-V0-12b8b0?style=flat-square" />
+  <img alt="Agents" src="https://img.shields.io/badge/agents-3-12b8b0?style=flat-square" />
+  <img alt="Skills" src="https://img.shields.io/badge/skills-8-12b8b0?style=flat-square" />
+  <img alt="Deterministic hooks" src="https://img.shields.io/badge/hooks-4-12b8b0?style=flat-square" />
+  <img alt="Claude Code" src="https://img.shields.io/badge/runtime-Claude%20Code-30363d?style=flat-square" />
+</p>
 
-## 🔥 Why it exists
+<p align="center">
+  You describe the problem. EasyDev turns it into vertical slices, delegates implementation,
+  independently checks the result, and interrupts you only when a decision genuinely needs a human.
+</p>
 
-Every rule here was bought with a failure. In the source project, a ten-hour build had the
-human answering "what next?" dozens of times, when every answer was already derivable from
-the repository. Four features were reported built and did not exist, under a green suite.
-Five findings were reported without anyone checking the instrument that produced them. A
-recycled database row id was reachable as another user's session in three requests, under
-91 passing tests, which is full admin takeover. A stale deployment served a pre-auth build
-on a public URL twice, because a deploy-time health check answered from the old container.
-Every rule in this repository traces to one of those.
+---
 
-## ⚡ Quickstart
+## Why EasyDev exists
+
+AI coding agents can produce a lot of code quickly. The harder problem is making sure they do the **right work**, verify it independently, avoid silent failures, and know when to stop and ask.
+
+EasyDev was designed around failures observed in a real project:
+
+- features reported as complete even though they did not exist;
+- green test suites that missed a serious session-security flaw;
+- findings produced by unverified measurement tools;
+- scripted edits that exited successfully while changing nothing;
+- repeated design reversals because decisions were not recorded;
+- stale deployments that passed a health check from the wrong revision.
+
+The result is intentionally small: **3 agents, 8 skills, 4 deterministic hooks, and an explicit autonomy policy**.
+
+> EasyDev is not trying to replace engineering judgment. It is trying to spend that judgment only where it matters.
+
+---
+
+## How it works
+
+```mermaid
+flowchart LR
+    A[Problem / feature] --> B[Orchestrator]
+    B --> C[Vertical slice]
+    C --> D[Builder]
+    D --> E[Deterministic hooks]
+    E --> F[Checker]
+    F -->|pass| G[Slice complete]
+    F -->|important finding| D
+    F -->|material decision| H[Human escalation]
+    G --> B
+```
+
+EasyDev separates responsibilities so the same agent does not quietly implement, review, and approve its own work.
+
+| Layer | Responsibility | Key constraint |
+| --- | --- | --- |
+| **Orchestrator** | Sequencing, slicing, state, delegation, summaries | Does not write product code or tests |
+| **Builder** | Implements one vertical slice end-to-end | Cannot declare its own slice complete |
+| **Checker** | Reviews acceptance criteria and exercises the artifact | Read-only; cannot fix what it reviews |
+| **Hooks** | Enforce deterministic rules outside the model | Fail closed when an invariant is violated |
+| **Human** | High-impact decisions only | Not used for routine implementation choices |
+
+---
+
+## Quick start
 
 ```bash
 git clone https://github.com/mjgromek/easydev-agentic-pipeline.git my-project
-cd my-project   # the session's working directory must be INSIDE the clone
+cd my-project
+
 git config core.hooksPath hooks
-claude   # then ask for the orchestrator: it reads the repo and states the next action
+claude
 ```
 
-**Start the session with its working directory inside the clone.** Agents and skills are
-enumerated once, when the session starts, from that directory. Clone into a subdirectory and
-start the session in the parent, and `.claude/` sits one level below the root: none of the
-three agents and none of the eight skills exist, and nothing warns you. Definitions added
-after a session has started are not picked up either — restart.
+### 1. Start Claude Code inside the clone
 
-**Preflight — the first thing to do in any new session, before any work.** Ask for the list
-of available agent types and confirm `orchestrator`, `builder` and `checker` are in it. If
-they are not, the session is rooted outside the clone or was started before the files
-existed: restart inside the clone. Skip this check and a request for the orchestrator falls
-through to `general-purpose`, which holds every tool and will appear to work.
+The session working directory must be **inside the repository**. Claude Code enumerates agents and skills when the session starts.
 
-**A clone does not wire the hooks — that `core.hooksPath` line is required, once per
-clone.** This repository deliberately does not wire its own: it has no tests and no product
-code, so the test-first rule would refuse every commit to the template itself.
+If the session starts one directory above the clone, `.claude/` will not be loaded and the custom agents/skills may appear to be missing. Definitions added after a session begins also require a restart.
 
-## 📋 What a slice looks like
+### 2. Run the preflight check
 
-This block is the only thing you read per phase. It is generated, capped at 26 lines, and
-refuses vague values — "all tests pass" is rejected because it names nothing exercised.
+Before any project work, confirm the available agent types include:
+
+```text
+orchestrator
+builder
+checker
+```
+
+If they are missing, restart Claude Code from inside the repository.
+
+### 3. Wire the Git hooks
+
+```bash
+git config core.hooksPath hooks
+```
+
+A clone does not configure `core.hooksPath` automatically.
+
+### 4. Start with the orchestrator
+
+Ask the orchestrator to inspect the repository and state the next action. It should own sequencing from that point onward.
+
+---
+
+## The development loop
+
+Each phase is a **vertical slice**: something small enough to build and verify end-to-end, but meaningful enough to produce user-visible or system-visible value.
+
+```text
+Discover
+   ↓
+Slice
+   ↓
+Build with tests
+   ↓
+Run deterministic checks
+   ↓
+Independent review + artifact verification
+   ↓
+Fix important findings (bounded loop)
+   ↓
+Record decisions
+   ↓
+Ship / continue
+```
+
+A completed slice produces a compact report rather than a long transcript:
 
 ```text
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -56,138 +142,234 @@ refuses vague values — "all tests pass" is rejected because it names nothing e
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 🎁 WHAT YOU CAN DO NOW
-   Add an appliance and see how much cover is left. Appliances are stored
-   in warranty.db in the project folder.
+   Add an appliance and see how much cover is left.
 
 🔍 HOW I KNOW IT WORKS
-   Added "Fridge", 5 years cover from 2024-03-01: the list shows 236 days
-   left. Restarted the app; it was still there.
+   Added "Fridge", restarted the app, and confirmed persistence.
 
 📝 FILES CHANGED
-   src/warranty/models.py | 34 ++++++++++++
-   src/warranty/cli.py    | 21 ++++++--
-   tests/test_models.py   | 48 ++++++++++++++++
-   3 files changed, 98 insertions(+), 5 deletions(-)
-   Nothing needs your eyes.
-   Continuing to slice 4. Say `hold` to stop before it starts.
+   src/warranty/models.py
+   src/warranty/cli.py
+   tests/test_models.py
 
-⚙️  DECIDED     Dates stored as ISO strings — stopped at the stdlib rung
-📥 DEFERRED    CSV import — urgent when a user has more than 20 appliances
+⚙️  DECIDED     Dates stored as ISO strings
+📥 DEFERRED    CSV import
 🙋 NEEDS YOU   Nothing
-➡️  NEXT        Slice 4 — warn 30 days before expiry
+➡️  NEXT        Warn 30 days before expiry
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-## 🧩 What's inside
+The report must name what was actually exercised. Vague statements such as `all tests pass` are not treated as sufficient evidence.
+
+---
+
+## Agents
 
 | Agent | Owns | Cannot do |
 | --- | --- | --- |
-| orchestrator | Sequencing, slicing, state, delegation, the summary | Write product code or tests |
-| builder | One slice end to end: failing test first, then the minimum | Declare a slice complete; write `.agent/` |
-| checker | Review against criteria, then exercising the artifact | **Write anything — it has no write access** |
+| `orchestrator` | Sequencing, slicing, state, delegation, final slice summary | Write product code or tests |
+| `builder` | One slice end-to-end: failing test first, then minimum implementation | Declare a slice complete; write `.agent/` state |
+| `checker` | Review against acceptance criteria, then exercise the artifact | **Write anything** — it has no write access |
 
-| Skill | What it does | Hard cap |
+### Why the checker is read-only
+
+A reviewer that can silently repair the code can also make its own verdict appear correct. EasyDev keeps the checker read-only so its job stays simple: **observe, measure, report**.
+
+---
+
+## Skills
+
+| Skill | Purpose | Hard cap |
 | --- | --- | --- |
-| discovery | One-time intake interview; writes `PROJECT.md` and slice one | 5 rounds, 4 questions each, 20 total |
-| grill-me | Resolves one mid-build ambiguity that would be guessed at | 1 round, 3–5 questions |
-| tdd | Red, green, refactor for the slice's tests | Criteria plus at most 2 implied guards |
-| ponytail | Simplicity gate over a diff at the phase gate | One verdict and one line of reason per item |
-| architecture-check | Boundary and scaling review when module boundaries moved | At most 2 items marked FIX NOW |
-| security-gate | Trigger policy for the built-in `/security-review` | Risk-triggered only; else declines in a line |
-| theme-factory | Settles palette and type once, on the project's real screen | Once per project; at most 2 re-render rounds |
-| frontend-design | Visual direction when UI is in scope | UI slices only; palette belongs to theme-factory |
+| `discovery` | One-time intake; creates `PROJECT.md` and the first slice | 5 rounds × 4 questions |
+| `grill-me` | Resolves one ambiguity that would otherwise be guessed | 1 round, 3–5 questions |
+| `tdd` | Red → green → refactor for the current slice | Acceptance criteria + at most 2 implied guards |
+| `ponytail` | Simplicity gate over a diff | One verdict + one-line reason per item |
+| `architecture-check` | Boundary/scaling review when module boundaries move | At most 2 `FIX NOW` items |
+| `security-gate` | Decides whether the built-in security review is warranted | Risk-triggered; otherwise declines in one line |
+| `theme-factory` | Establishes palette and typography once on the real UI | Once per project; max 2 re-render rounds |
+| `frontend-design` | Visual direction when UI work is in scope | UI slices only |
 
-| Hook | What it refuses |
+The skills are intentionally bounded. They exist to improve decisions, not to create endless analysis loops.
+
+---
+
+## Deterministic hooks
+
+Model instructions are useful. Some rules are important enough to enforce outside the model.
+
+| Hook | Refuses / verifies |
 | --- | --- |
-| `hooks/pre-commit` | A staged line matching one of seven secret patterns. Override: `--no-verify` |
-| `hooks/commit-msg` | A `feat:`/`fix:` with no preceding `test:` on an overlapping path; a `feat:` that does not stage `.agent/DECISIONS.md` |
-| `hooks/verify-deploy.sh` | Calling a deploy done while `/version` has not served `EXPECTED_REVISION` within 120s, or any live assertion fails |
-| `hooks/probe.sh` | Silence between deploys: the same assertions on cron, non-zero when the live site stops satisfying them |
+| `hooks/pre-commit` | Staged lines matching one of seven secret patterns; a staged `.agent/STATE.md` citing a bare commit SHA that does not resolve, or exceeding its 120-line cap |
+| `hooks/commit-msg` | `feat:` / `fix:` without a preceding overlapping `test:`; `feat:` without staged `.agent/DECISIONS.md` |
+| `hooks/verify-deploy.sh` | Declaring deploy success before the expected revision is live or when a live assertion fails |
+| `hooks/probe.sh` | Silent production regressions between deployments |
 
-## 🛡 The four guardrails
+The secret check can be intentionally overridden with `--no-verify`. Other gates are designed around explicit postconditions rather than trusting command exit codes alone.
 
-**The checker drives the artifact, never the diff alone, and it has no write access at
-all.** Four features were reported built and did not exist. It reports and never fixes, so
-it cannot quietly make its own verdict true.
+---
 
-**Verify the instrument before trusting the observation.** Five false findings came from
-instruments nobody checked — contrast judged by eye, a test that rescaled the unit it
-measured. A finding states how it was measured.
+## Four guardrails
 
-**Exit code is not proof — assert the postcondition.** A silent no-op patch exits zero and
-leaves the file identical, which is how edits were reported as landed when they were not.
+### 1. The reviewer must exercise the artifact
 
-**One decision, one record, enforced by a hook rather than by discipline.** Status
-indicators reversed twice, renter visibility three times; `commit-msg` now refuses a
-`feat:` commit that does not stage `.agent/DECISIONS.md`.
+A diff can look correct while the feature is absent or unreachable. The checker validates the acceptance criteria against the running artifact where possible.
 
-## 🎚 Autonomy
+### 2. Verify the instrument before trusting the observation
+
+A test, script, screenshot, metric, or visual check can itself be wrong. Findings should state **how they were measured**.
+
+### 3. Exit code is not proof
+
+A command can exit `0` and still fail to produce the intended state. EasyDev checks the postcondition when the result matters.
+
+### 4. Decisions live in one place
+
+Material project decisions are recorded in `.agent/DECISIONS.md`; a feature commit must stage that record. The goal is to stop already-settled decisions from drifting between slices.
+
+---
+
+## Bounded autonomy
+
+EasyDev uses four autonomy levels.
 
 | Level | Example | Behaviour |
 | --- | --- | --- |
-| 0, automatic | Implementation matching existing patterns, tests, docs | Act; report in the summary |
-| 1, do and report | A small dependency, an internal interface change | Act; name it in the summary |
-| 2, propose and wait | A schema migration, an auth change, any user-visible design direction | Stop; one decision, one recommendation |
-| 3, explicit approval | Production deletion, secrets, billing, irreversible effects | Never without a direct yes |
+| **0 — automatic** | Implementation matching established patterns, tests, docs | Act; report later |
+| **1 — do and report** | Small dependency, internal interface change | Act; include in slice summary |
+| **2 — propose and wait** | Schema migration, auth change, user-visible design direction | Stop; give one recommendation |
+| **3 — explicit approval** | Production deletion, secrets, billing, irreversible effects | Never proceed without a direct yes |
 
-The matrix and the escalation format live in `.claude/policies/autonomy.md`, the only copy.
+The canonical matrix and escalation format live in `.claude/policies/autonomy.md`, alongside
+three companion policies: `summary.md` (the phase report and its refusal conditions),
+`findings.md` (how defects in the pipeline itself are recorded), and `progress.md` (the live
+board a human can read while a delegated run is still working). Each file declares its own
+line cap in its first line, so the number lives with the file it governs.
 
-## ⚙️ Configuration
+The intended human interface is simple: **routine decisions disappear; material decisions become explicit**.
 
-Read by `verify-deploy.sh` and `probe.sh` through `hooks/lib/live-assertions.sh`. An unset
-optional variable is skipped aloud, never silently.
+---
 
-| Variable | Required | If unset |
+## Deployment verification
+
+`verify-deploy.sh` and `probe.sh` share assertions through `hooks/lib/live-assertions.sh`.
+
+| Variable | Required | Behaviour if unset |
 | --- | --- | --- |
-| `BASE_URL` | yes | `FATAL BASE_URL is unset. Nothing was asserted.`, and the run fails |
-| `PROTECTED_PATH` | yes | `FATAL PROTECTED_PATH is unset. Nothing was asserted.`, and the run fails |
+| `BASE_URL` | yes | Fails: nothing can be asserted |
+| `PROTECTED_PATH` | yes | Fails: protected-access behavior cannot be verified |
 | `HEALTH_PATH` | no | Defaults to `/health` |
-| `RESOURCE_PATH` | no | A4, the resource assertion, is skipped |
-| `TEST_USER`, `TEST_PASS` | no | A3 login and A4 resource are skipped |
-| `LOGIN_PATH` | no | A3 login is skipped |
-| `EXPECTED_REVISION` | verify-deploy only | The revision gate is skipped, and a health check can answer from the old container |
+| `RESOURCE_PATH` | no | Resource assertion skipped |
+| `TEST_USER`, `TEST_PASS` | no | Login/resource assertions skipped |
+| `LOGIN_PATH` | no | Login assertion skipped |
+| `EXPECTED_REVISION` | `verify-deploy` only | Revision gate skipped |
 | `VERSION_PATH` | no | Defaults to `/version` |
-| `REVISION_TIMEOUT` | no | Defaults to 120s; a shorter value prints `SHORTENED revision gate` |
+| `REVISION_TIMEOUT` | no | Defaults to `120s` |
 
-On Railway, `BASE_URL` is the public domain, `EXPECTED_REVISION` is the deployment SHA,
-and `PROTECTED_PATH` is required. The scripts are platform-agnostic — they take a URL.
-
-### Running the probe from cron
+Example continuous probe:
 
 ```sh
 */10 * * * * BASE_URL=https://app.example.com PROTECTED_PATH=/api/me \
   /path/to/hooks/probe.sh >> /var/log/probe.log 2>&1
 ```
 
-## 🚫 What this deliberately does not do
+On Railway, `BASE_URL` is the public domain, `EXPECTED_REVISION` can be the deployment SHA, and `PROTECTED_PATH` remains required. The scripts themselves are platform-agnostic and operate against a URL.
 
-- No branch or pull request automation
-- No MCP servers
-- No dashboard or web UI
-- No vector memory or embedding store
-- No task queue or parallel agents
-- No fourth agent
+---
 
-Each of these sits in `.agent/BACKLOG.md` with the condition that would make it urgent.
+## What EasyDev deliberately does not do
 
-## 📍 Status
+V0 intentionally excludes:
 
-V0 is cut. Nine of the ten definition-of-done items are evidenced, and the four hooks are
-proven by sixteen fail-on-purpose cases in `./hooks/test/run-hook-tests.sh`. Clone this
-repository and run that script: it builds its own throwaway repositories, needs no
-configuration, is safe to run in a repository with its own hooks wired, and checks every
-refusal case against `git log` rather than trusting an exit code. **The builder and checker loop has not yet run end to end on a
-real project**, so nothing here should be read as a proven result.
+- branch / pull-request automation;
+- MCP servers;
+- dashboard or web UI;
+- vector memory / embedding stores;
+- task queues;
+- parallel agent swarms;
+- a fourth specialist agent.
 
-The original design specification is in `docs/DESIGN.md`. It is a historical record, not a
-runtime dependency — nothing reads it, and the implementation wins wherever the two
-disagree.
+Those ideas belong in `.agent/BACKLOG.md` only when a real project demonstrates a concrete need for them.
 
-## 📜 Credits
+> **Default rule:** if V0 works without another abstraction, do not add the abstraction.
 
-`tdd` and `grill-me` are adapted from
-[mattpocock/skills](https://github.com/mattpocock/skills); `frontend-design` and
-`theme-factory` from [anthropics/skills](https://github.com/anthropics/skills); the
-`ponytail` ladder from [dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail)
-(MIT). Each vendored skill keeps its own licence file in its own directory. All are
-tightened forks with no automatic update path — upstream fixes do not arrive on their own.
+---
+
+## Current status
+
+**V0 is cut and has now been driven on a real build.**
+
+- The four hooks are covered by **19 fail-on-purpose cases** in `./hooks/test/run-hook-tests.sh`.
+- The hook test harness builds throwaway repositories and checks refusal cases against resulting Git state rather than trusting exit codes alone.
+- The **builder → checker loop has been run end-to-end**, across multiple slices of a real project, with the checker reproducing each failing test before accepting its fix.
+- That validation run produced its own defect log. Nineteen findings against the pipeline itself are recorded in `docs/RUN-001-FINDINGS.md`, several of them fixed here; the rest carry an urgency condition in `.agent/BACKLOG.md`.
+- The pipeline is therefore evidenced, not production-proven. It has been used, measured, and found to have faults worth writing down.
+
+Run the hook suite with:
+
+```bash
+./hooks/test/run-hook-tests.sh
+```
+
+The original design specification remains in `docs/DESIGN.md` as a historical record. Runtime behavior is defined by the implementation when the two differ.
+
+---
+
+## Validation roadmap
+
+The next milestone is not more framework work. It is a real project.
+
+```text
+V0 pipeline
+    ↓
+real project using EasyDev
+    ↓
+measure friction + human interventions
+    ↓
+fix only demonstrated problems
+    ↓
+V0.2
+```
+
+Useful evidence to collect during validation:
+
+- active human interventions per slice;
+- failed review / verification cycles;
+- defects caught before release;
+- decisions escalated vs handled autonomously;
+- cases where the pipeline added unnecessary process.
+
+This is what should decide V1 — not speculative feature ideas.
+
+---
+
+## Design principles
+
+**Small by default.** Three agents are easier to reason about than an agent hierarchy.
+
+**Independent evidence beats self-report.** The builder is not the verifier.
+
+**Deterministic where possible.** Hooks enforce invariants that should not depend on prompt compliance.
+
+**Escalate impact, not uncertainty.** Reversible implementation details stay autonomous; consequential decisions reach the human.
+
+**Real projects drive the roadmap.** New machinery must earn its place by solving an observed failure mode.
+
+---
+
+## Credits
+
+`tdd` and `grill-me` are adapted from [mattpocock/skills](https://github.com/mattpocock/skills).
+
+`frontend-design` and `theme-factory` are adapted from [anthropics/skills](https://github.com/anthropics/skills).
+
+The `ponytail` simplicity ladder is adapted from [dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) (MIT).
+
+Each vendored skill keeps its own license file. These are tightened forks with no automatic update path; upstream fixes do not arrive automatically.
+
+---
+
+<p align="center">
+  <strong>EasyDev</strong><br />
+  Less prompting. More verified progress.
+</p>
