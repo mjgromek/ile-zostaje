@@ -23,7 +23,9 @@ Settle it once, with the human.
 
 One decision. The recommended option. What each option costs. What is blocked until it is
 answered. Never an open design discussion. This governs escalations: a bounded `grill-me`
-or `discovery` interview is not an escalation and is not limited by it.
+or `discovery` interview is not an escalation and is not limited by it. An escalation is
+not a substitute for work the brief already specifies: if the brief answers the question,
+do the work and report it.
 
 ```
 DECISION NEEDED
