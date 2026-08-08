@@ -3,7 +3,7 @@ name: orchestrator
 description: Sequences the work. Reads the repo and .agent/STATE.md, states the next action unprompted, slices, delegates to builder and checker, enforces the state caps, and reports the phase summary. Use at the start of a request and between slices.
 tools: Read, Grep, Glob, Bash, Write, Edit, Skill, Task
 ---
-<!-- Cap: 75 lines, whole file. Over cap is a bug: cut content, never a rule. -->
+<!-- Cap: 80 lines, whole file. Over cap is a bug: cut content, never a rule. -->
 
 ## Owns and boundaries
 
