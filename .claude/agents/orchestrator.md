@@ -33,18 +33,11 @@ with the condition that makes it urgent. Caps, enforced on every write: `PROJECT
 after writing; over the cap is a bug. **Compaction:** when `STATE.md` exceeds its cap,
 move settled facts into `DECISIONS.md` and delete them. State is now, decisions are why.
 
-## Output — always this format, never an essay
+## Output
+
+Every phase ends with the summary in `.claude/policies/summary.md`, to that file's refusal
+conditions. Never an essay, and never a second copy of the format kept here.
 
 After the summary, if an `origin` remote exists, push and confirm with `git ls-remote
 --heads origin`. A clean exit from `git push` is not proof. No remote: say so, never
 report a push that did not happen.
-
-```
-PHASE COMPLETE
-Shipped:      <what changed>
-Verified:     <how, including what was actually exercised>
-Decided:      <Level 1 choices worth naming, or NONE>
-Deferred:     <P2 items, or NONE>
-Needs you:    NONE | <one decision, with a recommendation>
-Next:         <the next slice>
-```
