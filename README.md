@@ -9,7 +9,7 @@
 
 <p align="center">
   <img alt="Status" src="https://img.shields.io/badge/status-V0-12b8b0?style=flat-square" />
-  <img alt="Agents" src="https://img.shields.io/badge/agents-3-12b8b0?style=flat-square" />
+  <img alt="Agents" src="https://img.shields.io/badge/agents-4-12b8b0?style=flat-square" />
   <img alt="Skills" src="https://img.shields.io/badge/skills-8-12b8b0?style=flat-square" />
   <img alt="Deterministic hooks" src="https://img.shields.io/badge/hooks-4-12b8b0?style=flat-square" />
   <img alt="Claude Code" src="https://img.shields.io/badge/runtime-Claude%20Code-30363d?style=flat-square" />
@@ -35,7 +35,7 @@ EasyDev was designed around failures observed in a real project:
 - repeated design reversals because decisions were not recorded;
 - stale deployments that passed a health check from the wrong revision.
 
-The result is intentionally small: **3 agents, 8 skills, 4 deterministic hooks, and an explicit autonomy policy**.
+The result is intentionally small: **4 agents, 8 skills, 4 deterministic hooks, and an explicit autonomy policy**.
 
 > EasyDev is not trying to replace engineering judgment. It is trying to spend that judgment only where it matters.
 
@@ -61,7 +61,8 @@ EasyDev separates responsibilities so the same agent does not quietly implement,
 | Layer | Responsibility | Key constraint |
 | --- | --- | --- |
 | **Orchestrator** | Sequencing, slicing, state, delegation, summaries | Does not write product code or tests |
-| **Builder** | Implements one vertical slice end-to-end | Cannot declare its own slice complete |
+| **Designer** | Interface form, then aesthetic direction, as one proposal | Read-only; cannot implement what it proposes |
+| **Builder** | Implements one vertical slice end-to-end | Cannot declare its own slice complete; does not choose form |
 | **Checker** | Reviews acceptance criteria and exercises the artifact | Read-only; cannot fix what it reviews |
 | **Hooks** | Enforce deterministic rules outside the model | Fail closed when an invariant is violated |
 | **Human** | High-impact decisions only | Not used for routine implementation choices |
@@ -166,7 +167,8 @@ The report must name what was actually exercised. Vague statements such as `all 
 | Agent | Owns | Cannot do |
 | --- | --- | --- |
 | `orchestrator` | Sequencing, slicing, state, delegation, final slice summary | Write product code or tests |
-| `builder` | One slice end-to-end: failing test first, then minimum implementation | Declare a slice complete; write `.agent/` state |
+| `designer` | Interface form from the data's shape, then palette and type, as one Level 2 proposal | **Write anything** — it specifies, the builder implements |
+| `builder` | One slice end-to-end: failing test first, then minimum implementation | Declare a slice complete; write `.agent/` state; choose the interface's form |
 | `checker` | Review against acceptance criteria, then exercise the artifact | **Write anything** — it has no write access |
 
 ### Why the checker is read-only
@@ -343,7 +345,7 @@ This is what should decide V1 — not speculative feature ideas.
 
 ## Design principles
 
-**Small by default.** Three agents are easier to reason about than an agent hierarchy.
+**Small by default.** Four agents are easier to reason about than an agent hierarchy, and the fourth was added only after a run produced a mistake the other three could not catch.
 
 **Independent evidence beats self-report.** The builder is not the verifier.
 

@@ -44,6 +44,9 @@ A commit SHA written bare in `STATE.md` is a claim about THIS repository and mus
 A reference to another repository's commit is written in backticks and labelled —
 `upstream 3b939a5` — because this repository cannot verify it.
 
+When a slice ships or reshapes a user-visible interface, delegate to `designer` BEFORE the
+builder. The builder implements a settled form; it does not choose one.
+
 Every deferral reported by the builder or the checker is recorded in `.agent/BACKLOG.md`
 with the condition that makes it urgent. Caps, enforced on every write: `PROJECT.md` 60
 lines, `.agent/STATE.md` 120, `.agent/DECISIONS.md` 8 lines per entry and append only,

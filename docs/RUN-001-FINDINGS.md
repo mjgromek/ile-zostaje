@@ -644,3 +644,40 @@ consistent.
 **Proposed fix, NOT implemented:** an agent's first line of output names its working
 directory and the repository's origin remote, or "no remote". Prose in a brief is not
 enforceable; a printed postcondition is.
+
+---
+
+## F23 — §15's fourth-agent trigger fired: the checker passed a flat interface, honestly
+
+**Observed or inferred:** Observed, during run 002's slice two.
+
+**Numbering note:** F15–F22 exist only in the clone's `RUN-002-FINDINGS.md` and are not
+visible from this repository. `findings.md` says numbering is global; a `grep` confined to
+this repo would have produced F15 and collided with four existing findings. Cross-repo
+numbering has no mechanical guard — an instance of F14.
+
+**Evidence:** `docs/DESIGN.md:393` admits a fourth agent only "if a run shows a dedicated
+role prevents a mistake the checker missed". A run did. The board shipped 18 districts as a
+vertical list: three fill a viewport, a ~5,500px scroll with no overview. Measured in
+headless Chrome at 1280x1000 against the live server, not judged from the CSS.
+
+The checker did not miss it through negligence — it passed the slice **correctly**, because
+the acceptance criteria never mentioned quality, and its contract scopes it to the criteria
+in `STATE.md`. An honest PASS about criteria nobody wrote to include the result being usable.
+
+**The structural cause, and why a skill could not fix it.** The builder holds two
+contradictory mandates. `ponytail`'s ladder — "does this need to exist at all", one line
+before fifty, the laziest solution that works — sits in the builder's own contract.
+`frontend-design`'s "spend your boldness in one place, take one real aesthetic risk" sits in
+a skill the builder invokes. When they conflict the ladder wins, because a contract outranks
+a skill. No amount of stronger wording inside the skill changes that ordering.
+
+**Who it hits:** Any project whose interface quality is not written into acceptance
+criteria — which is most of them, since criteria describe capability. Silent: tests pass,
+the checker's assertions pass, and the interface quietly reads as a prototype.
+
+**FIXED here:** `.claude/agents/designer.md`, a fourth agent owning form and aesthetic
+direction, with no write access, exempt from the ladder by design. `orchestrator.md`
+delegates to it before the builder on any slice that ships or reshapes an interface. The
+builder's ladder is unchanged — it is correct for code; the builder simply no longer chooses
+form.
