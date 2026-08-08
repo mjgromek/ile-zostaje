@@ -31,6 +31,7 @@
 - The phase summary is the only format the human reads. Its format and refusal
   conditions live in `.claude/policies/summary.md` — follow that file, and never
   restate the template anywhere else.
+- Defects in the pipeline itself are recorded per `.claude/policies/findings.md`.
 
 ## Setup
 
@@ -38,7 +39,10 @@
   inherit it.
 - **If `orchestrator`, `builder` and `checker` are not in the available agent types, stop
   and say so** — the session is rooted outside the clone. Never proceed under `general-purpose`.
-- **Before any work, each agent reports which of its allowlisted tools actually arrived**,
-  naming any missing or delivered under another name. An absent tool degrades silently.
+- **Your first output line names your working directory and your `origin` remote, or
+  `no remote`.** Never rely on a brief's description of which repository this is.
+- **Before any work, name every tool in your `tools:` line that did not arrive, and any
+  that arrived under a different name.** `Task` may arrive as `Agent`. A tool named in a
+  contract and absent at runtime degrades silently.
 - State file caps are enforced by the orchestrator on every write. The numbers and the
   compaction rule live in `.claude/agents/orchestrator.md` — never restate them elsewhere.
