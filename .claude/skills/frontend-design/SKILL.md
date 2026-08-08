@@ -11,14 +11,13 @@ license: Complete terms in LICENSE.txt
 
 **Runs only when UI is in scope.** Never on a backend-only slice. If invoked on one, say
 so in one line and stop — there is no partial run and no pre-emptive styling of a UI that
-does not exist yet.
-**Invoke `theme-factory` for the palette and type decision before writing any CSS**,
-rather than proposing a palette here; it owns that Level 2 gate and records the answer in
-`PROJECT.md`.
-**Re-run when the volume of data the interface presents changes by an order of
-magnitude.** A layout designed for one item is not a layout for twenty. The form that was
-right at N=1 is frequently wrong at N=20, and no other part of this pipeline will notice —
-the tests pass, the checker's assertions pass, and the interface quietly stops working.
+does not exist yet. **Invoke `theme-factory` for the palette and type decision before
+writing any CSS**, rather than proposing a palette here; it owns that Level 2 gate and
+records the answer in `PROJECT.md`. **Re-run when the volume of data the interface
+presents changes by an order of magnitude.** A layout designed for one item is not a
+layout for twenty. The form that was right at N=1 is frequently wrong at N=20, and no
+other part of this pipeline will notice — the tests pass, the checker's assertions pass,
+and the interface quietly stops working.
 
 ## Form before aesthetics
 
