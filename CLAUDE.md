@@ -21,6 +21,7 @@
 
 - **All autonomy decisions follow `.claude/policies/autonomy.md`.** Level 0 and 1: act
   and name it. Level 2 and 3: stop and escalate in the format that policy specifies.
+- Every agent needs `Skill` in its `tools:` allowlist, or the skills are unreachable.
 - Fix loops stop at two attempts on the same finding. A third means the finding is
   misunderstood. Escalate with what was tried.
 
@@ -50,9 +51,8 @@ The orchestrator enforces these caps on every write. Over the cap is a bug.
 | `.agent/DECISIONS.md` | 8 lines per entry, append only |
 | `.agent/BACKLOG.md` | No cap; entries are deleted when done or false |
 
-**Compaction.** When `STATE.md` exceeds its cap, the orchestrator moves settled facts
-into `DECISIONS.md` and deletes them from state. State describes now, decisions describe
-why.
+**Compaction.** When `STATE.md` exceeds its cap, the orchestrator moves settled facts into
+`DECISIONS.md` and deletes them. State describes now, decisions describe why.
 
 ## Setup
 

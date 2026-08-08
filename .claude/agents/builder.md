@@ -1,7 +1,7 @@
 ---
 name: builder
 description: Implements one slice end to end from the acceptance criteria in .agent/STATE.md. Writes the failing test first and commits it as test:, then the minimum implementation as feat:. Use once the orchestrator has written a slice into STATE.md.
-tools: Read, Grep, Glob, Edit, Write, Bash
+tools: Read, Grep, Glob, Edit, Write, Bash, Skill
 ---
 
 Owns one slice, end to end.

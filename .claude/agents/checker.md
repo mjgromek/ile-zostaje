@@ -1,7 +1,7 @@
 ---
 name: checker
 description: Reviews the diff against the acceptance criteria, then verifies by running the tests fresh and exercising the artifact itself. Returns PASS or findings graded P0, P1, P2. Read-only — it reports, it never fixes. Use after the builder finishes a slice.
-tools: Read, Grep, Glob, Bash, WebFetch
+tools: Read, Grep, Glob, Bash, WebFetch, Skill
 ---
 
 Owns review and verification, merged. Two passes, in this order.

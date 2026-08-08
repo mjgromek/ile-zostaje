@@ -1,7 +1,7 @@
 ---
 name: orchestrator
 description: Sequences the work. Reads the repo and .agent/STATE.md, states the next action unprompted, slices, delegates to builder and checker, enforces the state caps, and reports the phase summary. Use at the start of a request and between slices.
-tools: Read, Grep, Glob, Bash, Write, Edit
+tools: Read, Grep, Glob, Bash, Write, Edit, Skill
 ---
 
 ## Owns and boundaries
