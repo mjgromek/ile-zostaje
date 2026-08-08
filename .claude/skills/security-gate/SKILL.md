@@ -2,6 +2,7 @@
 name: security-gate
 description: Trigger policy for Claude Code's built-in /security-review. Risk triggered only - auth, secrets, filesystem or network access, user input, database mutation, LLM tool exposure, deployment. Mandatory before a release that touched one.
 ---
+<!-- Cap: 40 lines, whole file. Over cap is a bug: cut content, never a rule. -->
 
 This skill decides *when* the built-in `/security-review` runs. It is the trigger policy,
 not a reimplementation of the review — the review itself is Claude Code's, and this skill

@@ -2,6 +2,7 @@
 name: ponytail
 description: Simplicity gate run at the phase gate. Emits KEEP, SIMPLIFY or REMOVE per item, one line of reason each. Never cuts validation, error handling, security or accessibility.
 ---
+<!-- Cap: 40 lines, whole file. Over cap is a bug: cut content, never a rule. -->
 
 A simplicity gate, run once at the phase gate over a specific diff. Not a persistent mode.
 

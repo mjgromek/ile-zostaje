@@ -8,14 +8,16 @@ license: Complete terms in LICENSE.txt
 ## Trigger
 
 **Runs only when a slice ships a user-visible interface, and only ONCE per project.** A
-theme is settled once, never renegotiated per slice. On a backend-only slice it declines in
+theme is settled once, never renegotiated per slice. On a backend-only slice it declines
+in
 one line and stops, and **it refuses to reopen a theme already recorded in
 `.agent/DECISIONS.md`**.
 
 A settled theme is colour, typography and visual identity. It is NOT the information
 design — what form the interface takes, what is visible at once, how it is arranged.
 Refusing to reopen a settled theme must never block a change of form or layout. If a new
-form needs colour roles the theme does not have, EXTEND the theme and record the extension;
+form needs colour roles the theme does not have, EXTEND the theme and record the
+extension;
 do not treat that as reopening it.
 
 ## The ten themes
@@ -50,13 +52,17 @@ instructions ("2, but darker, lose the rounded corners"); apply those to the cho
 variant, re-render, show again. **At most two re-render rounds**, then apply what it has
 and say so.
 
-On acceptance, record the palette, fonts and instructions in `.agent/DECISIONS.md`, which is
+On acceptance, record the palette, fonts and instructions in `.agent/DECISIONS.md`, which
+is
 append-only and uncapped, and read the refusal check from there. `PROJECT.md` carries a
-one-line pointer only. Recorded in `PROJECT.md` alone, the theme vanishes from the check the
-moment compaction moves it — and the one thing this skill exists to prevent becomes possible.
+one-line pointer only. Recorded in `PROJECT.md` alone, the theme vanishes from the check
+the
+moment compaction moves it — and the one thing this skill exists to prevent becomes
+possible.
 
 **Third branch: on EXPLICIT delegation, pick** — and require a `DECISIONS.md` entry naming
 what was picked, what it beat, and that no variant round was shown. Silence is still not
 delegation and still never proceeds.
 
-Adapted from https://github.com/anthropics/skills. Tightened per `docs/DESIGN.md` section 9, which makes user-visible design direction Level 2; it postdates the plan's six skills.
+Adapted from https://github.com/anthropics/skills. Tightened per `docs/DESIGN.md` section
+9, which makes user-visible design direction Level 2; it postdates the plan's six skills.

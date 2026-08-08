@@ -46,3 +46,6 @@
   contract and absent at runtime degrades silently.
 - State file caps are enforced by the orchestrator on every write. The numbers and the
   compaction rule live in `.claude/agents/orchestrator.md` — never restate them elsewhere.
+- **A cap counts lines wrapped at 90 characters.** Markdown table rows, fenced code blocks
+  and YAML frontmatter are exempt. An unwrapped file makes its own cap meaningless: a
+  600-character line and a 60-character line both count as one.
