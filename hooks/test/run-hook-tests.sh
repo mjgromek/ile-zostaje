@@ -1,5 +1,5 @@
 #!/bin/sh
-# Fail-on-purpose suite for all four hooks. Twenty-one cases.
+# Fail-on-purpose suite for all four hooks. Twenty-three cases.
 #
 # Every case asserts the INTENT of the rule, never the mechanism that implements
 # it. "An unverifiable claim is refused unless explicitly marked foreign" is
@@ -9,8 +9,8 @@
 # its exempt token, so it agreed with the bug while the hook stayed blind.
 #
 # Cases are grouped, not gapped: 1-10 and 17-21 cover commit-msg and pre-commit,
-# 11-16 cover verify-deploy and probe. All 21 run. Do NOT renumber — the numbers
-# are referenced from the findings files and from commit messages.
+# 11-16 and 22-23 cover verify-deploy and probe. All 23 run. Do NOT renumber — the
+# numbers are referenced from the findings files and from commit messages.
 #
 # Every refusal case also runs `git log --oneline` and asserts the commit is
 # genuinely absent. A hook that prints a refusal and lets the commit through is
@@ -149,7 +149,7 @@ assert_script() { # id expect needle cmd...
 	fi
 }
 
-printf 'HOOK SUITE  21 fail-on-purpose cases\n\n'
+printf 'HOOK SUITE  23 fail-on-purpose cases\n\n'
 printf 'commit-msg and pre-commit   cases 1-10, 17-21\n'
 
 # 1  feat: with no preceding test:
@@ -281,7 +281,7 @@ else
 	report 21 ALLOWED "refused: $(head -n 1 "$tmp/out")" FAIL
 fi
 
-printf '\nverify-deploy and probe     cases 11-16\n'
+printf '\nverify-deploy and probe     cases 11-16, 22-23\n'
 
 # Ports come from the OS, never from a constant. A fixed port silently tests
 # whatever else already holds it. See docs/RUN-001-FINDINGS.md, F6.
@@ -340,6 +340,18 @@ assert_script 15 FAIL "redirect is not a refusal" env \
 # 16  no BASE_URL: the run must say nothing was asserted, never pass quietly
 assert_script 16 FAIL "Nothing was asserted" env \
 	PROTECTED_PATH=/api/me sh "$hooks_src/probe.sh"
+
+# 22  a wholly public application declares it has no protected route. A2 skips loudly
+#     and the run passes — a gate that is red forever trains everyone to ignore it, and
+#     the next genuine failure becomes indistinguishable from the expected one. R2-F20.
+assert_script 22 PASS "SKIPPED  A2: the application declares no protected route" env \
+	BASE_URL="http://127.0.0.1:$good_port" NO_PROTECTED_ROUTE=1 \
+	sh "$hooks_src/probe.sh"
+
+# 23  PROTECTED_PATH unset with NO declaration. Still FATAL: an omission is not a
+#     declaration, or a forgotten variable silently disables the assertion.
+assert_script 23 FAIL "An omission is not a declaration" env \
+	BASE_URL="http://127.0.0.1:$good_port" sh "$hooks_src/probe.sh"
 
 printf '\n%s passed, %s failed\n' "$passed" "$failed"
 [ "$failed" -eq 0 ]

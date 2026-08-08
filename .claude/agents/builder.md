@@ -47,6 +47,9 @@ commit on an overlapping path. If it refuses, the order was wrong — fix the or
   were named, how many tests were written, and if the count exceeds criteria-plus-two, which
   guards they are and why each earns its place. An unstated count is a cap nobody is
   applying.
+- **Report the runner's COLLECTED count before and after, and how many tests you wrote.**
+  The delta must equal the number written. A covering test that exists but does not run —
+  unregistered, filtered, skipped — counts as missing.
 - Do not narrate tool use. Reading a file, running a command and searching are not worth a
   sentence. Intent is stated once per step in `.agent/PROGRESS.md`; between steps, work
   silently. The human reads the board and the phase summary, nothing else.

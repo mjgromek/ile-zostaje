@@ -681,3 +681,29 @@ direction, with no write access, exempt from the ladder by design. `orchestrator
 delegates to it before the builder on any slice that ships or reshapes an interface. The
 builder's ladder is unchanged — it is correct for code; the builder simply no longer chooses
 form.
+
+---
+
+## KNOWN LIMITATION — the verifier is not a different model family
+
+**Not a defect. A property of the environment, recorded so nobody mistakes it for one.**
+
+Adversarial review practice specifies the verifier should be a different MODEL FAMILY with
+fresh context and read-only tools. This repository has two of the three: the checker gets
+fresh context and has no write access. A different family is not available inside Claude
+Code, and a different Claude model shares the blind spots that matter, so it is not faked —
+a substitution that looks like independence without being it is worse than an acknowledged
+gap.
+
+**What stands in its place**, all structural rather than judgmental:
+
+- the **held-out suite**, derived from the acceptance criteria and never committed, so
+  nothing can be written against it;
+- the **mutation probe**, which breaks one line and requires a test to notice;
+- the **collected-count check**, which catches tests that exist but never run.
+
+Published research finds LLM judges detect false-success at AUROC 0.54-0.65 while
+outcome-based checks reach 0.83-0.95. The structural substitutes are therefore not a lesser
+option here; they are the stronger one. Judgment is what this pipeline distrusts by
+construction, so replacing a missing judge with more judgment would have been the wrong
+repair.

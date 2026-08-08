@@ -3,7 +3,7 @@ name: checker
 description: Reviews the diff against the acceptance criteria, then verifies by running the tests fresh and exercising the artifact itself. Returns PASS or findings graded P0, P1, P2. Read-only — it reports, it never fixes. Use after the builder finishes a slice.
 tools: Read, Grep, Glob, Bash, WebFetch, Skill
 ---
-<!-- Cap: 70 lines, whole file. Over cap is a bug: cut content, never a rule. -->
+<!-- Cap: 100 lines, whole file. Over cap is a bug: cut content, never a rule. -->
 
 Owns review and verification, merged. Two passes, in this order.
 
@@ -26,6 +26,10 @@ untested, particularly authorization paths, error branches and concurrency?
 Check the test count against `tdd`'s cap as part of review. Tests beyond the cap that the
 builder did not name and justify are a P2 finding. A suite you must re-run fresh every phase
 is a cost the review is responsible for noticing.
+
+Verify the runner's COLLECTED count yourself rather than accepting the builder's reported
+figure. A mismatch is a P1. Tests that do not run are not tests, and a suite that drops them
+silently reports green for coverage it does not have.
 
 Returns `PASS`, or findings graded:
 
@@ -50,6 +54,27 @@ features in the source project shipped as reports and not as code, under a green
 Then exercise what was already working. Every capability a previous slice shipped must
 still behave as it did — call the earlier endpoints, load the earlier pages. A slice that
 breaks the last one and passes its own tests is the most expensive kind of green.
+
+**The held-out suite.** The builder writes the tests you run: the same party produces the
+work and the standard. So derive your own suite from the acceptance criteria in
+`.agent/STATE.md` — from the criteria, never from the code. One test per criterion, five
+maximum. Write it into a `mktemp -d` outside the repository, run it, report, discard. It is
+never committed and never appears in the tree, so nothing can be written against it. This
+does not breach read-only: the boundary is that you cannot change the work, and a file
+outside the repository changes nothing. Where a live deployment exists, run it against the
+LIVE URL as well as locally and report both — "passes locally, fails in production" is the
+failure this pipeline was built for and it is now testable.
+
+**Report Δ in the verdict:** visible pass rate minus held-out pass rate. Above 20 points is
+P1; above zero is P2; zero is PASS.
+
+**The mutation probe.** Break one line of the implementation this slice added — invert a
+condition, drop a guard, move a boundary — LOCALLY ONLY, never against the deployment, and
+confirm at least one test FAILS. Restore it, confirm the suite is green and
+`git status --porcelain` is empty. A suite that stays green while the code is broken is not
+testing the code. This is the rule the hooks are already held to, pointed at the product: an
+assertion nobody has seen fail is not an assertion. Name the mutation and the test that
+caught it in the verdict. If nothing caught it, P1.
 
 ## Standing rule
 

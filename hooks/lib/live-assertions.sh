@@ -4,7 +4,11 @@
 #
 # Environment:
 #   BASE_URL        required, no default
-#   PROTECTED_PATH  required
+#   PROTECTED_PATH  required, unless NO_PROTECTED_ROUTE=1 is declared
+#   NO_PROTECTED_ROUTE=1   the application has no authenticated route at all, so A2
+#                   skips loudly instead of failing forever. An explicit declaration,
+#                   never an omission: a forgotten variable must not disable an
+#                   assertion. See R2-F20.
 #   HEALTH_PATH     default /health
 #   RESOURCE_PATH   optional, enables A4
 #   TEST_USER, TEST_PASS, LOGIN_PATH   optional, enable A3 and A4
@@ -12,6 +16,8 @@ set -eu
 
 LA_PASS=0
 LA_FAIL=0
+LA_SKIP=0
+LA_SKIP_WHY=""
 
 la_code() {
 	# $1 url, remaining args passed to curl. Connection failure reads as 000.
@@ -31,7 +37,13 @@ la_fail() {
 }
 
 la_skip() {
-	printf 'SKIPPED  %s: %s unset\n' "$1" "$2"
+	la_skip_msg "$1" "$2 unset"
+}
+
+la_skip_msg() { # $1 assertion, $2 reason in full
+	LA_SKIP=$((LA_SKIP + 1))
+	LA_SKIP_WHY="${LA_SKIP_WHY}${LA_SKIP_WHY:+; }$1 $2"
+	printf 'SKIPPED  %s: %s\n' "$1" "$2"
 }
 
 run_live_assertions() {
@@ -42,8 +54,11 @@ run_live_assertions() {
 		printf 'FATAL    BASE_URL is unset. Nothing was asserted.\n' >&2
 		return 2
 	fi
-	if [ -z "${PROTECTED_PATH:-}" ]; then
-		printf 'FATAL    PROTECTED_PATH is unset. Nothing was asserted.\n' >&2
+	# An omission is not a declaration: PROTECTED_PATH missing is still FATAL unless the
+	# application explicitly declares it has no authenticated route.
+	if [ -z "${PROTECTED_PATH:-}" ] && [ "${NO_PROTECTED_ROUTE:-}" != 1 ]; then
+		printf 'FATAL    PROTECTED_PATH is unset and NO_PROTECTED_ROUTE is not declared.\n' >&2
+		printf '         An omission is not a declaration. Nothing was asserted.\n' >&2
 		return 2
 	fi
 	health_path=${HEALTH_PATH:-/health}
@@ -56,15 +71,19 @@ run_live_assertions() {
 	esac
 
 	# A2 protected route refused without a credential
-	code=$(la_code "$BASE_URL$PROTECTED_PATH")
-	case "$code" in
-	401 | 403) la_pass "A2 unauthenticated $PROTECTED_PATH refused" "$code" ;;
-	3??) la_fail "A2 unauthenticated $PROTECTED_PATH refused" "$code" \
-		" — redirect is not a refusal" ;;
-	200) la_fail "A2 unauthenticated $PROTECTED_PATH refused" "$code" \
-		" — route is open" ;;
-	*) la_fail "A2 unauthenticated $PROTECTED_PATH refused" "$code" ;;
-	esac
+	if [ -z "${PROTECTED_PATH:-}" ]; then
+		la_skip_msg "A2" "the application declares no protected route"
+	else
+		code=$(la_code "$BASE_URL$PROTECTED_PATH")
+		case "$code" in
+		401 | 403) la_pass "A2 unauthenticated $PROTECTED_PATH refused" "$code" ;;
+		3??) la_fail "A2 unauthenticated $PROTECTED_PATH refused" "$code" \
+			" — redirect is not a refusal" ;;
+		200) la_fail "A2 unauthenticated $PROTECTED_PATH refused" "$code" \
+			" — route is open" ;;
+		*) la_fail "A2 unauthenticated $PROTECTED_PATH refused" "$code" ;;
+		esac
+	fi
 
 	# A3 login with real credentials
 	if [ -z "${TEST_USER:-}" ] || [ -z "${TEST_PASS:-}" ]; then
@@ -94,6 +113,13 @@ run_live_assertions() {
 		fi
 	fi
 
-	printf 'ASSERTIONS  %s passed, %s failed\n' "$LA_PASS" "$LA_FAIL"
+	# The skip count is always printed. A run with two skips must never read the same as
+	# a run with none — that is how a disabled assertion hides inside a green summary.
+	if [ "$LA_SKIP" -gt 0 ]; then
+		printf 'ASSERTIONS  %s passed, %s failed, %s skipped (%s)\n' \
+			"$LA_PASS" "$LA_FAIL" "$LA_SKIP" "$LA_SKIP_WHY"
+	else
+		printf 'ASSERTIONS  %s passed, %s failed, 0 skipped\n' "$LA_PASS" "$LA_FAIL"
+	fi
 	[ "$LA_FAIL" -eq 0 ]
 }
