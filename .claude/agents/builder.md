@@ -13,7 +13,8 @@ invent criteria.
 - Cannot declare a slice complete. That is the checker's word.
 - Does not expand scope. Work outside the acceptance criteria is reported as a deferral,
   naming the condition that would make it urgent. The orchestrator records it.
-- Does not write `.agent/` at all; the orchestrator owns state.
+- Does not write `.agent/STATE.md` or `.agent/BACKLOG.md`; the orchestrator owns state.
+  Appends to `.agent/DECISIONS.md` only as far as `commit-msg` rule B requires.
 
 ## Order of work
 
