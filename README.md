@@ -1,4 +1,5 @@
-<!-- Cap: 180 lines. Not a state file; the state file caps are the orchestrator's. -->
+<!-- No line cap: this file grows with the project. The rule that protects it is
+     editorial — no section longer than 12 lines. Split or cut instead. -->
 
 # EasyDev — Agentic Engineering Pipeline
 
@@ -162,8 +163,8 @@ Each of these sits in `.agent/BACKLOG.md` with the condition that would make it 
 V0 is cut. Nine of the ten definition-of-done items are evidenced, and the four hooks are
 proven by sixteen fail-on-purpose cases in `./hooks/test/run-hook-tests.sh`. Clone this
 repository and run that script: it builds its own throwaway repositories, needs no
-configuration, and every refusal case checks the commit is absent from `git log` rather
-than trusting an exit code. **The builder and checker loop has not yet run end to end on a
+configuration, is safe to run in a repository with its own hooks wired, and checks every
+refusal case against `git log` rather than trusting an exit code. **The builder and checker loop has not yet run end to end on a
 real project**, so nothing here should be read as a proven result.
 
 The original design specification is in `docs/DESIGN.md`. It is a historical record, not a

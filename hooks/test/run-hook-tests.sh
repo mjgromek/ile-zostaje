@@ -9,20 +9,25 @@
 # Each commit case gets its own throwaway repository under mktemp -d, because
 # rule A looks back ten commits: a test: commit left by an earlier case would
 # satisfy a later one and the suite would pass for the wrong reason.
+#
+# Safe to run from a repository with its own hooks wired — that is the point, since
+# the people who wired them correctly are the people who need to verify them. Before
+# any commit is attempted, assert_scratch proves the repo about to be committed into
+# lives under mktemp and is not the caller's. The caller's git config is never read
+# or written.
 set -eu
 
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 hooks_src=$(CDPATH= cd -- "$script_dir/.." && pwd)
 
-if [ -n "$(git config --get core.hooksPath 2>/dev/null || true)" ]; then
-	printf 'REFUSED  core.hooksPath is set here (%s).\n' \
-		"$(git config --get core.hooksPath)" >&2
-	printf '         This suite builds its own throwaway repositories and must never run\n' >&2
-	printf '         against one with hooks wired. Unset it, or run from a fresh clone.\n' >&2
-	exit 2
-fi
+# The invoking repository's toplevel, used only to prove the suite is not standing
+# in it. Never its config: this suite reads and writes nothing in the caller's repo.
+caller_top=$(git rev-parse --show-toplevel 2>/dev/null || printf '')
 
 tmp=$(mktemp -d)
+# Physical path: on macOS mktemp hands back /var/... while git resolves /private/var/...,
+# and the containment check below would compare two spellings of the same directory.
+tmp=$(CDPATH= cd -- "$tmp" && pwd -P)
 pids=""
 cleanup() {
 	[ -z "$pids" ] || kill $pids 2>/dev/null || true
@@ -42,6 +47,22 @@ report() { # id expected actual verdict
 	printf '%-4s %-8s  %-52s  %s\n' "$1" "$2" "$3" "$4"
 }
 
+assert_scratch() { # dir — refuse to commit anywhere but our own scratch repo
+	top=$(git -C "$1" rev-parse --show-toplevel)
+	case "$top" in
+	"$tmp"/*) ;;
+	*)
+		printf 'ABORT  scratch repo %s is outside %s. Nothing was run.\n' "$top" "$tmp" >&2
+		exit 2
+		;;
+	esac
+	if [ -n "$caller_top" ] && [ "$top" = "$caller_top" ]; then
+		printf 'ABORT  scratch repo is the invoking repository (%s). Nothing was run.\n' \
+			"$top" >&2
+		exit 2
+	fi
+}
+
 new_repo() { # id -> path to a fresh repo with the hooks wired
 	d="$tmp/repo$1"
 	mkdir -p "$d/.agent"
@@ -49,6 +70,9 @@ new_repo() { # id -> path to a fresh repo with the hooks wired
 	git -C "$d" config user.email test@example.invalid
 	git -C "$d" config user.name "Hook Suite"
 	git -C "$d" config commit.gpgsign false
+	# Before anything is copied, deleted or committed: the rm below is destructive,
+	# so the containment proof has to come first, not merely before the commit.
+	assert_scratch "$d"
 	cp -R "$hooks_src" "$d/hooks"
 	rm -rf "$d/hooks/test"
 	git -C "$d" config core.hooksPath hooks
