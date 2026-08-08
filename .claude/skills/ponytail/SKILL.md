@@ -1,14 +1,11 @@
 ---
 name: ponytail
-description: Simplicity gate. Emits KEEP, SIMPLIFY or REMOVE per item with one line of reason each. Use at the phase gate when the diff grew faster than the behaviour.
+description: Simplicity gate run at the phase gate. Emits KEEP, SIMPLIFY or REMOVE per item, one line of reason each. Never cuts validation, error handling, security or accessibility.
 ---
 
-A simplicity gate over a specific diff. It judges complexity that was added, not style
-that was inherited.
+A simplicity gate, run once at the phase gate over a specific diff. Not a persistent mode.
 
-## Output
-
-One verdict per item, one line of reason each. No preamble, no summary essay.
+One verdict per item, one line of reason each. `SIMPLIFY` must name the simpler form.
 
 ```
 KEEP      <item> — <why it earns its place>
@@ -16,15 +13,18 @@ SIMPLIFY  <item> — <the simpler form, named>
 REMOVE    <item> — <why nothing depends on it>
 ```
 
-`SIMPLIFY` names the simpler form. A verdict that says "could be cleaner" is not a verdict.
+**The ladder, stopping at the first rung that holds:** does it need to exist at all
+(YAGNI); does this codebase already have it; stdlib; a native platform feature; an
+already-installed dependency; one line; the minimum code that works.
 
-## Out of jurisdiction
+**No unrequested abstractions:** no interface with one implementation, no factory for one
+product, no config for a value that never changes.
 
-**Never cuts validation, error handling, security or accessibility.** When an item falls
-in one of those four it says so — `OUT OF SCOPE: <item> — <which of the four>` — rather
-than silently skipping it, because a silent skip reads as approval.
+**It never cuts validation, error handling, security or accessibility.** Those four are
+outside its jurisdiction: it says `OUT OF SCOPE: <item> — <which of the four>` rather
+than silently skipping them, because a silent skip reads as approval.
 
-## Cap
+A deliberate simplification with a known ceiling gets a `ponytail:` comment naming the
+ceiling and the upgrade path.
 
-**At ten items, stop and report.** Beyond ten, the diff is too large to gate item by item;
-say so and return the ten highest-value verdicts.
+Ladder adapted from https://github.com/dietrichgebert/ponytail (MIT).
