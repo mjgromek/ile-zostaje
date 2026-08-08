@@ -28,17 +28,9 @@
 ## Reporting
 
 - **Reports are five lines or fewer per block. No essays.**
-- The phase summary is the only format the human reads:
-
-```
-PHASE COMPLETE
-Shipped:      <what changed>
-Verified:     <how, including what was actually exercised>
-Decided:      <Level 1 choices worth naming, or NONE>
-Deferred:     <P2 items, or NONE>
-Needs you:    NONE | <one decision, with a recommendation>
-Next:         <the next slice>
-```
+- The phase summary is the only format the human reads. Its format and refusal
+  conditions live in `.claude/policies/summary.md` — follow that file, and never
+  restate the template anywhere else.
 
 ## State files and caps
 
