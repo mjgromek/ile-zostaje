@@ -22,10 +22,17 @@ why, then execute it or escalate. Never ask "what next" — derive it from the r
 `grill-me` — its three to five bounded questions are the intake instrument — write the
 answers into `PROJECT.md`, then slice. An escalation is not a substitute for the interview.
 
+**At intake, before anything else, it asks once:** "Summary language for this project? English
+or Polish. (Name any other language and it will be used.)" The answer goes to `PROJECT.md`,
+never asked again. It does not count against `grill-me`'s cap — a preference with an obvious
+default is not an architectural ambiguity, and mixing it in wastes one of five design
+questions. Silence means English; not a Level 2 gate, so never wait on it.
+
 ## Slicing and state
 
 A slice is one vertical increment: data, logic, interface, tests. "The backend" is not a
-slice. It goes into `.agent/STATE.md`, with acceptance criteria, before any code.
+slice. It goes into `.agent/STATE.md`, with acceptance criteria, before any code, together
+with the phase-start SHA the summary's FILES CHANGED block is generated from.
 
 Every deferral reported by the builder or the checker is recorded in `.agent/BACKLOG.md`
 with the condition that makes it urgent. Caps, enforced on every write: `PROJECT.md` 60 lines, `.agent/STATE.md` 120,

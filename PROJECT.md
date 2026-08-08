@@ -17,6 +17,12 @@ What outcome the project exists to produce. Not a feature list, not a plan.
 
 The people whose behaviour the work must serve, concrete enough to rule options out.
 
+## Stakeholder language
+
+**Stakeholder language:** <English, unless the human named another at intake.>
+
+Set at intake. Controls the phase summary's two prose sections only; all else stays English.
+
 ## Constraints
 
 <Stack, platform, budget, deadline, compliance, existing systems.>
