@@ -1,5 +1,5 @@
 #!/bin/sh
-# Fail-on-purpose suite for all four hooks. Twenty-three cases.
+# Fail-on-purpose suite for all four hooks. Twenty-eight cases.
 #
 # Every case asserts the INTENT of the rule, never the mechanism that implements
 # it. "An unverifiable claim is refused unless explicitly marked foreign" is
@@ -8,9 +8,15 @@
 # passes forever. Case 18 did exactly that: it took the defective escape hatch as
 # its exempt token, so it agreed with the bug while the hook stayed blind.
 #
-# Cases are grouped, not gapped: 1-10 and 17-21 cover commit-msg and pre-commit,
-# 11-16 and 22-23 cover verify-deploy and probe. All 23 run. Do NOT renumber — the
-# numbers are referenced from the findings files and from commit messages.
+# Cases that exercise one rule against clean fixtures cannot catch rules that
+# interact. Where two rules can both fire on the same commit, at least one case
+# must stage the files they would realistically share. F32 was invisible for
+# exactly this reason.
+#
+# Cases are grouped, not gapped: 1-10, 17-21 and 24-28 cover commit-msg and
+# pre-commit, 11-16 and 22-23 cover verify-deploy and probe. All 28 run. Do NOT
+# renumber — the numbers are referenced from the findings files and from commit
+# messages.
 #
 # Every refusal case also runs `git log --oneline` and asserts the commit is
 # genuinely absent. A hook that prints a refusal and lets the commit through is
@@ -104,12 +110,19 @@ did_commit() { # dir msg -> 0 when git exited zero
 	git -C "$1" commit -q -m "$2" >"$tmp/out" 2>&1
 }
 
+# The subject alone, because `git log --oneline` prints only the subject and a
+# multi-line message handed to grep -F becomes several patterns — one of them the
+# blank line before a trailer, which matches every line of any log. That would make
+# the presence/absence assertion vacuously true for exactly the trailer cases that
+# need it most. Cases 26-28 carry trailers; this is what keeps their check real.
+subject_of() { printf '%s\n' "$1" | head -n 1; }
+
 assert_refused() { # id dir msg
 	if did_commit "$2" "$3"; then
 		report "$1" REFUSED "exit 0 — the commit was accepted" FAIL
 		return
 	fi
-	if git -C "$2" log --oneline | grep -qF "$3"; then
+	if git -C "$2" log --oneline | grep -qF "$(subject_of "$3")"; then
 		report "$1" REFUSED "refused, but the commit IS in git log" FAIL
 	else
 		report "$1" REFUSED "refused: $(head -n 1 "$tmp/out" | cut -c1-32), absent" PASS
@@ -118,7 +131,7 @@ assert_refused() { # id dir msg
 
 assert_allowed() { # id dir msg
 	if did_commit "$2" "$3"; then
-		if git -C "$2" log --oneline | grep -qF "$3"; then
+		if git -C "$2" log --oneline | grep -qF "$(subject_of "$3")"; then
 			report "$1" ALLOWED "committed, present in git log" PASS
 		else
 			report "$1" ALLOWED "exit 0 but absent from git log" FAIL
@@ -149,8 +162,8 @@ assert_script() { # id expect needle cmd...
 	fi
 }
 
-printf 'HOOK SUITE  23 fail-on-purpose cases\n\n'
-printf 'commit-msg and pre-commit   cases 1-10, 17-21\n'
+printf 'HOOK SUITE  28 fail-on-purpose cases\n\n'
+printf 'commit-msg and pre-commit   cases 1-10, 17-21, 24-28\n'
 
 # 1  feat: with no preceding test:
 d=$(new_repo 1)
@@ -280,6 +293,67 @@ if did_commit "$d" "chore: state citing a labelled foreign sha"; then
 else
 	report 21 ALLOWED "refused: $(head -n 1 "$tmp/out")" FAIL
 fi
+
+# 24  the F32 interaction. Rule B forces .agent/DECISIONS.md onto every feat: commit,
+#     and the progress board puts .agent/PROGRESS.md on test: commits, so dirof()
+#     matched `.agent` on both sides and rule A's overlap passed on every feat:
+#     commit regardless of coverage. Neither rule is wrong in isolation, and all 21
+#     earlier cases stage clean fixtures, so none of them could see it.
+d=$(new_repo 24)
+stage "$d" .agent/PROGRESS.md "- slice 1 open"
+stage "$d" tests/x.py "def test_x(): assert False"
+did_commit "$d" "test: failing test for x" || true
+stage "$d" src/unrelated.py "def unrelated(): pass"
+git -C "$d" add .agent/DECISIONS.md
+assert_refused 24 "$d" "feat: implement unrelated, which no test covers"
+
+# 25  the same interaction, with the code the test actually covers staged too.
+#     tests/x.py and src/x.py share a stem, so a real link exists and it lands.
+#     Without this case the fix could refuse everything and still look correct.
+d=$(new_repo 25)
+stage "$d" .agent/PROGRESS.md "- slice 1 open"
+stage "$d" tests/x.py "def test_x(): assert False"
+did_commit "$d" "test: failing test for x" || true
+stage "$d" src/unrelated.py "def unrelated(): pass"
+stage "$d" src/x.py "def x(): pass"
+git -C "$d" add .agent/DECISIONS.md
+assert_allowed 25 "$d" "feat: implement x, with unrelated alongside"
+
+# 26  the case no path rule can see: tests/test_layout.py genuinely covers
+#     pkg/theme.py, and neither directory nor stem says so. The Covers: trailer
+#     declares it, and the hook checks the declaration against what was staged.
+d=$(new_repo 26)
+stage "$d" .agent/PROGRESS.md "- slice open"
+stage "$d" tests/test_layout.py "def test_layout(): assert False"
+did_commit "$d" "test: the layout measured in a browser" || true
+stage "$d" pkg/theme.py "CSS = ''"
+git -C "$d" add .agent/DECISIONS.md
+assert_allowed 26 "$d" "feat: cap the body so the board scrolls
+
+Covers: pkg/theme.py"
+
+# 27  a trailer naming a path this commit never staged. Checked, not accepted:
+#     an unchecked declaration is a wish, and would be worse than no rule at all
+#     because it reads like evidence.
+d=$(new_repo 27)
+stage "$d" .agent/PROGRESS.md "- slice open"
+stage "$d" tests/test_layout.py "def test_layout(): assert False"
+did_commit "$d" "test: the layout measured in a browser" || true
+stage "$d" pkg/theme.py "CSS = ''"
+git -C "$d" add .agent/DECISIONS.md
+assert_refused 27 "$d" "feat: cap the body so the board scrolls
+
+Covers: pkg/never_staged.py"
+
+# 28  no overlap and no trailer. The default stays refusal — the declaration is an
+#     escape hatch to be reached for deliberately, never the path of least effort.
+d=$(new_repo 28)
+stage "$d" .agent/PROGRESS.md "- slice open"
+stage "$d" tests/test_layout.py "def test_layout(): assert False"
+did_commit "$d" "test: the layout measured in a browser" || true
+stage "$d" pkg/theme.py "CSS = ''"
+git -C "$d" add .agent/DECISIONS.md
+assert_refused 28 "$d" "feat: cap the body, coverage undeclared"
 
 printf '\nverify-deploy and probe     cases 11-16, 22-23\n'
 
