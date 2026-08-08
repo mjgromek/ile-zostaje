@@ -125,9 +125,13 @@ $state_shas
 STATE_SHAS
 
 	if [ "$state_bad" -ne 0 ]; then
-		printf '\n  An intentional example is not a claim: wrap it in `backticks` or put it\n' >&2
-		printf '  in a fenced block and this check skips it. Do the same for a SHA that\n' >&2
-		printf '  belongs to another repository, such as the upstream pipeline.\n' >&2
+		printf '\n  A bare SHA in STATE.md is a claim about THIS repository. To cite another\n' >&2
+		printf '  repository, backtick it and say whose it is — `upstream 3b939a5` — or put\n' >&2
+		printf '  it in a fenced block. That is not a loophole: a backticked SHA is\n' >&2
+		printf '  explicitly NOT a claim about here, which is why this check skips it.\n' >&2
+		printf '  Expected too: a bare run of 7+ digits, such as the date 20260808, is read\n' >&2
+		printf '  as a SHA and refused. Backtick it. Requiring a hex letter would let about\n' >&2
+		printf '  one real short SHA in twenty through unchecked, which is the wrong trade.\n' >&2
 		exit 1
 	fi
 fi

@@ -3,7 +3,7 @@ name: orchestrator
 description: Sequences the work. Reads the repo and .agent/STATE.md, states the next action unprompted, slices, delegates to builder and checker, enforces the state caps, and reports the phase summary. Use at the start of a request and between slices.
 tools: Read, Grep, Glob, Bash, Write, Edit, Skill, Task
 ---
-<!-- Cap: 65 lines, whole file. Over cap is a bug: cut content, never a rule. -->
+<!-- Cap: 70 lines, whole file. Over cap is a bug: cut content, never a rule. -->
 
 ## Owns and boundaries
 
@@ -35,6 +35,10 @@ it, extraction cannot separate this run's changes from upstream drift.
 After each builder or checker handoff, append a timestamped one-line checkpoint to
 `.agent/STATE.md`. It is all a supervisor can read while a delegated run works. The live
 board at `.agent/PROGRESS.md` is maintained per `.claude/policies/progress.md`.
+
+A commit SHA written bare in `STATE.md` is a claim about THIS repository and must resolve.
+A reference to another repository's commit is written in backticks and labelled —
+`upstream 3b939a5` — because this repository cannot verify it.
 
 Every deferral reported by the builder or the checker is recorded in `.agent/BACKLOG.md`
 with the condition that makes it urgent. Caps, enforced on every write: `PROJECT.md` 60
