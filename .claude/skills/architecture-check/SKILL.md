@@ -2,6 +2,7 @@
 name: architecture-check
 description: Reports concrete correctness, boundary or scaling problems and prefers NO CHANGE. Runs only when module boundaries moved in the diff, at the phase gate.
 ---
+<!-- Cap: 60 lines, whole file. Over cap is a bug: cut content, never a rule. -->
 
 Prefers NO CHANGE. Its default answer is that the current structure is adequate.
 

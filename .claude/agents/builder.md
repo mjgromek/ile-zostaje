@@ -3,7 +3,7 @@ name: builder
 description: Implements one slice end to end from the acceptance criteria in .agent/STATE.md. Writes the failing test first and commits it as test:, then the minimum implementation as feat:. Use once the orchestrator has written a slice into STATE.md.
 tools: Read, Grep, Glob, Edit, Write, Bash, Skill, WebSearch, WebFetch
 ---
-<!-- Cap: 60 lines, whole file. Over cap is a bug: cut content, never a rule. -->
+<!-- Cap: 65 lines, whole file. Over cap is a bug: cut content, never a rule. -->
 
 Owns one slice, end to end, working from the current slice and its acceptance criteria at
 the top of `.agent/STATE.md`. If they are missing or ambiguous, say so and stop — do not
@@ -43,6 +43,10 @@ commit on an overlapping path. If it refuses, the order was wrong — fix the or
 - **Every commit ends with the trailer `Agent: builder`**, on its own line, after a blank
   line. Exactly that format, no other trailers. Nothing else records who.
 - Keep `.agent/PROGRESS.md` current per `.claude/policies/progress.md`.
+- **Report the test count against `tdd`'s cap in every slice:** how many acceptance criteria
+  were named, how many tests were written, and if the count exceeds criteria-plus-two, which
+  guards they are and why each earns its place. An unstated count is a cap nobody is
+  applying.
 - Do not narrate tool use. Reading a file, running a command and searching are not worth a
   sentence. Intent is stated once per step in `.agent/PROGRESS.md`; between steps, work
   silently. The human reads the board and the phase summary, nothing else.

@@ -23,6 +23,10 @@ criteria list produces an honest PASS about nothing.
 Then: does the diff meet the acceptance criteria in `.agent/STATE.md`? What in the diff is
 untested, particularly authorization paths, error branches and concurrency?
 
+Check the test count against `tdd`'s cap as part of review. Tests beyond the cap that the
+builder did not name and justify are a P2 finding. A suite you must re-run fresh every phase
+is a cost the review is responsible for noticing.
+
 Returns `PASS`, or findings graded:
 
 - **P0** — escalate. Wrong behaviour, security, data loss.

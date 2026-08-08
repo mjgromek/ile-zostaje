@@ -2,6 +2,7 @@
 name: tdd
 description: Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests.
 ---
+<!-- Cap: 60 lines, whole file. Over cap is a bug: cut content, never a rule. -->
 
 # Test-Driven Development
 
@@ -45,5 +46,7 @@ When the shape of that interface is itself in question — how deep the module i
 **The named acceptance criteria from `.agent/STATE.md`, plus at most two implied guards.** An implied guard is written only with a stated reason, and the report says which two and why.
 
 **At a third implied guard, refuse.** Do not write it. Report it as a deferral with the condition that would make it urgent, and let the orchestrator record it. No speculative tests, and no test for behaviour nobody asked for: a test that exists because it seemed thorough is scope expansion wearing a test's clothes.
+
+**A test that asserts documentation agrees with configuration, or that a placeholder looks like a placeholder, is lint, not a test.** It does not verify behaviour through a public interface and it does not belong in the suite the checker re-runs every phase. Testing a seam by TAKING a value from config and exercising it is correct and is not this. Re-typing a literal and asserting equality is not.
 
 Adapted from https://github.com/mattpocock/skills. Tightened per `docs/DESIGN.md` section 6.
