@@ -554,6 +554,24 @@ shown. Do NOT implement.
 
 ---
 
+## F12 — the summary asserts the work is pushed and never says when it was not
+
+**Observed or inferred:** Observed, by external review of the file, not by the run.
+
+**Evidence:** `summary.md:45` stated as fact that "the work is already committed and
+pushed" — the justification for the `hold` offer. The 90-minute run made 15 commits in a
+repository with no origin remote. The orchestrator handled the skip correctly
+(`orchestrator.md:44-46`) and recorded it in `STATE.md:79`, but the summary — the only
+thing the human reads — implied the work was safe elsewhere. Same failure class as a
+silently skipped assertion; `live-assertions.sh` prints SKIPPED for exactly this reason.
+
+**Who it hits:** Any run without a remote, or where the push fails. Silent.
+
+**FIXED in ccfb77b:** the closing line now states push status always, and says
+"NOT PUSHED: <reason>. This work exists only on this machine." when it did not run.
+
+---
+
 ## F13 — rule A is unsatisfiable for prose contracts, and the escape is a prefix
 
 **Observed or inferred:** Observed, during the port-back of these findings.
