@@ -189,15 +189,21 @@ did_commit "$d" "test: failing test for f" || true
 stage "$d" src/f.py "def f(): return 3"
 assert_allowed 7 "$d" "fix: correct f with no decision record"
 
-# 8  an AWS access key in an added line
+# 8  an AWS access key in an added line.
+#    Built from two pieces so the fixture is a real match once assembled but never
+#    a literal in this file — otherwise the scanner refuses its own test suite.
+#    See docs/RUN-001-FINDINGS.md, F2.
 d=$(new_repo 8)
-stage "$d" config.txt "key = AKIAAAAAAAAAAAAAAAAA"
+aws_key="AKIA""AAAAAAAAAAAAAAAA"
+stage "$d" config.txt "key = $aws_key"
 assert_refused 8 "$d" "chore: add config with an aws key"
 
 # 9  a private key header. This silently matched nothing until grep -e was used,
 #    because the pattern starts with a dash and was read as options. Keep forever.
+#    Split across two pieces for the same reason as case 8.
 d=$(new_repo 9)
-stage "$d" id_rsa "-----BEGIN RSA PRIVATE KEY-----"
+priv_key="-----BEGIN RSA PRIVATE"" KEY-----"
+stage "$d" id_rsa "$priv_key"
 assert_refused 9 "$d" "chore: add a private key"
 
 # 10  an ordinary chore: commit

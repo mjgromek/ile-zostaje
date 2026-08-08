@@ -6,14 +6,21 @@ set -eu
 
 TAB=$(printf '\t')
 
+# Patterns that would otherwise appear here as contiguous literals are assembled
+# from fragments at runtime. A table that matches itself refuses its own source,
+# so a fresh clone can never commit its own hooks and silently ends up with none.
+# See docs/RUN-001-FINDINGS.md, F2. The heredoc below is unquoted for this reason.
+gcp_a='"private_key'
+gcp_b='_id"'
+
 patterns() {
-	cat <<'PATTERNS'
+	cat <<PATTERNS
 aws-access-key	AKIA[0-9A-Z]{16}
 private-key	-----BEGIN [A-Z ]*PRIVATE KEY-----
 slack-token	xox[abprs]-[0-9A-Za-z-]{10,}
 github-token	gh[pousr]_[0-9A-Za-z]{20,}
 google-api-key	AIza[0-9A-Za-z_-]{35}
-gcp-sa-json	"private_key_id"
+gcp-sa-json	${gcp_a}${gcp_b}
 generic-secret	(api[_-]?key|secret|password|passwd|token)["'[:space:]]*[:=]["'[:space:]]*[A-Za-z0-9/+=_-]{20,}
 PATTERNS
 }
