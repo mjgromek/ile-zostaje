@@ -590,3 +590,39 @@ by the author's honesty about the prefix, not by the hook.
 prefix. If a commit touches source paths, require the test regardless of what it calls
 itself. That is language-specific and needs a per-project config, so it is a design
 decision, not a five-minute change.
+
+---
+
+## F14 — no agent verifies which repository it is operating in
+
+**Observed or inferred:** Observed.
+
+**Evidence:** Two repositories with near-identical structure — the pipeline template and a
+clone of it — sit side by side. A brief that said "in the pipeline repo" as prose was
+executed against the clone. Every finding it produced was correct for the repo it was in,
+and every external verification was correct for the other, and the contradiction was only
+caught by comparing them. Both parties reported with full rigour and neither checked
+`pwd`.
+
+The same secret-scanner probe, same key, same command, in the two trees:
+
+```
+~/Desktop/Warsaw_District_Air_Board/warsaw-air     hooks/pre-commit:33 exemption present
+  $ git commit -m "chore: scanner check"
+  [main 1efa586] chore: scanner check          <- ALLOWED
+
+~/Desktop/EasyDev_Agentic_Engineering_Pipeline     exemption absent, fragments at 13-14
+  $ git commit -m "chore: scanner check"
+  REFUSED  secret-scan [aws-access-key]  hooks/probe.sh:26
+```
+
+Neither result was wrong. They were answers to the same question about different repos,
+and nothing in either report named which one.
+
+**Who it hits:** Anyone running the pipeline alongside a clone, a vendored copy, or a
+worktree. Silent: the work lands, the commits succeed, the reports are internally
+consistent.
+
+**Proposed fix, NOT implemented:** an agent's first line of output names its working
+directory and the repository's origin remote, or "no remote". Prose in a brief is not
+enforceable; a printed postcondition is.
