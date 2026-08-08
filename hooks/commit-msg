@@ -2,6 +2,25 @@
 # Two rules that need the commit message, which pre-commit cannot see:
 #   A. test-first ordering — a feat: or fix: commit follows a test: commit on an
 #      overlapping path. fix: is gated too: without a test, a fix is a claim.
+#      Overlap is computed over code paths only: .agent/ and docs/ are excluded
+#      from BOTH sides, because rule B guarantees a shared .agent path on every
+#      feat: commit and would otherwise satisfy rule A by itself.
+#      Rule A passes on EITHER the dir/stem overlap or a `Covers:` trailer.
+#
+#      The trailer exists because no path rule can express every real link:
+#      tests/test_layout.py genuinely covers warsaw_air/theme.py, and no amount of
+#      widening the heuristic will see it. So the heuristic stays narrow and the
+#      cases it cannot see are DECLARED.
+#
+#      A `Covers:` trailer is CHECKED, not accepted. Every path it names must be
+#      staged in this commit, and the nearest test: commit must itself have staged
+#      some file outside .agent/ and docs/. Be clear about what that is worth: it
+#      does NOT prove the test exercises the code. Nothing cheap does. It is a
+#      checked declaration rather than a guess, and it is only claimed as that.
+#
+#      The trailer is deliberately the unusual path. When the names line up nothing
+#      is needed, so a `Covers:` line in history marks a link that was not obvious —
+#      which makes it precisely the commit a reviewer should stop and read.
 #   B. decision record    — a feat: commit, or an ADR change, stages .agent/DECISIONS.md.
 #      Deliberately NOT fired by fix:. Paperwork on every routine fix trains filler,
 #      and a DECISIONS.md full of filler stops being read.
@@ -48,6 +67,20 @@ dirof() {
 	esac
 }
 
+# Paths that can never be evidence of a test-to-code link. Rule B forces every
+# feat: commit to stage .agent/DECISIONS.md, and the progress board puts
+# .agent/PROGRESS.md in test: commits, so dirof() matched `.agent` on both sides
+# and rule A's overlap passed on every feat: commit whether or not a test covered
+# the code. Rule A enforced nothing from the day the board landed. F32.
+comparable() { # paths -> only those outside .agent/ and docs/
+	for p in $1; do
+		case "$p" in
+		.agent/* | docs/*) ;;
+		*) printf '%s\n' "$p" ;;
+		esac
+	done
+}
+
 if [ "$needs_test_first" -eq 1 ]; then
 	test_sha=""
 	for sha in $(git rev-list -n 10 HEAD 2>/dev/null || true); do
@@ -67,20 +100,78 @@ if [ "$needs_test_first" -eq 1 ]; then
 	fi
 
 	test_paths=$(git show --name-only --format= "$test_sha")
+
+	# Compare only paths that could carry code. A state file, a progress board or a
+	# decision record on either side is bookkeeping, not coverage.
+	staged_cmp=$(comparable "$staged")
+	test_cmp=$(comparable "$test_paths")
+
+	if [ -z "$staged_cmp" ]; then
+		printf 'REFUSED  rule A, test-first ordering\n' >&2
+		printf '  This commit staged no code path that a test could overlap with.\n' >&2
+		printf '  Everything staged is under .agent/ or docs/, which is bookkeeping:\n' >&2
+		printf '  a state file, a progress board or a decision record is never evidence\n' >&2
+		printf '  of a test-to-code link.\n' >&2
+		printf '  staged: %s\n' $staged >&2
+		exit 1
+	fi
+
+	if [ -z "$test_cmp" ]; then
+		printf 'REFUSED  rule A, test-first ordering\n' >&2
+		printf '  Nearest test: commit %s staged no code path either — only\n' \
+			"$(git rev-parse --short "$test_sha")" >&2
+		printf '  .agent/ or docs/ bookkeeping, which cannot evidence coverage.\n' >&2
+		printf '  test commit: %s\n' $test_paths >&2
+		printf '  Satisfy it: commit the failing test on the real path first.\n' >&2
+		exit 1
+	fi
+
 	overlap=0
-	for sp in $staged; do
-		for tp in $test_paths; do
+	for sp in $staged_cmp; do
+		for tp in $test_cmp; do
 			[ "$(dirof "$sp")" = "$(dirof "$tp")" ] && overlap=1
 			[ "$(stem "$sp")" = "$(stem "$tp")" ] && overlap=1
 		done
 	done
 
-	if [ "$overlap" -eq 0 ]; then
+	# A Covers: trailer is validated whenever it is present, not only when the
+	# heuristic has already failed. A declaration naming a path this commit never
+	# staged is a defect on its own, and an incidental dir/stem match must not
+	# excuse it — that is how a declaration decays into decoration.
+	covers=$(sed -n 's/^Covers:[[:space:]]*//p' "$msg_file")
+	covered=0
+	if [ -n "$covers" ]; then
+		for cp in $covers; do
+			declared=0
+			for sp in $staged; do
+				[ "$sp" = "$cp" ] && declared=1
+			done
+			if [ "$declared" -eq 0 ]; then
+				printf 'REFUSED  rule A, Covers: names a path this commit did not stage\n' >&2
+				printf '  declared: %s\n' "$cp" >&2
+				printf '  staged:   %s\n' $staged >&2
+				printf '  The trailer is checked, not taken on trust. Every path it names\n' >&2
+				printf '  must be staged here. Remove the path or stage it.\n' >&2
+				exit 1
+			fi
+		done
+		# test_cmp is already known non-empty above: the nearest test: commit staged
+		# some file outside .agent/ and docs/. That is the whole of what is verified.
+		covered=1
+	fi
+
+	if [ "$overlap" -eq 0 ] && [ "$covered" -eq 0 ]; then
 		printf 'REFUSED  rule A, test-first ordering\n' >&2
 		printf '  Nearest test: commit %s touches no overlapping path.\n' "$(git rev-parse --short "$test_sha")" >&2
 		printf '  staged:      %s\n' $staged >&2
 		printf '  test commit: %s\n' $test_paths >&2
-		printf '  Satisfy it: the test must share a directory or a filename stem with the code.\n' >&2
+		printf '  Satisfy it either way:\n' >&2
+		printf '    - the test shares a directory or a filename stem with the code, or\n' >&2
+		printf '    - the message carries a trailer  Covers: <path> [<path>...]\n' >&2
+		printf '      naming the staged paths that test covers. The trailer is checked\n' >&2
+		printf '      against what you staged; it does not prove the test exercises the\n' >&2
+		printf '      code, and is not claimed to. Use it where no path rule could see\n' >&2
+		printf '      the link, and expect a reviewer to read any commit that carries one.\n' >&2
 		exit 1
 	fi
 fi
