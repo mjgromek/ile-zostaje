@@ -2,8 +2,6 @@
   <img src="assets/easydev-logo.png" alt="EasyDev — Agentic Engineering Pipeline" width="760" />
 </p>
 
-<h1 align="center">EasyDev</h1>
-
 <p align="center">
   <strong>A bounded-autonomy engineering pipeline for Claude Code.</strong><br />
   Plan → Build → Review → Verify → Ship.
