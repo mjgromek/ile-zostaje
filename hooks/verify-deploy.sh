@@ -43,11 +43,14 @@ else
 	printf '         from the old container\n'
 fi
 
+# The skip count rides on the verdict line too. The ASSERTIONS line already names the
+# skips, but this is the line people read, and "PASS (1 assertions)" looks the same
+# whether three were skipped or none.
 if run_live_assertions; then
-	printf 'VERIFY-DEPLOY  PASS (%s assertions)\n' "$LA_PASS"
+	printf 'VERIFY-DEPLOY  PASS (%s assertions, %s skipped)\n' "$LA_PASS" "$LA_SKIP"
 	exit 0
 fi
 
-printf 'VERIFY-DEPLOY  FAIL (%s failures of %s assertions)\n' \
-	"$LA_FAIL" "$((LA_PASS + LA_FAIL))" >&2
+printf 'VERIFY-DEPLOY  FAIL (%s failures of %s assertions, %s skipped)\n' \
+	"$LA_FAIL" "$((LA_PASS + LA_FAIL))" "$LA_SKIP" >&2
 exit 1
