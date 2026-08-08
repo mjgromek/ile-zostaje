@@ -93,7 +93,7 @@ refuses vague values — "all tests pass" is rejected because it names nothing e
 | tdd | Red, green, refactor for the slice's tests | Criteria plus at most 2 implied guards |
 | ponytail | Simplicity gate over a diff at the phase gate | One verdict and one line of reason per item |
 | architecture-check | Boundary and scaling review when module boundaries moved | At most 2 items marked FIX NOW |
-| security-review | Trigger policy for the built-in `/security-review` | Risk-triggered only; else declines in a line |
+| security-gate | Trigger policy for the built-in `/security-review` | Risk-triggered only; else declines in a line |
 | theme-factory | Settles palette and type once, on the project's real screen | Once per project; at most 2 re-render rounds |
 | frontend-design | Visual direction when UI is in scope | UI slices only; palette belongs to theme-factory |
 

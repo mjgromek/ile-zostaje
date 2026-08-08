@@ -1,10 +1,12 @@
 ---
-name: security-review
+name: security-gate
 description: Trigger policy for Claude Code's built-in /security-review. Risk triggered only - auth, secrets, filesystem or network access, user input, database mutation, LLM tool exposure, deployment. Mandatory before a release that touched one.
 ---
 
-This is the trigger policy for Claude Code's built-in `/security-review`, not a
-reimplementation of it. The review stays independent: never run by whoever wrote the code.
+This skill decides *when* the built-in `/security-review` runs. It is the trigger policy,
+not a reimplementation of the review — the review itself is Claude Code's, and this skill
+never performs one. It is named `security-gate` so it cannot collide with the built-in.
+The review stays independent: never run by whoever wrote the code.
 
 ## Triggers
 
