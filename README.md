@@ -1,5 +1,5 @@
-<!-- No line cap: this file grows with the project. The rule that protects it is
-     editorial — no section longer than 12 lines. Split or cut instead. -->
+<!-- No line cap. No PROSE section longer than 18 lines. Tables and reproduced
+formats are exempt: each is one thing, and splitting it makes it wrong. -->
 
 # EasyDev — Agentic Engineering Pipeline
 
