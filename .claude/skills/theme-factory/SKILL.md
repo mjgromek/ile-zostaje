@@ -3,6 +3,7 @@ name: theme-factory
 description: Settles a project's palette and typography once, from ten preset themes or a generated custom one, shown as three variants on the project's own real screen. Runs only when a slice ships a user-visible interface.
 license: Complete terms in LICENSE.txt
 ---
+<!-- Cap: 70 lines, whole file. Over cap is a bug: cut content, never a rule. -->
 
 ## Trigger
 
@@ -10,6 +11,12 @@ license: Complete terms in LICENSE.txt
 theme is settled once, never renegotiated per slice. On a backend-only slice it declines in
 one line and stops, and **it refuses to reopen a theme already recorded in
 `.agent/DECISIONS.md`**.
+
+A settled theme is colour, typography and visual identity. It is NOT the information
+design — what form the interface takes, what is visible at once, how it is arranged.
+Refusing to reopen a settled theme must never block a change of form or layout. If a new
+form needs colour roles the theme does not have, EXTEND the theme and record the extension;
+do not treat that as reopening it.
 
 ## The ten themes
 

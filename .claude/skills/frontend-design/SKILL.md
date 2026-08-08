@@ -3,6 +3,7 @@ name: frontend-design
 description: Guidance for distinctive, intentional visual design when building new UI or reshaping an existing one. Helps with aesthetic direction, typography, and making choices that don't read as templated defaults.
 license: Complete terms in LICENSE.txt
 ---
+<!-- Cap: 75 lines, whole file. Over cap is a bug: cut content, never a rule. -->
 
 # Frontend Design
 
@@ -10,6 +11,17 @@ license: Complete terms in LICENSE.txt
 
 **Runs only when UI is in scope.** Never on a backend-only slice. If invoked on one, say so in one line and stop — there is no partial run and no pre-emptive styling of a UI that does not exist yet.
 **Invoke `theme-factory` for the palette and type decision before writing any CSS**, rather than proposing a palette here; it owns that Level 2 gate and records the answer in `PROJECT.md`.
+**Re-run when the volume of data the interface presents changes by an order of magnitude.** A layout designed for one item is not a layout for twenty. The form that was right at N=1 is frequently wrong at N=20, and no other part of this pipeline will notice — the tests pass, the checker's assertions pass, and the interface quietly stops working.
+
+## Form before aesthetics
+
+Before any aesthetic decision, establish whether the interface FORM fits the SHAPE of the data. What kind of thing is this — geographic, temporal, categorical, relational, a ranking, a single value? What question does the person actually arrive with, and what form answers it in one glance rather than by reading?
+
+A vertical list is the default form for everything, which is exactly why a vertical list is what makes an interface look like a prototype. Choosing it must be a decision with a reason, not the absence of one.
+
+State the chosen form and why the data's shape implies it, BEFORE any palette, type or layout work. If the form and the aesthetic conflict, the form wins.
+
+## Aesthetic direction
 
 Approach this as the design lead at a small studio known for giving every client a visual identity that could not be mistaken for anyone else's. This client has already rejected proposals that felt templated, and is paying for a distinctive point of view: make deliberate, opinionated choices about palette, typography, and layout that are specific to this brief, and take one real aesthetic risk you can justify.
 

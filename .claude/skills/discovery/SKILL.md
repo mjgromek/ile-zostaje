@@ -2,6 +2,7 @@
 name: discovery
 description: Structured stakeholder interview run once per project, before anything exists, producing PROJECT.md and slice one. Runs when PROJECT.md is the unfilled template. Not for mid-build ambiguity — that is grill-me.
 ---
+<!-- Cap: 65 lines, whole file. Over cap is a bug: cut content, never a rule. -->
 
 Once per project, when `PROJECT.md` is the unfilled template — the orchestrator's first
 action at intake. **REFUSES to run against a filled `PROJECT.md`:** a settled objective is
@@ -20,7 +21,11 @@ round**, each carrying a recommended answer, so "yes to all" is a complete reply
    important instruction in this file.
 2. **OUTCOME** — what good looks like, how we will know it happened. Push for something
    observable: "faster" is not an outcome, "an on-call engineer finds the cause without
-   opening the console" is.
+   opening the console" is. **A brief that specifies WHAT to build does not answer what the
+   result should be like to use. Ask this round regardless.** If the answer names only
+   capabilities, ask again: what should the user see, understand and be able to do at a
+   glance? An outcome nobody stated becomes whatever the default implementation happens to
+   produce.
 3. **USERS AND CONSTRAINTS** — who touches this, how often, how technical. What is already
    fixed and not up for debate: stack, cloud, budget, data residency, compliance, systems
    it must live beside.
