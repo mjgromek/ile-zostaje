@@ -42,10 +42,15 @@ wall of paths. The "read first" line names AT MOST ONE file, only for a real rea
 Level 1 choice expensive to reverse, a P2 deferral in that file, or one the checker could
 not exercise. Otherwise it prints exactly "Nothing needs your eyes." **It NEVER tells the
 human to review the files before further development.** The orchestrator does not pause
-here and must not pretend to — the work is already committed and pushed, so reading it
-later costs nothing, and a review request every phase reinstates the supervision this
-pipeline exists to remove. The `hold` line is the whole offer. If NEEDS YOU is not
-"Nothing", it is already stopped and the "Continuing to" line is omitted.
+here and must not pretend to — the work is committed, so reading it later costs nothing,
+and a review request every phase reinstates the supervision this pipeline exists to
+remove. The `hold` line is the whole offer. If NEEDS YOU is not "Nothing", it is already
+stopped and the "Continuing to" line is omitted.
+
+**The closing line states the push status, always.** Pushed and confirmed: keep the `hold`
+offer as written. No origin remote, or the push did not run: replace it with "NOT PUSHED:
+<reason>. This work exists only on this machine." Never imply the work is safe elsewhere
+when it is not — a silent skip reads as a pass.
 
 **The two prose sections follow `PROJECT.md`'s `Stakeholder language:` line, set once
 during discovery.** Non-English there means 🎁 WHAT YOU CAN DO NOW and 🔍 HOW I KNOW IT
