@@ -89,29 +89,51 @@ if git diff --cached --name-only | grep -qxF "$STATE_PATH"; then
 		exit 1
 	fi
 
-	# Candidate object ids. Fenced blocks and inline `code` are stripped first:
-	# a documented example SHA is not a claim about work that happened.
+	# Candidate object ids, one record per unique SHA: line, sha, status.
+	#
+	# Exempt ONLY inside a fenced block, or when the token immediately before the
+	# SHA is an explicit label — upstream, example, external. Inline backticks
+	# exempt NOTHING: backticks are simply how anyone writes a SHA in markdown, so
+	# using them as the marker silently swallowed 7 of 9 real checks. See F20.
+	# "check" wins over "exempt" when the same SHA appears both ways.
 	state_shas=$(git show ":$STATE_PATH" | awk '
 		/^[ \t]*```/ { fence = !fence; next }
-		fence { next }
 		{
 			line = $0
-			while (match(line, /`[^`]*`/))
-				line = substr(line, 1, RSTART - 1) " " substr(line, RSTART + RLENGTH)
 			gsub(/[^0-9A-Za-z]/, " ", line)
 			n = split(line, tok, " ")
-			for (i = 1; i <= n; i++)
-				if (tok[i] ~ /^[0-9a-f]{7,40}$/) printf "%s\t%s\n", NR, tok[i]
+			for (i = 1; i <= n; i++) {
+				if (tok[i] !~ /^[0-9a-f]{7,40}$/) continue
+				s = tok[i]
+				prev = (i > 1) ? tolower(tok[i - 1]) : ""
+				if (fence) st = "fenced"
+				else if (prev == "upstream" || prev == "example" || prev == "external")
+					st = "labelled"
+				else st = "check"
+				if (!(s in status) || st == "check") { status[s] = st; where[s] = NR }
+			}
 		}
-	')
+		END { for (s in status) printf "%s\t%s\t%s\n", where[s], s, status[s] }
+	' | sort -n)
 
 	state_bad=0
-	seen=" "
-	while IFS="$TAB" read -r lineno sha; do
+	state_total=0
+	state_ok=0
+	state_fenced=0
+	state_labelled=0
+	while IFS="$TAB" read -r lineno sha st; do
 		[ -n "${sha:-}" ] || continue
-		case "$seen" in *" $sha "*) continue ;; esac
-		seen="$seen$sha "
+		state_total=$((state_total + 1))
+		if [ "$st" = fenced ]; then
+			state_fenced=$((state_fenced + 1))
+			continue
+		fi
+		if [ "$st" = labelled ]; then
+			state_labelled=$((state_labelled + 1))
+			continue
+		fi
 		if git cat-file -e "$sha^{commit}" 2>/dev/null; then
+			state_ok=$((state_ok + 1))
 			continue
 		fi
 		printf 'REFUSED  state-sha  %s:%s\n' "$STATE_PATH" "$lineno" >&2
@@ -124,14 +146,39 @@ if git diff --cached --name-only | grep -qxF "$STATE_PATH"; then
 $state_shas
 STATE_SHAS
 
+	# Always report the count. "0 checked, 0 failed" and "9 checked, 0 failed" are
+	# otherwise indistinguishable, which is how the exemption hid seven live checks.
+	# Same rule as live-assertions.sh: never skip silently, always name what was
+	# skipped and why.
+	state_exempt=$((state_fenced + state_labelled))
+	state_reasons=""
+	if [ "$state_fenced" -gt 0 ]; then
+		state_reasons="$state_fenced fenced"
+	fi
+	if [ "$state_labelled" -gt 0 ]; then
+		if [ -n "$state_reasons" ]; then
+			state_reasons="$state_reasons, $state_labelled labelled"
+		else
+			state_reasons="$state_labelled labelled"
+		fi
+	fi
+	if [ "$state_exempt" -gt 0 ]; then
+		printf 'state-sha: verified %s of %s commit references (%s exempt: %s)\n' \
+			"$state_ok" "$state_total" "$state_exempt" "$state_reasons" >&2
+	else
+		printf 'state-sha: verified %s of %s commit references (0 exempt)\n' \
+			"$state_ok" "$state_total" >&2
+	fi
+
 	if [ "$state_bad" -ne 0 ]; then
-		printf '\n  A bare SHA in STATE.md is a claim about THIS repository. To cite another\n' >&2
-		printf '  repository, backtick it and say whose it is — `upstream 3b939a5` — or put\n' >&2
-		printf '  it in a fenced block. That is not a loophole: a backticked SHA is\n' >&2
-		printf '  explicitly NOT a claim about here, which is why this check skips it.\n' >&2
-		printf '  Expected too: a bare run of 7+ digits, such as the date 20260808, is read\n' >&2
-		printf '  as a SHA and refused. Backtick it. Requiring a hex letter would let about\n' >&2
-		printf '  one real short SHA in twenty through unchecked, which is the wrong trade.\n' >&2
+		printf '\n  A bare SHA in STATE.md is a claim about THIS repository, and backticks\n' >&2
+		printf '  do not change that — they are just markdown. To cite another repository,\n' >&2
+		printf '  LABEL it: upstream 3b939a5, example deadbeef, external abc1234. The label\n' >&2
+		printf '  is the marker, not the formatting, because a label is deliberate and\n' >&2
+		printf '  backticks are a habit. A fenced block is exempt too.\n' >&2
+		printf '  Expected: a bare run of 7+ digits, such as the date 20260808, is read as\n' >&2
+		printf '  a SHA and refused. Label it. Requiring a hex letter would let about one\n' >&2
+		printf '  real short SHA in twenty through unchecked, which is the wrong trade.\n' >&2
 		exit 1
 	fi
 fi

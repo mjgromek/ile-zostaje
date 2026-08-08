@@ -1,5 +1,5 @@
 #!/bin/sh
-# Fail-on-purpose suite for all four hooks. Nineteen cases.
+# Fail-on-purpose suite for all four hooks. Twenty-one cases.
 #
 # Every refusal case also runs `git log --oneline` and asserts the commit is
 # genuinely absent. A hook that prints a refusal and lets the commit through is
@@ -138,7 +138,7 @@ assert_script() { # id expect needle cmd...
 	fi
 }
 
-printf 'HOOK SUITE  19 fail-on-purpose cases\n\n'
+printf 'HOOK SUITE  21 fail-on-purpose cases\n\n'
 printf 'commit-msg and pre-commit\n'
 
 # 1  feat: with no preceding test:
@@ -220,14 +220,15 @@ Phase-start SHA: ea70e08
 - 17:41 — builder returned 2a: 3 commits, 9f14ff5 feat. 18/18."
 assert_refused 17 "$d" "chore: state citing a commit that never existed"
 
-# 18  STATE.md citing only SHAs that resolve, plus a backticked example that does
-#     not — the escape hatch must actually exempt it, or the check is unusable.
+# 18  STATE.md citing only SHAs that resolve, plus a LABELLED example that does not —
+#     the escape hatch must exempt it, or the check is unusable. This case originally
+#     used backticks as the marker; that was the F20 defect, so the label is the marker.
 d=$(new_repo 18)
 real_sha=$(git -C "$d" rev-parse --short HEAD)
 stage "$d" .agent/STATE.md "# STATE
 
 Phase-start SHA: $real_sha
-An example of the form this check rejects is \`deadbeefcafe\`, which resolves nowhere."
+An example deadbeefcafe of the form this check rejects, which resolves nowhere."
 assert_allowed 18 "$d" "chore: state citing only real commits"
 
 # 19  STATE.md one line over its cap. RUN-002 committed it at 122 and noticed by
@@ -242,6 +243,32 @@ while [ "$i" -le 121 ]; do
 done
 git -C "$d" add .agent/STATE.md
 assert_refused 19 "$d" "chore: state over its line cap"
+
+# 20  a BACKTICKED non-existent SHA. Backticks are how anyone writes a SHA in markdown,
+#     so they must exempt nothing — using them as the marker hid 7 of 9 checks. F20.
+d=$(new_repo 20)
+stage "$d" .agent/STATE.md "# STATE
+
+Slice landed in \`ea70e08\`, which is backticked and still a claim about this repository."
+assert_refused 20 "$d" "chore: state with a backticked bad sha"
+
+# 21  an explicitly LABELLED foreign SHA. Allowed, and the count line must say so —
+#     an exemption nobody can see is the defect, not the exemption itself.
+d=$(new_repo 21)
+stage "$d" .agent/STATE.md "# STATE
+
+Synced from upstream ea70e08, another repository's commit, which this one cannot resolve."
+if did_commit "$d" "chore: state citing a labelled foreign sha"; then
+	if ! git -C "$d" log --oneline | grep -qF "chore: state citing a labelled foreign sha"; then
+		report 21 ALLOWED "exit 0 but absent from git log" FAIL
+	elif grep -qF "1 exempt: 1 labelled" "$tmp/out"; then
+		report 21 ALLOWED "committed; reported \"1 exempt: 1 labelled\"" PASS
+	else
+		report 21 ALLOWED "committed but never reported the exemption" FAIL
+	fi
+else
+	report 21 ALLOWED "refused: $(head -n 1 "$tmp/out")" FAIL
+fi
 
 printf '\nverify-deploy.sh and probe.sh\n'
 

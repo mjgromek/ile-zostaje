@@ -40,9 +40,12 @@ board at `.agent/PROGRESS.md` is maintained per `.claude/policies/progress.md`.
 checkpoint's clock, a measured line's timestamp, any date. `progress.md` states the rule and
 the reason; it governs every file, not only the board. A model-written time is a claim.
 
-A commit SHA written bare in `STATE.md` is a claim about THIS repository and must resolve.
-A reference to another repository's commit is written in backticks and labelled —
-`upstream 3b939a5` — because this repository cannot verify it.
+A commit SHA in `STATE.md` is a claim about THIS repository and must resolve. A reference to
+another repository's commit carries an explicit LABEL — `upstream 3b939a5`, `example
+deadbeef`, `external abc1234` — because this repository cannot verify it. **The label is
+what exempts it, not the backticks.** Backticks are how anyone writes a SHA in markdown, so
+treating them as the marker turns a habit into a silent exemption; that hid 7 of 9 checks
+once already.
 
 When a slice ships or reshapes a user-visible interface, delegate to `designer` BEFORE the
 builder. The builder implements a settled form; it does not choose one.
