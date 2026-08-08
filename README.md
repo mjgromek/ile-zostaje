@@ -1,3 +1,5 @@
+<!-- Cap: 180 lines. Not a state file; the state file caps are the orchestrator's. -->
+
 # EasyDev — Agentic Engineering Pipeline
 
 A bounded-autonomy operating system for Claude Code: three agents, eight skills, four
@@ -132,6 +134,10 @@ optional variable is skipped aloud, never silently.
 | `LOGIN_PATH` | no | A3 login is skipped |
 | `EXPECTED_REVISION` | verify-deploy only | The revision gate is skipped, and a health check can answer from the old container |
 | `VERSION_PATH` | no | Defaults to `/version` |
+| `REVISION_TIMEOUT` | no | Defaults to 120s; a shorter value prints `SHORTENED revision gate` |
+
+On Railway, `BASE_URL` is the public domain, `EXPECTED_REVISION` is the deployment SHA,
+and `PROTECTED_PATH` is required. The scripts are platform-agnostic — they take a URL.
 
 ### Running the probe from cron
 
@@ -154,8 +160,11 @@ Each of these sits in `.agent/BACKLOG.md` with the condition that would make it 
 ## 📍 Status
 
 V0 is cut. Nine of the ten definition-of-done items are evidenced, and the four hooks are
-proven by eleven fail-on-purpose tests. **The builder and checker loop has not yet run end
-to end on a real project**, so nothing here should be read as a proven result.
+proven by sixteen fail-on-purpose cases in `./hooks/test/run-hook-tests.sh`. Clone this
+repository and run that script: it builds its own throwaway repositories, needs no
+configuration, and every refusal case checks the commit is absent from `git log` rather
+than trusting an exit code. **The builder and checker loop has not yet run end to end on a
+real project**, so nothing here should be read as a proven result.
 
 The original design specification is in `docs/DESIGN.md`. It is a historical record, not a
 runtime dependency — nothing reads it, and the implementation wins wherever the two
