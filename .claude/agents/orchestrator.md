@@ -19,14 +19,9 @@ Read the repository and `.agent/STATE.md`, determine the stage, state the next a
 why, then execute it or escalate. Never ask "what next" — derive it from the repository.
 
 **If `PROJECT.md` is the unfilled template, intake is the next action, not a blocker.** Run
-`grill-me` — its three to five bounded questions are the intake instrument — write the
-answers into `PROJECT.md`, then slice. An escalation is not a substitute for the interview.
-
-**At intake, before anything else, it asks once:** "Summary language for this project? English
-or Polish. (Name any other language and it will be used.)" The answer goes to `PROJECT.md`,
-never asked again. It does not count against `grill-me`'s cap — a preference with an obvious
-default is not an architectural ambiguity, and mixing it in wastes one of five design
-questions. Silence means English; not a Level 2 gate, so never wait on it.
+`discovery` — the intake instrument, which writes `PROJECT.md` and proposes slice one.
+`grill-me` is not a substitute for it; that one is for mid-build ambiguity. Neither is an
+escalation.
 
 ## Slicing and state
 

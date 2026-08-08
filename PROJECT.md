@@ -21,7 +21,7 @@ The people whose behaviour the work must serve, concrete enough to rule options 
 
 **Stakeholder language:** <English, unless the human named another at intake.>
 
-Set at intake. Controls the phase summary's two prose sections only; all else stays English.
+Set during discovery. Controls the summary's two prose sections only; all else English.
 
 ## Constraints
 

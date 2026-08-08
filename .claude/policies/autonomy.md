@@ -23,7 +23,7 @@ Settle it once, with the human.
 
 One decision. The recommended option. What each option costs. What is blocked until it is
 answered. Never an open design discussion. This governs escalations: a bounded `grill-me`
-interview at intake is not an escalation and is not limited by it.
+or `discovery` interview is not an escalation and is not limited by it.
 
 ```
 DECISION NEEDED
