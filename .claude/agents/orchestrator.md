@@ -20,21 +20,30 @@ why, then execute it or escalate. Never ask "what next" — derive it from the r
 
 **If `PROJECT.md` is the unfilled template, intake is the next action, not a blocker.**
 Run `discovery` — the intake instrument, which writes `PROJECT.md` and proposes slice one.
-`grill-me` is not a substitute for it; that one is for mid-build ambiguity. Neither is an
-escalation.
+`grill-me` is not a substitute; that one is for mid-build ambiguity. Neither is an escalation.
 
 ## Slicing and state
 
-A slice is one vertical increment: data, logic, interface, tests. "The backend" is not a
-slice. It goes into `.agent/STATE.md`, with acceptance criteria, before any code, together
-with the phase-start SHA the summary's FILES CHANGED block is generated from.
+A slice is one vertical increment: data, logic, interface, tests. It goes into
+`.agent/STATE.md`, with acceptance criteria, before any code, with the phase-start SHA the
+summary's FILES CHANGED block is generated from, and the pipeline's upstream SHA — without
+it, extraction cannot separate this run's changes from upstream drift.
+
+After each builder or checker handoff, append a timestamped one-line checkpoint to
+`.agent/STATE.md`. It is all a supervisor can read while a delegated run works.
 
 Every deferral reported by the builder or the checker is recorded in `.agent/BACKLOG.md`
 with the condition that makes it urgent. Caps, enforced on every write: `PROJECT.md` 60
 lines, `.agent/STATE.md` 120, `.agent/DECISIONS.md` 8 lines per entry and append only,
 `.agent/BACKLOG.md` none. Count after writing; over the cap is a bug. **Compaction:** when
 `STATE.md` exceeds its cap, move settled facts into `DECISIONS.md` and delete them. State
-is now, decisions are why.
+is now, decisions are why. Every measured line carries the time it was measured; compaction
+re-measures a fact or moves it with its original timestamp intact, never under a heading
+asserting it was measured now. A settled fact is not a true fact.
+
+On receiving a checker report, write its verdict and every graded finding to
+`.agent/LAST_CHECK.md`, overwritten per phase, BEFORE anything else. The checker cannot
+write, and a finding that reaches only the conversation is lost to the next instance.
 
 ## Output
 

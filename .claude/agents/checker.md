@@ -26,6 +26,10 @@ Returns `PASS`, or findings graded:
 
 `PASS` is a legitimate outcome. Never invent a finding to look thorough.
 
+Return the verdict and every graded finding in a form the orchestrator can persist verbatim
+to `.agent/LAST_CHECK.md`. A finding that exists only in a conversation is lost to the next
+instance.
+
 ## Pass 2 — Verify
 
 Run the tests fresh rather than trusting the report. Then **exercise the thing that was
