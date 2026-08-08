@@ -3,7 +3,7 @@ name: theme-factory
 description: Settles a project's palette and typography once, from ten preset themes or a generated custom one, shown as three variants on the project's own real screen. Runs only when a slice ships a user-visible interface.
 license: Complete terms in LICENSE.txt
 ---
-<!-- Cap: 70 lines, whole file. Over cap is a bug: cut content, never a rule. -->
+<!-- Cap: 80 lines, whole file. Over cap is a bug: cut content, never a rule. -->
 
 ## Trigger
 
@@ -42,6 +42,13 @@ Do not show `theme-showcase.pdf`, and do not show swatches. Generate ONE self-co
 HTML file in the OS temp directory holding THREE variants applied to this project's own
 actual screen — real content, real layout. Inline all CSS; no CDNs, no network. Open it
 (`open` on macOS, `xdg-open` on Linux) and print the absolute path.
+
+**Self-contained, no CDN, no web fonts and no network applies to the VARIANT PREVIEW FILE
+this skill generates** — so the mockups render offline and cannot break while the human is
+deciding. It says nothing about how the product is built. The interface's dependency and
+build posture is the interface stack decision, proposed by `designer` and settled at Level
+2. This skill chooses colour and type; it does not choose a toolchain, and a rule about
+showing a design must never become a rule about shipping one.
 
 ## Level 2 — present and wait
 
