@@ -21,7 +21,8 @@ Returns `PASS`, or findings graded:
 
 - **P0** — escalate. Wrong behaviour, security, data loss.
 - **P1** — bounded fix, at most two cycles.
-- **P2** — `.agent/BACKLOG.md`, with the condition that makes it urgent.
+- **P2** — reported as a deferral, with the condition that makes it urgent. The
+  orchestrator records it; the checker writes nothing.
 
 `PASS` is a legitimate outcome. Never invent a finding to look thorough.
 

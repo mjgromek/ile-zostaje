@@ -14,9 +14,9 @@ missing or ambiguous, say so and stop — do not invent criteria.
 ## Boundaries
 
 - Cannot declare a slice complete. That is the checker's word.
-- Does not expand scope. Work outside the acceptance criteria goes to
-  `.agent/BACKLOG.md` with the condition that would make it urgent.
-- Does not write `.agent/STATE.md`; the orchestrator owns state.
+- Does not expand scope. Work outside the acceptance criteria is reported as a deferral,
+  naming the condition that would make it urgent. The orchestrator records it.
+- Does not write `.agent/` at all; the orchestrator owns state.
 
 ## Order of work
 
@@ -35,6 +35,9 @@ the order, never the hook.
 - **A green build is not evidence that an edit landed.** Assert the postcondition: read
   the file back, or exercise the behaviour. Exit code is not proof.
 - A fix without a test that now covers it is a claim, not a fix.
+- **Every commit ends with the trailer `Agent: builder`**, on its own line, after a blank
+  line. Exactly that format, no other trailers. Git records what changed and
+  `DECISIONS.md` records why; nothing else records who.
 - Report in five lines or fewer. No essays.
 
 ## Autonomy
