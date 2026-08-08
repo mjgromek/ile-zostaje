@@ -49,6 +49,11 @@ test.
 - **Implementation-coupled** — mocks internal collaborators, tests private methods, or
   verifies through a side channel (querying the database instead of using the interface).
   The tell: the test breaks when you refactor but behavior hasn't changed.
+- **Written against the mechanism, not the intent** — the case asserts how the rule is
+  implemented rather than what it is for, so it inherits whatever the mechanism gets wrong,
+  agrees with it, and passes forever. `hooks/test/run-hook-tests.sh` carries the worked
+  example in its header: a case that took a defective escape hatch as its exempt token.
+  This applies to infrastructure suites too, which no other skill governs.
 - **Tautological** — the assertion recomputes the expected value the way the code does
   (`expect(add(a, b)).toBe(a + b)`, a snapshot derived by hand the same way, a constant
   asserted equal to itself), so it passes by construction and can never disagree with the

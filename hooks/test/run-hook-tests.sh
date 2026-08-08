@@ -1,6 +1,17 @@
 #!/bin/sh
 # Fail-on-purpose suite for all four hooks. Twenty-one cases.
 #
+# Every case asserts the INTENT of the rule, never the mechanism that implements
+# it. "An unverifiable claim is refused unless explicitly marked foreign" is
+# intent. "Backticks exempt a SHA" is mechanism. A case written against the
+# mechanism inherits whatever the mechanism gets wrong, agrees with it, and
+# passes forever. Case 18 did exactly that: it took the defective escape hatch as
+# its exempt token, so it agreed with the bug while the hook stayed blind.
+#
+# Cases are grouped, not gapped: 1-10 and 17-21 cover commit-msg and pre-commit,
+# 11-16 cover verify-deploy and probe. All 21 run. Do NOT renumber — the numbers
+# are referenced from the findings files and from commit messages.
+#
 # Every refusal case also runs `git log --oneline` and asserts the commit is
 # genuinely absent. A hook that prints a refusal and lets the commit through is
 # the exact failure class this repository exists to catch, and an exit code
@@ -139,7 +150,7 @@ assert_script() { # id expect needle cmd...
 }
 
 printf 'HOOK SUITE  21 fail-on-purpose cases\n\n'
-printf 'commit-msg and pre-commit\n'
+printf 'commit-msg and pre-commit   cases 1-10, 17-21\n'
 
 # 1  feat: with no preceding test:
 d=$(new_repo 1)
@@ -270,7 +281,7 @@ else
 	report 21 ALLOWED "refused: $(head -n 1 "$tmp/out")" FAIL
 fi
 
-printf '\nverify-deploy.sh and probe.sh\n'
+printf '\nverify-deploy and probe     cases 11-16\n'
 
 # Ports come from the OS, never from a constant. A fixed port silently tests
 # whatever else already holds it. See docs/RUN-001-FINDINGS.md, F6.
