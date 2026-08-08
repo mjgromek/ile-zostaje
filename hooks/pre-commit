@@ -68,4 +68,68 @@ if [ -e "$verdict" ]; then
 	exit 1
 fi
 
+# STATE.md integrity. Message-independent, so it belongs here rather than in
+# commit-msg: it needs the staged content and nothing else.
+#
+# The orchestrator writes .agent/STATE.md and every other agent trusts it. The
+# checker validates a diff AGAINST it, so it stands downstream of this file and
+# structurally cannot see a fabrication in it. RUN-002 F15: an orchestrator wrote
+# checkpoints, PASS verdicts and four SHAs for work that had not happened. It
+# caught itself. Self-report is not a control.
+STATE_PATH=.agent/STATE.md
+STATE_CAP=120
+
+if git diff --cached --name-only | grep -qxF "$STATE_PATH"; then
+	state_lines=$(git show ":$STATE_PATH" | wc -l | tr -d ' ')
+	if [ "$state_lines" -gt "$STATE_CAP" ]; then
+		printf 'REFUSED  state-cap  %s\n' "$STATE_PATH" >&2
+		printf '  %s is %s lines, over its %s-line cap.\n' \
+			"$STATE_PATH" "$state_lines" "$STATE_CAP" >&2
+		printf '  Compact settled facts into .agent/DECISIONS.md and delete them here.\n' >&2
+		exit 1
+	fi
+
+	# Candidate object ids. Fenced blocks and inline `code` are stripped first:
+	# a documented example SHA is not a claim about work that happened.
+	state_shas=$(git show ":$STATE_PATH" | awk '
+		/^[ \t]*```/ { fence = !fence; next }
+		fence { next }
+		{
+			line = $0
+			while (match(line, /`[^`]*`/))
+				line = substr(line, 1, RSTART - 1) " " substr(line, RSTART + RLENGTH)
+			gsub(/[^0-9A-Za-z]/, " ", line)
+			n = split(line, tok, " ")
+			for (i = 1; i <= n; i++)
+				if (tok[i] ~ /^[0-9a-f]{7,40}$/) printf "%s\t%s\n", NR, tok[i]
+		}
+	')
+
+	state_bad=0
+	seen=" "
+	while IFS="$TAB" read -r lineno sha; do
+		[ -n "${sha:-}" ] || continue
+		case "$seen" in *" $sha "*) continue ;; esac
+		seen="$seen$sha "
+		if git cat-file -e "$sha^{commit}" 2>/dev/null; then
+			continue
+		fi
+		printf 'REFUSED  state-sha  %s:%s\n' "$STATE_PATH" "$lineno" >&2
+		printf '  STATE.md cites a commit that does not exist: %s at line %s. A state\n' \
+			"$sha" "$lineno" >&2
+		printf '  file that references work which did not happen is the failure this\n' >&2
+		printf '  pipeline exists to catch.\n' >&2
+		state_bad=1
+	done <<STATE_SHAS
+$state_shas
+STATE_SHAS
+
+	if [ "$state_bad" -ne 0 ]; then
+		printf '\n  An intentional example is not a claim: wrap it in `backticks` or put it\n' >&2
+		printf '  in a fenced block and this check skips it. Do the same for a SHA that\n' >&2
+		printf '  belongs to another repository, such as the upstream pipeline.\n' >&2
+		exit 1
+	fi
+fi
+
 exit 0

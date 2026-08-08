@@ -1,5 +1,5 @@
 #!/bin/sh
-# Fail-on-purpose suite for all four hooks. Sixteen cases.
+# Fail-on-purpose suite for all four hooks. Nineteen cases.
 #
 # Every refusal case also runs `git log --oneline` and asserts the commit is
 # genuinely absent. A hook that prints a refusal and lets the commit through is
@@ -138,7 +138,7 @@ assert_script() { # id expect needle cmd...
 	fi
 }
 
-printf 'HOOK SUITE  16 fail-on-purpose cases\n\n'
+printf 'HOOK SUITE  19 fail-on-purpose cases\n\n'
 printf 'commit-msg and pre-commit\n'
 
 # 1  feat: with no preceding test:
@@ -210,6 +210,38 @@ assert_refused 9 "$d" "chore: add a private key"
 d=$(new_repo 10)
 stage "$d" notes.md "nothing sensitive here"
 assert_allowed 10 "$d" "chore: add notes"
+
+# 17  STATE.md citing a SHA that does not resolve. The literal is one of the four
+#     an orchestrator invented in RUN-002 F15 — plausible shape, no such object.
+d=$(new_repo 17)
+stage "$d" .agent/STATE.md "# STATE
+
+Phase-start SHA: ea70e08
+- 17:41 — builder returned 2a: 3 commits, 9f14ff5 feat. 18/18."
+assert_refused 17 "$d" "chore: state citing a commit that never existed"
+
+# 18  STATE.md citing only SHAs that resolve, plus a backticked example that does
+#     not — the escape hatch must actually exempt it, or the check is unusable.
+d=$(new_repo 18)
+real_sha=$(git -C "$d" rev-parse --short HEAD)
+stage "$d" .agent/STATE.md "# STATE
+
+Phase-start SHA: $real_sha
+An example of the form this check rejects is \`deadbeefcafe\`, which resolves nowhere."
+assert_allowed 18 "$d" "chore: state citing only real commits"
+
+# 19  STATE.md one line over its cap. RUN-002 committed it at 122 and noticed by
+#     counting afterward; a cap nothing checks is a suggestion.
+d=$(new_repo 19)
+mkdir -p "$d/.agent"
+: >"$d/.agent/STATE.md"
+i=1
+while [ "$i" -le 121 ]; do
+	printf 'state line %s\n' "$i" >>"$d/.agent/STATE.md"
+	i=$((i + 1))
+done
+git -C "$d" add .agent/STATE.md
+assert_refused 19 "$d" "chore: state over its line cap"
 
 printf '\nverify-deploy.sh and probe.sh\n'
 
