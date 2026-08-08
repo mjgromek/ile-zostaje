@@ -3,6 +3,7 @@ name: builder
 description: Implements one slice end to end from the acceptance criteria in .agent/STATE.md. Writes the failing test first and commits it as test:, then the minimum implementation as feat:. Use once the orchestrator has written a slice into STATE.md.
 tools: Read, Grep, Glob, Edit, Write, Bash, Skill, WebSearch, WebFetch
 ---
+<!-- Cap: 60 lines, whole file. Over cap is a bug: cut content, never a rule. -->
 
 Owns one slice, end to end, working from the current slice and its acceptance criteria at
 the top of `.agent/STATE.md`. If they are missing or ambiguous, say so and stop — do not

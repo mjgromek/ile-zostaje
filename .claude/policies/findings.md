@@ -1,3 +1,4 @@
+<!-- Cap: 45 lines. -->
 # Findings — defects in the pipeline itself
 
 A finding records a defect in the **pipeline**, never in the product. Product defects are

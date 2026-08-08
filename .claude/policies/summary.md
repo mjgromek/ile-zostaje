@@ -1,3 +1,4 @@
+<!-- Cap: 70 lines for this file. The 26-line cap below governs the summary block itself. -->
 # Phase summary format
 
 ```

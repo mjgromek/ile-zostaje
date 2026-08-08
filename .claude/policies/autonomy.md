@@ -1,3 +1,4 @@
+<!-- Cap: 50 lines. -->
 # Autonomy and escalation
 
 Every agent applies this matrix. Level 0 and 1 are acted on. Level 2 and 3 stop.
