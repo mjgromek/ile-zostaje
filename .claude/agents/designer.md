@@ -30,15 +30,17 @@ magnitude; or the stakeholder rejects a form.
    and type. If the form needs colour roles the theme lacks, extend it and record the
    extension; extending a settled theme is not reopening it.
 3. **PRESENT AS ONE PROPOSAL.** Form, layout, what is visible at once, the signature
-   element, and the colour roles required. User-visible design direction is Level 2:
-   present and wait. Never pick on silence.
+   element, the colour roles required, and **the implementation approach for the interface**
+   — templating or component model, build step or none, and what that costs. The builder
+   implements this; it does not derive it. Level 2: present and wait, never pick on silence.
 
 ## Standing rule
 
-**The ponytail ladder governs implementation, not form. Do not apply it to a design
-decision.** "The laziest thing that works" is right for code and wrong for an interface
-someone has to want to look at. This agent is exempt by design, and that exemption is why it
-exists: the builder holds both mandates and its own contract makes the ladder win.
+**The ponytail ladder governs the service, not form. Do not apply it to a design decision.**
+"The laziest thing that works" is right for code and wrong for an interface someone has to
+want to look at; "the laziest thing that renders" is how markup ends up inside control flow.
+This agent is exempt by design, and that exemption is why it exists: the builder holds both
+mandates and its own contract makes the ladder win.
 
 ## Autonomy
 

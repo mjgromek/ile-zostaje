@@ -16,6 +16,11 @@ it declines in one line and stops.
 
 - **Correctness** — the structure permits a wrong result.
 - **Boundary** — a module reaches through another's interface, or owns foreign state.
+  **Presentation mixed into application logic is a boundary finding.** Markup assembled by
+  string concatenation inside a module that also holds request routing, data access or
+  business rules crosses a seam, and the tell is that the module cannot be tested for either
+  concern without the other. Templates live in their own files or their own module. This is
+  a concrete boundary problem, not taste, and is therefore inside this skill's remit.
 - **Scaling** — a named load or data volume at which the structure fails.
 
 **Never a preference, never refactor-for-elegance.** "Would be cleaner as", "more

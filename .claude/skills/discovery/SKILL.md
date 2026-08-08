@@ -28,7 +28,13 @@ round**, each carrying a recommended answer, so "yes to all" is a complete reply
    produce.
 3. **USERS AND CONSTRAINTS** — who touches this, how often, how technical. What is already
    fixed and not up for debate: stack, cloud, budget, data residency, compliance, systems
-   it must live beside.
+   it must live beside. **When an interface is in scope, the service stack and the
+   INTERFACE stack are two questions, asked separately.** Language and framework for the
+   backend; language, framework and build approach for anything a person looks at. A single
+   "what stack" answer settles the first and lets the second be derived by whatever rule is
+   loudest — which is how a UI ends up as strings inside application logic. Both are Level
+   2: expensive to reverse, and the interface one is user-visible. Present options with a
+   recommendation and wait. Record both in `PROJECT.md`.
 4. **NON-GOALS AND INVARIANTS** — what we are deliberately not building, and what must
    never break. Ask directly: "what would make this a failure even if it worked?"
 5. **DONE** — what must be true to call it shipped, who decides, what gets demonstrated
