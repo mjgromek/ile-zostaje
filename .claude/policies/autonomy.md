@@ -36,6 +36,13 @@ Options:      <A — what it costs> / <B — what it costs>
 Blocked:      <what cannot proceed until this is answered>
 ```
 
+Every claim in an escalation is marked measured or inferred, and a measured claim names
+the instrument that produced it. A human deciding on an unlabelled claim is deciding on a
+guess wearing a fact's clothes. This is the observed/inferred rule `findings.md` already
+requires internally, applied at the boundary where it matters most. (R2-F31: a Level 2
+decision was made on "638px, table off-screen", presented as measured, produced by a probe
+macOS had clamped to ~500 CSS px. The real defect was a ~70px squeeze.)
+
 If more than one decision is pending, escalate the one that blocks the most work and hold
 the rest.
 

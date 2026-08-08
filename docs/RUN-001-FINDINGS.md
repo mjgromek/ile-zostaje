@@ -707,3 +707,148 @@ outcome-based checks reach 0.83-0.95. The structural substitutes are therefore n
 option here; they are the stronger one. Judgment is what this pipeline distrusts by
 construction, so replacing a missing judge with more judgment would have been the wrong
 repair.
+
+---
+
+<!-- PORTED 2026-08-09 from the clone's RUN-002-FINDINGS.md (warsaw-air, run 2, slices 4-5),
+     source SHA d32881b. IDs carry the R2- run prefix per .claude/policies/findings.md.
+     Full evidence — timestamps, verbatim probe output — lives in the source record;
+     these entries are the pipeline-relevant substance plus status as of the port. -->
+
+## R2-F26 — the designer cannot see the thing it is designing
+
+**Observed or inferred:** Observed in run 2. Ported.
+
+**Evidence:** `designer.md` frontmatter omitted `Bash`. Slice 4 existed because the board
+measured ~6,438px in headless Chrome; the designer sent to fix it could not render a page,
+said so — "every height number below is a budget for the builder to verify, not a
+measurement" — and substituted stylesheet arithmetic (24 + 24 + 16 + 96 + … ≈ 922px), which
+is precisely what the pipeline's own rules forbid.
+
+**Who it hits:** Every slice with a layout constraint. Read-only was the intent, but
+read-only and cannot-measure are different things: the checker is also read-only and has
+`Bash`, which is the proof it was never needed for write-denial. Write access is enforced
+by the absence of `Edit` and `Write`, not by the absence of a shell.
+
+**Status:** FIXED in run 2 — `Bash` added to `designer.md`. Confirmed delivered in this
+session's spawn census: the designer reported `Bash` among its arrived tools.
+
+## R2-F27 — an agent-definition fix applied mid-session does not reach the running session
+
+**Observed or inferred:** Observed in run 2, three independent instruments agreeing. Ported.
+
+**Evidence:** The R2-F26 fix was live on disk — the frontmatter read correctly when the
+file was read. The session's agent-type listing also looked correct. The spawned designer's
+own first line: "Bash did NOT arrive." Two enumerations exist and only one updates: the
+agent-type listing is a session-start snapshot, while the delivered tool set is what the
+runtime actually hands a spawned subagent. The same designer made 19 successful WebFetch
+calls in that run, so the instrument reporting the absence was itself working.
+
+**Who it hits:** Any mid-session pipeline repair. Editing an agent definition and
+continuing looks identical to editing one and having it take effect. It cost a design
+round, and was caught only because the designer reported its delivered tools unprompted.
+
+**Proposed fix:** An agent-definition change is followed by a session restart before any
+run that depends on it. And the arrival census becomes mandatory, not conventional: an
+agent's first line states its DELIVERED tools and names every contracted tool that did not
+arrive or arrived renamed. This is F11's failure class, now with a measured cost.
+
+## R2-F31 — escalations do not mark unmeasured claims INFERRED
+
+**Observed or inferred:** Observed in run 2, self-reported by the orchestrator. Ported.
+
+**Evidence:** A Level 2 escalation read "638px of horizontal overflow pushes the table
+off-screen entirely" and the backlog called the content "unrecoverable". Neither was
+measured — nobody scrolled. The probe behind the number was itself clamped: macOS limits
+headless Chrome to ~500 CSS px, so `--window-size=390,844` reported `clientWidth=500`. At
+a true 390px the table was already reachable (`maxScrollX=756`). The real defect was a
+collapsed grid track squeezing the table ~70px under its desktop width. The human decided
+on the inflated premise, presented as fact.
+
+**Who it hits:** The human, at the exact boundary the pipeline exists to protect.
+`findings.md` requires observed/inferred marking of internal notes; nothing required it of
+what reaches the human — a note to oneself got more rigour than a decision request.
+
+**Status:** FIXED at the port — `.claude/policies/autonomy.md` now requires every claim in
+an escalation to be marked measured or inferred, with measured claims naming their
+instrument. See the clause and this port's commit.
+
+## R2-F32 — commit-msg rule A enforced nothing: two correct rules composed into a false green
+
+**Observed or inferred:** Observed in run 2; mechanism confirmed upstream by inspection and
+by audit. Ported.
+
+**Evidence:** Rule B forces every `feat:` commit to stage `.agent/DECISIONS.md`. The
+progress board causes `test:` commits to stage `.agent/PROGRESS.md`. `dirof()` returned
+`.agent` for both, so rule A's overlap check passed on every `feat:` commit regardless of
+whether any test covered the code. Audited over history: rule A passed 17 of 17 `feat:`
+commits in warsaw-air — it refused nothing, ever. Neither rule is wrong in isolation.
+
+**Who it hits:** Every project using this pipeline. Rule A is the pipeline's central
+guarantee — the one enforced by a hook rather than by discipline — and it silently stopped
+binding the day the progress board landed. The 21-case suite could not catch it because
+every case staged clean fixtures; a suite of individually-correct rules tested one at a
+time cannot see two of them compose into a false green.
+
+**Status:** FIXED upstream and in the clone (`39794b4` / `d32881b`): overlap is computed
+over paths outside `.agent/` and `docs/` on both sides, a checked `Covers:` trailer handles
+links no path rule can see, and suite cases 24-28 stage the interacting fixtures.
+
+## R2-F33 — five tests that could not fail, and where in the lifecycle each was caught
+
+**Observed or inferred:** Observed, run 2, all five individually evidenced in the clone's
+record and in this repository's commits.
+
+**Evidence:** Five checks in one run passed while asserting nothing:
+
+1. **Self-comparison** — a ring-closure check compared a district's tuple of rings to
+   itself. Trivially true.
+2. **Truncate-before-read** — a progress-board writer opened its file for writing before
+   reading it, committing an empty board with exit 0.
+3. **Shape-not-value** — band colours asserted only as six distinct `^#[0-9a-f]{6}$`
+   strings; a one-character drift in a published EEA scale hex stayed green through 103
+   tests until a checker mutation exposed it.
+4. **The overflow:hidden scroll container** — a guard's docstring promised
+   `overflow-x: hidden` would redden it; an `overflow:hidden` box is still a scroll
+   container, `window.scrollTo` moves it programmatically, and the geometry probe was
+   blind under both `body` and `html` mutations.
+5. **The grep -F multi-line presence check** — the hook suite's `assert_allowed` grepped
+   the whole commit message; a multi-line message becomes several patterns, one of them
+   the blank line before a trailer, which matches every line of any log.
+
+The first four were found AFTER landing — by later mutation, by looking at the artifact,
+or by the checker. The fifth was caught DURING authoring, before it landed. That
+difference is the finding: the counterfactual habit (run the assertion against the broken
+state before trusting it) moved the catch from cleanup to construction, which is the only
+place it is cheap.
+
+**Who it hits:** Everyone, structurally. Five independent authors, five different
+mechanisms, one shape: an instrument that cannot produce a negative result. No review of
+the assertion's text caught any of them; only running the assertion against a state it
+should reject did.
+
+**Proposed fix:** Already partly in force — the suite's header rule and cases 24-28 encode
+it for the hooks. The general rule worth porting to the agent contracts: a new test is
+run once against the defect it exists to catch (mutate, then restore) before it is
+trusted, and a test that cannot be made to fail is reported as a finding, not committed.
+
+## R2-F34 — architecture-check cannot fire on the case its own clause was written for
+
+**Observed or inferred:** Observed, 2026-08-09, measured against the clone.
+
+**Evidence:** The skill's boundary section targets "markup assembled by string
+concatenation inside a module that also holds request routing" — and its trigger reads
+"Runs only when module boundaries moved in the diff." The clone's `app.py` went 295 → 466
+lines with 41 tag-bearing lines and zero template files, and the skill declined every
+phase gate. A missing seam produces one-module diffs by definition, and one-module diffs
+are the decline condition: the clause is structurally unreachable from its own trigger.
+
+**Who it hits:** Any project growing a monolith — which is the default failure mode the
+clause was written against.
+
+**Status:** FIXED at the port, both repos: the trigger now also fires when any single
+module grew by 100 or more counted lines across the phase's diff. 100 because it is
+module-sized in the reference codebase (`theme.py` 132, `boundaries.py` 222 at birth): a
+module's worth of new code producing no new seam is the shape of a seam not drawn. The
+observed miss (+171) fires; routine slice growth (+8 to +60) does not. The skill's
+default remains NO CHANGE, so an eager trigger costs one look, not a refactor.
