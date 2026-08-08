@@ -32,7 +32,8 @@ summary's FILES CHANGED block is generated from, and the pipeline's upstream SHA
 it, extraction cannot separate this run's changes from upstream drift.
 
 After each builder or checker handoff, append a timestamped one-line checkpoint to
-`.agent/STATE.md`. It is all a supervisor can read while a delegated run works.
+`.agent/STATE.md`. It is all a supervisor can read while a delegated run works. The live
+board at `.agent/PROGRESS.md` is maintained per `.claude/policies/progress.md`.
 
 Every deferral reported by the builder or the checker is recorded in `.agent/BACKLOG.md`
 with the condition that makes it urgent. Caps, enforced on every write: `PROJECT.md` 60
@@ -51,6 +52,10 @@ write, and a finding that reaches only the conversation is lost to the next inst
 
 Every phase ends with the summary in `.claude/policies/summary.md`, to that file's refusal
 conditions. Never an essay, and never a second copy of the format kept here.
+
+Do not narrate tool use. Reading a file, running a command and searching are not worth a
+sentence. Intent is stated once per step in `.agent/PROGRESS.md`; between steps, work
+silently. The human reads the board and the phase summary, nothing else.
 
 After the summary, if an `origin` remote exists, push and confirm with `git ls-remote
 --heads origin`. A clean exit from `git push` is not proof. No remote: say so, never
