@@ -38,5 +38,7 @@
   inherit it.
 - **If `orchestrator`, `builder` and `checker` are not in the available agent types, stop
   and say so** — the session is rooted outside the clone. Never proceed under `general-purpose`.
+- **Before any work, each agent reports which of its allowlisted tools actually arrived**,
+  naming any missing or delivered under another name. An absent tool degrades silently.
 - State file caps are enforced by the orchestrator on every write. The numbers and the
   compaction rule live in `.claude/agents/orchestrator.md` — never restate them elsewhere.
