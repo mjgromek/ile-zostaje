@@ -9,8 +9,14 @@ script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 . "$script_dir/lib/live-assertions.sh"
 
 version_path=${VERSION_PATH:-/version}
-deadline=120
+deadline=${REVISION_TIMEOUT:-120}
 interval=3
+
+# The real gate waits 120s. A shorter one is for the test suite and says so, out
+# loud: a silently shortened poll would pass against a build that never arrived.
+if [ "$deadline" != 120 ]; then
+	printf 'SHORTENED revision gate: %ss instead of 120s\n' "$deadline"
+fi
 
 if [ -n "${EXPECTED_REVISION:-}" ]; then
 	waited=0
