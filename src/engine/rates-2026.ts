@@ -50,8 +50,10 @@ export const RATES_2026: YearRates = {
     },
     chorobowa: {
       value: 2.45,
-      quote:
-        'na ubezpieczenie chorobowe – 2,45% podstawy wymiaru. Składki na ubezpieczenie chorobowe finansujesz w całości Ty.',
+      // The second half of this quote used to say who finances the składka.
+      // True, and printed — on the sibling financing page, not this one. A
+      // quote is evidence for the page beside it or it is nothing.
+      quote: 'na ubezpieczenie chorobowe – 2,45% podstawy wymiaru.',
       source: ZUS_RATES,
       sourceTitle: 'ZUS — Wysokość składek na ubezpieczenia społeczne',
       effective: '2026-01-01',
@@ -87,10 +89,13 @@ export const RATES_2026: YearRates = {
     },
     thresholdAnnualGrosz: {
       value: 12_000_000,
+      // Was a hand-rebuilt version of the scale table on Dochody z pracy: the
+      // words were the page's, the punctuation and the layout were not. The
+      // threshold is stated as one sentence on the skala page, so cite that.
       quote:
-        'Skala podatkowa w 2026 roku: do 120 000 — 12% minus kwota zmniejszająca podatek 3 600 zł; ponad 120 000 — 10 800 zł + 32% nadwyżki ponad 120 000 zł.',
-      source: PIT_WORK,
-      sourceTitle: 'podatki.gov.pl — Dochody z pracy',
+        'Stawka podatku uzależniona jest od wysokości uzyskanego dochodu i wynosi: 12% dla podstawy obliczenia podatku do wysokości 120 000 zł',
+      source: PIT_SCALE,
+      sourceTitle: 'podatki.gov.pl — Opodatkowanie według skali podatkowej',
       effective: '2026-01-01',
       verified: VERIFIED,
     },
@@ -114,7 +119,7 @@ export const RATES_2026: YearRates = {
     deductibleCostsMonthlyGrosz: {
       value: 25_000,
       quote:
-        'W 2026 roku zryczałtowane koszty uzyskania przychodów z pracy wynoszą: 250 zł miesięcznie, a za rok podatkowy łącznie nie więcej niż 3000 zł – w przypadku uzyskiwania przychodów z jednego stosunku pracy.',
+        'W 2026 roku zryczałtowane koszty uzyskania przychodów z pracy wynoszą: 250 zł miesięcznie, a za rok podatkowy łącznie nie więcej niż: 3000 zł.',
       source: PIT_WORK,
       sourceTitle: 'podatki.gov.pl — Dochody z pracy',
       effective: '2026-01-01',
