@@ -66,7 +66,7 @@ export function GrossCard({
             className={s.quick}
             onClick={() => onGrossText(String(minimumWageGrosz / 100))}
           >
-            {t(lang, 'field.gross.quickfill', { year })}
+            <span className={s.quickChip}>{t(lang, 'field.gross.quickfill', { year })}</span>
           </button>
         </div>
       </div>

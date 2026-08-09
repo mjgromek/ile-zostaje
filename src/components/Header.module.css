@@ -31,11 +31,14 @@
   border: 1.5px solid var(--ink);
   border-radius: var(--r-pill);
   overflow: hidden;
-  height: 44px;
+  /* A fixed 44 with border-box left the buttons 41 px tall: the 1.5 px borders
+     came out of the target, not out of the page. The buttons set the height. */
+  min-height: 44px;
 }
 
 .lang {
   min-width: 48px;
+  min-height: 44px;
   padding: 0 var(--s3);
   border: 0;
   background: transparent;

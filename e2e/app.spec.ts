@@ -126,7 +126,7 @@ test('criterion 7 — entries survive a reload and nothing leaves the device', a
 });
 
 /** Scrolls the control into view and measures it where it will be clicked. */
-async function target(page: Page, locator: ReturnType<Page['locator']>) {
+async function target(locator: ReturnType<Page['locator']>) {
   await locator.scrollIntoViewIfNeeded();
   const box = await locator.boundingBox();
   if (!box) throw new Error('control has no box');
@@ -146,26 +146,26 @@ test('P1-1 — every control takes a click across the 44 px the spec promises', 
     const rect = (el.parentElement as HTMLElement).getBoundingClientRect();
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
   });
-  const grossBox = await target(page, gross);
+  const grossBox = await target(gross);
   expect(grossBox.height).toBeGreaterThanOrEqual(44);
   await page.mouse.click(row.x + row.width / 2, row.y + 4);
   expect(await page.evaluate(() => document.activeElement?.id)).toBe('gross');
 
   const quick = page.getByRole('button', { name: /Płaca minimalna/ });
-  const quickBox = await target(page, quick);
+  const quickBox = await target(quick);
   expect(quickBox.height).toBeGreaterThanOrEqual(44);
   expect(quickBox.width).toBeGreaterThanOrEqual(44);
   await page.mouse.click(quickBox.x + quickBox.width / 2, quickBox.y + 4);
   await expect(gross).toHaveValue('4806');
 
   const summary = page.getByTestId('sources').locator('summary');
-  const summaryBox = await target(page, summary);
+  const summaryBox = await target(summary);
   expect(summaryBox.height).toBeGreaterThanOrEqual(44);
   await page.mouse.click(summaryBox.x + 24, summaryBox.y + 4);
   await expect(page.getByTestId('sources')).toHaveAttribute('open', '');
 
   const english = page.getByRole('radio', { name: 'Angielski' });
-  const langBox = await target(page, english);
+  const langBox = await target(english);
   expect(langBox.height).toBeGreaterThanOrEqual(44);
   expect(langBox.width).toBeGreaterThanOrEqual(44);
   await page.mouse.click(langBox.x + langBox.width / 2, langBox.y + 4);

@@ -35,6 +35,9 @@
   flex: 1 1 0;
   width: 0;
   min-width: 0;
+  /* The row is 56 px; centring left the field itself 24 px tall, so a tap near
+     the top of the row hit the row and focused nothing. The field fills it. */
+  align-self: stretch;
   border: 0;
   outline-offset: -3px;
   background: transparent;
@@ -58,18 +61,33 @@
   margin-top: var(--s1);
 }
 
+/* §6: a 36 px chip inside a 44 px hit area, via padding on the button. The
+   padding is on the BUTTON, so the extra 8 px take the click; a min-height on
+   the wrapper only made the wrapper tall and the chip still missed the tap. */
 .quick {
-  border: 1px solid var(--line);
-  background: var(--surface);
-  border-radius: var(--r-chip);
-  padding: var(--s2) var(--s3);
-  font-family: var(--face-body);
-  font-size: 13px;
-  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: var(--s1) 0;
+  border: 0;
+  background: none;
   cursor: pointer;
 }
 
-.quick:hover {
+.quickChip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 var(--s3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-chip);
+  background: var(--surface);
+  font-family: var(--face-body);
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.quick:hover .quickChip {
   background: var(--paper);
 }
 

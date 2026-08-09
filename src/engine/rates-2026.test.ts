@@ -83,8 +83,11 @@ test('every quote is verbatim from the page it cites', () => {
   expect(entries.length).toBe(12);
 
   for (const { path, cited } of entries) {
-    const passages = PAGE_TEXT[cited.sourceTitle];
-    expect(passages, `${path}: no page text recorded for "${cited.sourceTitle}"`).toBeDefined();
+    const passages = PAGE_TEXT[cited.sourceTitle] ?? [];
+    expect(
+      passages.length,
+      `${path}: no page text recorded for "${cited.sourceTitle}"`,
+    ).toBeGreaterThan(0);
 
     const quote = normalise(cited.quote);
     const onPage = passages.some((passage) => normalise(passage).includes(quote));

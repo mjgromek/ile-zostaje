@@ -9,6 +9,9 @@
   font-weight: 600;
   color: var(--ink);
   cursor: pointer;
+  /* 20 px of text plus 12 above and below: a 44 px row the whole width of the
+     column. Padding rather than a display change, which would drop the marker. */
+  padding: var(--s3) 0;
 }
 
 .intro {
