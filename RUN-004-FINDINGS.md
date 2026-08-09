@@ -175,3 +175,28 @@ That contrast is the finding — it is a controlled comparison, not an anecdote.
 `.agent/DECISIONS.md` per entry, counting characters not bytes. Do NOT implement here: it
 is a hook change outside slice 1's scope, and the hooks have their own test suite that
 would need a case. Logged, worked around by counting after every write this phase.
+
+## R4-F9 — "rendered variants" is required by a stakeholder instruction that no agent's write boundary allows for
+**Observed or inferred:** OBSERVED as a contract gap; the resolution below is a convention
+this run adopted, not something any contract states.
+**Evidence:** The stakeholder's new standing instruction requires two or three layout
+variants RENDERED on the real screen before the builder starts. Rendering needs files.
+`.claude/agents/designer.md:3` says "Writes nothing"; `orchestrator.md` limits me to
+`.agent/` plus `PROJECT.md`; the builder owns `src/` but in the sequence it runs AFTER the
+choice the variants exist to inform. On a literal reading no agent may produce the artefact
+the stakeholder asked to look at.
+**How it actually resolved:** the designer rendered into the session scratchpad, OUTSIDE
+the repository, using `Bash` — which is in its allowlist. Verified: `git status
+--porcelain` shows only my own `.agent` edits, and `find` over the repo for the showcase
+names returns nothing. 279 689-byte self-contained HTML plus 14 screenshots, none of it in
+the tree. The designer disclosed it plainly rather than quietly.
+**Why the alternative is worse:** routing it through the builder as a `chore:` commit puts
+throwaway scaffolding in the history and makes deleting it someone's job — and a job nobody
+is assigned is how it ships. Rendering outside the repository cannot ship by construction.
+**Who it hits:** every future screen-reshaping slice, on every clone, now that the
+instruction is standing.
+**Proposed fix:** one clause in `designer.md` — "writes nothing INTO THE REPOSITORY;
+throwaway renders go outside it" — which is what "writes nothing" was always protecting.
+Do NOT implement here: it is a contract edit, and contract edits in this run are the
+stakeholder's call (see R4-F1). Logged so the next run does not re-derive it or route it
+through the builder.

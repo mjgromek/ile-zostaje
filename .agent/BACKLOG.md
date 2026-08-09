@@ -25,6 +25,18 @@ Format:
   citable. Adding a year is a data file, not code; if it is not, invariant one has broken.
 - Side-by-side comparison of the three contract types on one gross figure — Urgent when:
   anyone is observed re-entering the same amount to compare contracts.
+- The shipped typography carries an ACCEPTED weakness, in the winning variant's own words:
+  two grotesques, so the point of view rests on size and weight discipline alone. This is a
+  trade the stakeholder chose with the alternatives in front of them, NOT a defect and not
+  a finding — Urgent when: a screen's hierarchy goes visibly flat, or a slice adds a
+  display-level element that must separate from body text at the same size and weight and
+  cannot. Do not resolve it by quietly introducing a third face.
+- Wordmark and ladder total ship at 18 px where DESIGN-SLICE-1 §3 fixes the display floor
+  at 19 px — a slice 1 self-inconsistency, spotted during the theme run and deliberately
+  NOT slipped in with it — Urgent when: any slice revisits the type scale, or the 19 px
+  floor is used as the rule to judge a new element.
+- Chorobowa on zlecenie is voluntary and modelled as off, stated in help text rather than
+  given a control — Urgent when: a user reports a zlecenie that does pay chorobowa.
 - P2-6: the `pit.costs` quote truncates a qualifying clause, so the disclosure states a
   conditional annual cap (3 000 zł, one employment relationship) as absolute — Urgent when:
   a user with two employers reads the disclosure, or a later slice uses the annual cap. The

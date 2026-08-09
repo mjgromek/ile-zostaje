@@ -85,3 +85,21 @@ Why: The stakeholder asked directly: "z każdym slice commituj też jako wersje 
 Rules out: Tagging before a PASS, and a later run "simplifying" this away — not mine to
      drop. Not my choice: a standing instruction, recorded so it survives me.
 
+## 2026-08-09 — Typography: the stakeholder chose variant A, the shipped control
+What: theme-factory ran three type variants on the real screen. A (Bricolage / Familjen /
+     Plex Mono, as shipped) beat B (Fraunces) and C (Bricolage at width 75%): "wybieram
+     ten." No font change lands in slice 2; no colour token was ever in question.
+Why: Recorded as a decision the stakeholder MADE, not as "no change needed" — the
+     alternatives were rendered and shown and the control won, which a later run must see.
+Rules out: Re-running the type question without new evidence.
+Level: Stakeholder decision, not mine.
+
+## 2026-08-09 — Page-form variants are rendered and chosen by the stakeholder. INSTRUCTION
+What: Every slice that reshapes the screen renders two or three structurally different
+     takes on the real screen and stops until the stakeholder picks. They must differ in
+     structure, not decoration; an honest pair beats a set padded to three.
+Why: Their words: "ale chcę też warianty stron nie tylko fontów jak coś." Choosing type
+     from rendered variants worked; form is chosen the same way, looked at not imagined.
+Rules out: One-proposal design handoffs, and building before the pick. The stop is
+     requested, so it is not a Level 3 violation and never to be worked around.
+
