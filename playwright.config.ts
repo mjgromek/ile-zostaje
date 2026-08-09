@@ -8,6 +8,9 @@ export default defineConfig({
   reporter: [['list']],
   use: {
     baseURL: 'http://localhost:5173',
+    // The audience is in Poland, so the app defaults to Polish when the browser
+    // asks for Polish. Give the browser a Polish locale and the default is PL.
+    locale: 'pl-PL',
     trace: 'retain-on-failure',
   },
   projects: [
