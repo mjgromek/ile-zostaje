@@ -1,5 +1,5 @@
 SLICE 1 — Umowa o pracę: monthly gross in, real net out, both languages
-NOW: Builder fix 1/2 — citation quotes checked against the live pages, three quotes not verbatim   [22:10]
+NOW: Builder fix 1/2 — quotes and provenance labels done, tap targets under a click probe   [22:13]
 
 [x] Discovery, PROJECT.md, slice one and its eight criteria
 [x] Designer: spec accepted, persisted to .agent/DESIGN-SLICE-1.md
