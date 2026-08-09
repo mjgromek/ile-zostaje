@@ -73,3 +73,13 @@ Rules out: Multi-employer months, podwyższone KUP, no-PIT-2 payroll, art. 83 re
      the health contribution to the tax advance. Each is a later slice, none is silent.
 Level: 1, do and report, under the run-4 grant.
 
+## 2026-08-09 — Polish number grouping is forced, against CLDR's own pl default
+What: `formatMoney` sets `useGrouping: 'always'`, so pl-PL prints `6 000,00` and not
+     `6000,00`. CLDR's pl locale suppresses grouping below five digits.
+Why: The design spec fixes `6 000,00` and `4 711,43 zł` as measured examples, Polish
+     typographic convention groups from four digits, and a salary is exactly the range
+     where the default would drop the separator. Following the library here would have
+     silently changed the one number the whole screen exists to show.
+Rules out: Relying on the locale default for money anywhere in this app.
+Level: 1, do and report.
+

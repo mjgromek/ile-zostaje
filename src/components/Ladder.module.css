@@ -1,0 +1,107 @@
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--s5);
+}
+
+.head th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding-bottom: var(--s2);
+  border-bottom: 1.5px solid var(--ink);
+}
+
+.head th:last-child {
+  text-align: right;
+}
+
+.row td {
+  padding: var(--s3) 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.name {
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.name::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--swatch, var(--line));
+}
+
+.why {
+  margin: var(--s1) 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+
+.chip {
+  display: inline-block;
+  margin-top: var(--s2);
+  background: var(--honey-soft);
+  color: var(--ink);
+  border-radius: var(--r-chip);
+  padding: 2px var(--s2);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.amounts {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.amount {
+  font-family: var(--face-data);
+  font-weight: 500;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.struck {
+  color: var(--ink-muted);
+  text-decoration: line-through;
+  margin-right: var(--s2);
+}
+
+.remainder {
+  display: block;
+  margin-top: var(--s1);
+  font-family: var(--face-data);
+  font-weight: 500;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+}
+
+.total td {
+  padding-top: var(--s4);
+  border-bottom: 0;
+}
+
+.totalName {
+  font-family: var(--face-display);
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.totalAmount {
+  font-family: var(--face-data);
+  font-weight: 500;
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,83 @@
+.answer {
+  background: var(--honey);
+  border-radius: var(--r-card);
+  padding: var(--s5) var(--s4);
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--on-honey-quiet);
+}
+
+.figure {
+  font-family: var(--face-display);
+  font-weight: 700;
+  font-size: clamp(44px, 13vw, 76px);
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  margin: var(--s2) 0 var(--s1);
+}
+
+.from {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--on-honey-quiet);
+}
+
+.delta {
+  display: inline-block;
+  margin-top: var(--s3);
+  background: var(--ink);
+  color: var(--honey);
+  border-radius: var(--r-pill);
+  padding: var(--s1) var(--s3);
+  font-size: 13px;
+  font-weight: 600;
+  animation: rise var(--dur) var(--ease);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.persistent {
+  margin: var(--s3) 0 0;
+  font-size: 13.5px;
+  color: var(--ink);
+}
+
+.furniture {
+  margin: var(--s5) 0 0;
+  padding-top: var(--s3);
+  border-top: 1px solid rgba(43, 33, 28, 0.18);
+  display: grid;
+  gap: var(--s1);
+}
+
+.furniture p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.empty {
+  margin: var(--s2) 0 0;
+  font-family: var(--face-display);
+  font-weight: 700;
+  font-size: 19px;
+  color: var(--ink);
+}

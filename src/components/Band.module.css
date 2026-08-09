@@ -1,0 +1,83 @@
+.wrap {
+  display: grid;
+  gap: var(--s2);
+}
+
+.band {
+  display: flex;
+  gap: 2px;
+  height: 44px;
+  border-radius: var(--r-chip);
+  overflow: hidden;
+  outline: 1.5px solid rgba(43, 33, 28, 0.18);
+  outline-offset: -1.5px;
+  background: var(--paper);
+}
+
+.segment {
+  min-width: 4px;
+  height: 100%;
+  transition: flex-basis var(--dur) var(--ease);
+}
+
+/* The residue of rounding lands here, so the bar always fills exactly. */
+.net {
+  flex: 1 1 auto;
+  background: var(--honey);
+  display: flex;
+  align-items: center;
+  padding-left: var(--s2);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.emerytalna {
+  background: var(--plum-1);
+}
+.rentowa {
+  background: var(--plum-2);
+}
+.chorobowa {
+  background: var(--plum-3);
+}
+.zdrowotna {
+  background: var(--plum-4);
+}
+.pit {
+  background: var(--graphite);
+}
+
+.captions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s3);
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.year {
+  font-family: var(--face-data);
+  font-size: 12px;
+  color: var(--ink-muted);
+  display: none;
+}
+
+@media (max-width: 379px) {
+  .year {
+    display: block;
+  }
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  border: 1px dashed var(--line);
+  border-radius: var(--r-chip);
+  font-size: 13px;
+  color: var(--ink-muted);
+}

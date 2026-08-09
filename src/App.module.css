@@ -1,0 +1,81 @@
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 var(--s4) var(--s8);
+}
+
+.lede {
+  font-family: var(--face-display);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin: 0 0 var(--s5);
+  max-width: 34ch;
+}
+
+.columns {
+  display: grid;
+  gap: var(--s5);
+}
+
+.left,
+.right,
+.provenance {
+  /* A grid item's min-width is auto, so a long label inside would force the
+     column wider than the viewport. This is what stops that at 320 px. */
+  min-width: 0;
+  display: grid;
+  gap: var(--s5);
+  align-content: start;
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: 0 var(--s4);
+  background: var(--honey);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.stickyAmount {
+  font-family: var(--face-data);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 900px) {
+  .lede {
+    font-size: 26px;
+    max-width: 26ch;
+  }
+
+  .columns {
+    grid-template-columns: 380px 1fr;
+    grid-template-rows: auto 1fr;
+    gap: var(--s7);
+  }
+
+  .left {
+    grid-column: 1;
+    grid-row: 1;
+    position: sticky;
+    top: var(--s5);
+  }
+
+  .provenance {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .right {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+}

@@ -9,3 +9,6 @@ blob-report/
 *.local
 # Derived: copied from node_modules by scripts/copy-fonts.mjs on install.
 public/f/
+
+# tsc -b build cache
+tsconfig.tsbuildinfo

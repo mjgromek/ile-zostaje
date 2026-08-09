@@ -1,0 +1,45 @@
+.details {
+  margin-top: var(--s5);
+  border-top: 1px solid var(--line);
+  padding-top: var(--s3);
+}
+
+.summary {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.intro {
+  margin: var(--s3) 0 var(--s2);
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s3);
+}
+
+.item {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.value {
+  font-family: var(--face-data);
+  font-weight: 500;
+}
+
+.meta {
+  display: block;
+  color: var(--ink-muted);
+}
+
+.item a {
+  color: var(--amber-ink);
+}

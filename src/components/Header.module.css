@@ -1,0 +1,66 @@
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s4) 0;
+}
+
+.wordmark {
+  font-family: var(--face-display);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  color: var(--amber-ink);
+  margin: 0;
+}
+
+.year {
+  font-family: var(--face-data);
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--ink-muted);
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  padding: 2px var(--s2);
+  white-space: nowrap;
+}
+
+.langs {
+  margin-left: auto;
+  display: flex;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+  height: 44px;
+}
+
+.lang {
+  min-width: 48px;
+  padding: 0 var(--s3);
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--face-body);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease);
+}
+
+.langActive {
+  background: var(--ink);
+  color: var(--honey);
+}
+
+@media (max-width: 379px) {
+  .year {
+    display: none;
+  }
+}
+
+@media (min-width: 900px) {
+  .wordmark {
+    font-size: 20px;
+  }
+}

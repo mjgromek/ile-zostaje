@@ -1,0 +1,63 @@
+/* Every value the design spec fixes, in one place, so a later theme pass can
+   revise the system without touching a component. Contrast ratios were measured
+   with the WCAG 2.x relative-luminance formula, not eyeballed. */
+
+:root {
+  /* Surface */
+  --paper: #fff6ee;
+  --surface: #ffffff;
+  --line: #e8dcd0;
+
+  /* Ink */
+  --ink: #2b211c; /* 14.71:1 on paper, 15.71:1 on surface */
+  --ink-muted: #6b5b52; /* 6.06:1 on paper, 6.47:1 on surface */
+
+  /* The one accent. It means exactly one thing: money you keep. */
+  --honey: #ffc24a; /* ink on honey 9.77:1 */
+  --honey-soft: #ffe0a3; /* ink on it 12.7:1 */
+  --amber-ink: #8a5600; /* 5.77:1 on paper */
+  --on-honey-quiet: #5a3b00; /* 7.2:1 on honey */
+
+  /* One sequential ramp for one category: składki. Fills only. */
+  --plum-1: #6e3f5f;
+  --plum-2: #855273;
+  --plum-3: #9c6787;
+  --plum-4: #b37e9c;
+
+  /* The one non-składka deduction. A neutral, not a fifth accent. */
+  --graphite: #4a3f3a;
+
+  /* Type */
+  --face-display: 'Bricolage', ui-sans-serif, system-ui, sans-serif;
+  --face-body: 'Familjen', ui-sans-serif, system-ui, sans-serif;
+  --face-data: 'PlexMono', ui-monospace, monospace;
+
+  /* 4 px grid, no exceptions */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+  --s8: 64px;
+
+  --r-chip: 6px;
+  --r-control: 10px;
+  --r-card: 16px;
+  --r-pill: 999px;
+
+  /* Exactly one elevation, on the segmented-control thumb. */
+  --lift: 0 1px 2px rgba(43, 33, 28, 0.14);
+
+  --dur-fast: 140ms;
+  --dur: 240ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur: 0ms;
+  }
+}

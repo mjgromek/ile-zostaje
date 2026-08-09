@@ -49,10 +49,20 @@ function toWholeZloty(amountGrosz: number): number {
   return divRoundHalfUp(amountGrosz, 100) * 100;
 }
 
-function pitAdvanceGrosz(grossGrosz: number, zusGrosz: number, exemptGrosz: number, rates: YearRates): number {
+/**
+ * The monthly advance, and the base it was computed on. The screen shows that
+ * base in the why-line, so it has to be the base the arithmetic actually used —
+ * the one already rounded to full złote — or the row does not add up on paper.
+ */
+function pitAdvance(
+  grossGrosz: number,
+  zusGrosz: number,
+  exemptGrosz: number,
+  rates: YearRates,
+): { amountGrosz: number; baseGrosz: number } {
   const { pit } = rates;
   const taxedIncome = grossGrosz - exemptGrosz;
-  if (taxedIncome <= 0) return 0;
+  if (taxedIncome <= 0) return { amountGrosz: 0, baseGrosz: 0 };
 
   // Contributions attach to the income they were withheld from: the share that
   // sits under the relief is not deductible, so only the taxed proportion is.
@@ -70,7 +80,7 @@ function pitAdvanceGrosz(grossGrosz: number, zusGrosz: number, exemptGrosz: numb
     applyRate(secondBracket, pit.secondRatePercent.value) -
     pit.taxReducingMonthlyGrosz.value;
 
-  return toWholeZloty(Math.max(0, tax));
+  return { amountGrosz: toWholeZloty(Math.max(0, tax)), baseGrosz: base };
 }
 
 /**
@@ -101,15 +111,20 @@ export function computeUop(grossGrosz: number, under26: boolean, rates: YearRate
   );
   const exempt = under26 ? Math.min(gross, monthlyReliefLimit) : 0;
 
-  const pit = pitAdvanceGrosz(gross, zus, exempt, rates);
-  const pitWithoutRelief = under26 ? pitAdvanceGrosz(gross, zus, 0, rates) : pit;
+  const pit = pitAdvance(gross, zus, exempt, rates);
+  const pitWithoutRelief = under26 ? pitAdvance(gross, zus, 0, rates) : pit;
 
   const amounts: Array<[LineKey, number, number, number]> = [
     ['emerytalna', emerytalna, gross, contributions.emerytalna.value],
     ['rentowa', rentowa, gross, contributions.rentowa.value],
     ['chorobowa', chorobowa, gross, contributions.chorobowa.value],
     ['zdrowotna', zdrowotna, healthBase, contributions.zdrowotna.value],
-    ['pit', pit, gross - zus - rates.pit.deductibleCostsMonthlyGrosz.value, rates.pit.firstRatePercent.value],
+    [
+      'pit',
+      pit.amountGrosz,
+      under26 ? pitWithoutRelief.baseGrosz : pit.baseGrosz,
+      rates.pit.firstRatePercent.value,
+    ],
   ];
 
   let remainder = gross;
@@ -125,7 +140,7 @@ export function computeUop(grossGrosz: number, under26: boolean, rates: YearRate
     lines,
     netGrosz: remainder,
     under26,
-    pitWithoutReliefGrosz: pitWithoutRelief,
-    reliefWorthGrosz: Math.max(0, pitWithoutRelief - pit),
+    pitWithoutReliefGrosz: pitWithoutRelief.amountGrosz,
+    reliefWorthGrosz: Math.max(0, pitWithoutRelief.amountGrosz - pit.amountGrosz),
   };
 }
