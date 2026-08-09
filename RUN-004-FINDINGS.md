@@ -152,3 +152,26 @@ checker is NOT hit: it drives Playwright, which fails loudly on a bad navigation
 `tabs_context_mcp` or a screenshot before reading anything into what the page shows. Never
 accept the navigate result's own tab listing as proof it arrived. Third instrument in this
 run to report a state it did not have, after R4-F3 and R4-F5.
+
+## R4-F8 — the per-entry cap on DECISIONS.md is enforced by diligence alone, and it failed 5 times in one phase
+**Observed or inferred:** OBSERVED, by counting every entry in the file after writing it.
+**Evidence:** `.agent/DECISIONS.md` declares "Cap: 8 lines per entry" in its own header.
+After slice 1's writes, 5 of 9 entries were over: 9, 9, 11, 10 and 9 lines wrapped at 90.
+Three were written by me, two by the builder. Nothing refused any of them. `hooks/pre-commit`
+enforces exactly one state cap — `STATE_CAP=120` on `.agent/STATE.md` — and no other file's
+cap is checked anywhere in the hooks. The commit that carried the over-cap entries passed
+with `state-sha: verified 1 of 1 commit references (0 exempt)` and no cap complaint.
+**Second-order defect in the fix:** my first count used `awk`, which counts BYTES. Em dashes
+and Polish diacritics are multi-byte, so it reported "No backend" at 9 lines when it is 8.
+Recounting in python by character changed the over-cap set from 6 entries to 5. A cap
+instrument that miscounts the very characters this project is written in would have had me
+compact an entry that was already inside its limit.
+**Who it hits:** every clone. `CLAUDE.md` says caps are "enforced by the orchestrator on
+every write", which is precisely the class R4-F2 documents: a rule that binds only if an
+agent remembers it. STATE.md's cap is mechanical and was never violated all phase; the
+caps that are prose were violated five times in the same phase, by two different agents.
+That contrast is the finding — it is a controlled comparison, not an anecdote.
+**Proposed fix:** one line — extend `hooks/pre-commit`'s existing cap block to
+`.agent/DECISIONS.md` per entry, counting characters not bytes. Do NOT implement here: it
+is a hook change outside slice 1's scope, and the hooks have their own test suite that
+would need a case. Logged, worked around by counting after every write this phase.
