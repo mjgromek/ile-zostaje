@@ -25,6 +25,22 @@ Format:
   citable. Adding a year is a data file, not code; if it is not, invariant one has broken.
 - Side-by-side comparison of the three contract types on one gross figure — Urgent when:
   anyone is observed re-entering the same amount to compare contracts.
+- P2-6: the `pit.costs` quote truncates a qualifying clause, so the disclosure states a
+  conditional annual cap (3 000 zł, one employment relationship) as absolute — Urgent when:
+  a user with two employers reads the disclosure, or a later slice uses the annual cap. The
+  250 zł/month value it cites is correct and unaffected.
+- P2-5: the `rentowa` and `chorobowa` quotes end with `.` where zus.pl prints `,` — they are
+  list items rendered as sentences — Urgent when: anyone diffs the quotes character-for-
+  character against the source, which the builder's quote test deliberately does not.
+- P2-4: the gross field's focus ring is `outline-offset: -3px` where DESIGN-SLICE-1 §6 says
+  `2px`; the ring is present, 3 px and unclipped, so only its placement differs — Urgent
+  when: theme-factory revisits focus in slice 2, or a second inset ring makes the
+  inconsistency visible side by side.
+- Art. 83 reduction of składka zdrowotna to the tax advance is not modelled — Urgent when:
+  a very low part-time gross reports a net that is too low. Raised by the builder in slice 1.
+- A real axe / screen-reader accessibility pass — Urgent when: any slice claims an
+  accessibility standard, or a user reports one. Slice 1's criteria cover contrast, focus,
+  targets and the live region, but no slice has yet run an audit tool end to end.
 - The annual ZUS contribution ceiling (limit 30-krotności) is not modelled — Urgent when:
   any supported input can express an annual income above the ceiling, which slice 3's
   year unit will allow. Until then it only misstates emerytalna and rentowa for high

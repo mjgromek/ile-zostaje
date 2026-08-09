@@ -73,3 +73,82 @@ instrument — and here the instrument was the shell itself.
 **Proposed fix:** not a contract edit. Worked around in-project: every command in the
 acceptance criteria is invoked so that PATH is set first, and `.agent/STATE.md` carries the
 one line agents must use. Logged so the next run does not re-derive it.
+
+## R4-F4 — the phase summary said "Continuing to slice 1's build" and then did not continue
+**Observed or inferred:** OBSERVED.
+**Evidence:** The run-4 phase summary printed `Continuing to slice 1's build. Say `hold` to
+stop before it starts.` with `🙋 NEEDS YOU   Nothing`. The orchestrator then stopped and
+delegated nothing, correctly: the brief bounded its deliverables at the phase summary, and
+`.claude/policies/autonomy.md:30` grades running past a bounded brief as Level 3. Verified
+against the repository, not the report: `git log` shows one commit `abfdece`, no builder
+commit, `.agent/STATE.md` "In flight: Nothing", working tree clean.
+**The defect is in the format, not the agent.** `.claude/policies/summary.md` gives the
+closing line exactly two states: continuing (print the `hold` offer) or blocked (NEEDS YOU
+is not "Nothing", the block moves above the banner and the line is omitted). A third state
+happened here — not blocked, nothing needed, and stopping anyway because the brief ended.
+The format cannot express it, so the agent printed the closest available line and the
+summary asserted an action that did not occur. The human's only stopping lever, `hold`,
+was offered against work that was never going to start.
+**Who it hits:** every run where the human bounds the brief short of the next slice, which
+is the normal shape of a discovery or pre-flight phase. Silent in the dangerous direction:
+the summary reads as more autonomous than the run was.
+**Proposed fix:** one line — `summary.md` needs a third closing state for "stopped because
+the brief ended here, say `go` to continue". Do NOT implement: it is an edit to a policy
+contract and a design question about who holds the continue decision. Logged, not answered.
+
+## R4-F5 — the browser a11y snapshot reports a stale switch state, and nearly produced a false P1
+**Observed or inferred:** OBSERVED, by contradiction between two instruments on one element
+in one page state.
+**Evidence:** The under-26 switch in the slice-1 screen. `read_page` returned
+`switch "on" [ref_24]` on three separate reads: once while the screen showed PIT −498,00 zł
+and net 5 783,91 zł (relief OFF), and twice while it showed PIT struck to 0 zł and net
+6 281,91 zł (relief ON). Direct DOM probe via `javascript_tool` on the same element in the
+same session: `{tag: INPUT, role: switch, ariaChecked: null, domChecked: true}` before a
+click, `domChecked: false` after — the DOM tracks correctly, and the final `read_page` said
+`"on"` while `domChecked` was `false`. Two instruments, same element, opposite answers; the
+rendered numbers agree with the DOM, so the a11y snapshot is the one that is wrong.
+**What it nearly cost:** a fabricated product defect. The first reading supported "the
+switch reports on while the relief is not applied", which is a P1 accessibility bug against
+this project's first-class case — the under-26 relief for its exact audience. It would have
+gone to the builder, who would have found nothing to fix, and burned a fix cycle against a
+defect that does not exist. `role="switch"` on a native `input[type=checkbox]` takes its
+checked state from the DOM property, so there is nothing wrong with the markup.
+**Who it hits:** the checker, on this slice and every later one. Acceptance criterion 3
+says both relief states are "observed on screen, not inferred from code" — a checker that
+reads state off `read_page` instead of the rendered figures satisfies the wording of that
+criterion with a value the instrument invented. It fails in both directions: a false defect
+now, a false PASS later.
+**Proposed fix:** not a code change. The checker asserts toggle state from the rendered
+output — the net figure, the struck-through PIT line, the badge — or from a `javascript_tool`
+DOM probe, never from the `read_page` switch state. `filter: "interactive"` also omits
+`role="switch"` entirely, so a control can look absent when it is present; that cost a
+detour here too. Passed to the orchestrator for the checker's method, logged so the next
+run does not re-derive it.
+
+<!-- R4-F6 is reserved: the orchestrator was told it holds the next number and may be
+     writing concurrently. A gap is cheaper than a collision. -->
+
+## R4-F7 — the browser `navigate` tool reports a successful navigation that did not happen
+**Observed or inferred:** OBSERVED, by asking two tools about the same tab.
+**Evidence:** `navigate` to `http://localhost:5199` returned `Navigated to
+http://localhost:5199` and listed the tab as `"localhost" ("http://localhost:5199")`. The
+tab had not moved: `tabs_context_mcp` immediately after returned `"New Tab"
+("chrome://newtab/")`, and `read_page` and `computer:screenshot` both refused with "Can't
+interact with browser-internal or unparseable URLs." A second `navigate` produced the
+contradiction inside ONE tool result — its own summary said `localhost:5199/` while the
+front-loaded context block in the same output said `chrome://newtab/`. The server was not
+the problem: `curl` to the same URL returned `HTTP 200` throughout.
+**Trigger, inferred not measured:** the tab group from earlier in this session stopped
+existing between passes — `tabs_context_mcp` went from returning a live group to "No tab
+group exists for this session" — most likely because the window was closed. Creating a
+fresh group succeeded, but navigation inside it never took effect. Not re-derived, because
+confirming it means reproducing a broken extension binding on purpose.
+**Who it hits:** any agent verifying an artifact through this MCP browser, which is how
+CLAUDE.md says the artifact must be exercised. The failure is the dangerous shape: a
+success string for an action that did not occur. Taken at face value, the next observation
+— a blank page, a missing element, a stale value — gets attributed to the product. The
+checker is NOT hit: it drives Playwright, which fails loudly on a bad navigation.
+**Proposed fix:** not a code change, a method. After any `navigate`, confirm the URL from
+`tabs_context_mcp` or a screenshot before reading anything into what the page shows. Never
+accept the navigate result's own tab listing as proof it arrived. Third instrument in this
+run to report a state it did not have, after R4-F3 and R4-F5.

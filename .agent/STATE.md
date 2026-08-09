@@ -51,13 +51,15 @@ Checked in a real browser against the running app, not against the diff.
 
 ## Shipped
 
-Nothing yet. No product code exists at ea76697.
+**Slice 1 — umowa o pracę, monthly gross to real net.** Checker PASS on all eight criteria
+with no open P0 or P1, after one fix cycle. Engine, screen, the cited 2026 rate data and 16
+tests (9 vitest, 7 Playwright) are committed and tagged `v0.1.0` on GitHub.
 
 ## In flight
 
-Nothing. `designer` has delivered; its spec is persisted at `.agent/DESIGN-SLICE-1.md` and
-is authoritative for the builder — read it before writing any interface code. `builder` is
-the next delegation and is not blocked.
+Nothing. Slice 2 — umowa zlecenie and umowa o dzieło, with student status on zlecenie — is
+the next slice and has not started. `theme-factory` runs at its START, per the designer:
+its three-variant showcase needs the project's own real screen, which now exists.
 
 ## Blocked
 
@@ -66,8 +68,12 @@ silent, with each choice recorded in DECISIONS.md.
 
 ## Last verification result
 
-No slice verified yet. Pre-flight only: `./hooks/test/run-hook-tests.sh` passed 28/28,
-reported by the human at the start of run 4, not re-run by this instance.
+2026-08-09, after fix cycle 1 — **PASS on all eight criteria, no open P0 or P1.** Δ = 0
+(visible 16/16, held-out 5/5). P1-1, P2-2, P2-3 CLOSED by driving the artifact. Exercised in
+real Chromium: the ladder sums to the gross to the grosz at six amounts, tap targets probed
+by one real click per CSS pixel, zero foreign requests, citations re-read on the live pages.
+Mutation probe: `align-self: stretch` -> `center` was caught by the new tap-target test.
+Three P2 deferrals remain, in BACKLOG. Full report, verbatim, in `.agent/LAST_CHECK.md`.
 
 ## Next slices, in order
 
@@ -82,3 +88,7 @@ reported by the human at the start of run 4, not re-run by this instance.
   Polish, four decisions recorded, slice one written here.
 - 2026-08-09 21:06 — designer delivered; spec persisted to .agent/DESIGN-SLICE-1.md, accepted at
   Level 1 under the run-4 grant. ZUS ceiling deferred to BACKLOG. Builder is next.
+- 2026-08-09 22:03 — checker PASS, 1xP1 + 3xP2; verdict persisted to .agent/LAST_CHECK.md.
+  P2-1 (stale STATE) fixed here. Builder given P1-1, P2-2, P2-3 as fix attempt 1 of 2.
+- 2026-08-09 22:37 — re-verify PASS, no open P0/P1. P1-1, P2-2, P2-3 closed; P2-4/5/6 to
+  BACKLOG. Slice 1 ships as v0.1.0.

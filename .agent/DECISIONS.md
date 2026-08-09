@@ -25,10 +25,9 @@ Level: 1, under the run-4 brief's grant to choose where the brief is silent.
 ## 2026-08-09 — TypeScript + Vite + React, tested with Vitest and Playwright
 What: The interface stack. Vitest for the calculation engine, Playwright driving a real
      browser for the artifact checks.
-Why: Node 25.9.0 and npm are present (R4-F3), so a real test runner is available. React
-     because one screen recalculates many linked fields live and hand-rolled DOM updates
-     break in ways unit tests do not see. Playwright is what makes "the checker drives the
-     artifact" true rather than aspirational — the checker has no browser tool.
+Why: Node 25.9.0 and npm are present (R4-F3). React because one screen recalculates many
+     linked fields live and hand-rolled DOM updates break in ways unit tests miss.
+     Playwright is what makes "the checker drives the artifact" true, not aspirational.
 Rules out: A Python-served app, a build-free vanilla page, jsdom-only verification.
 Level: 2 by autonomy.md — taken at Level 1 under the run-4 brief's explicit grant.
 
@@ -51,35 +50,38 @@ Rules out: A single undated rate set, and rates carried in engine branches.
 Level: 1, do and report.
 
 ## 2026-08-09 — The slice 1 design direction is accepted without a stakeholder round
-What: The designer's spec (`.agent/DESIGN-SLICE-1.md`) is authoritative for the builder:
-     honey as the single accent, deductions as one plum ramp, a proportional band plus a
-     subtraction ladder, no green and no red anywhere.
-Why: Warm and friendly was settled by the stakeholder; this is that direction made
-     concrete, not a new one. The brief closed questions for this phase and told me to
-     choose where it is silent. The designer graded its own spec Level 2 correctly under
-     autonomy.md — the grant, not the grading, is what moves it.
+What: `.agent/DESIGN-SLICE-1.md` is authoritative for the builder: honey as the single
+     accent, deductions as one plum ramp, a band plus a ladder, no green and no red.
+Why: Warm and friendly was settled by the stakeholder; this makes it concrete, it is not
+     a new direction. The run-4 grant, not the designer's own Level 2 grading, moves it.
 Rules out: A stakeholder review before the builder starts. The reversal risk is the
-     no-green/no-red call, named by the designer as the one item most likely rejected.
+     no-green/no-red call, which the designer named as most likely to be rejected.
 Level: 2 by autonomy.md — taken at Level 1 under the run-4 brief's explicit grant.
 
 ## 2026-08-09 — The engine models one payroll case, and models the relief limit properly
-What: Slice one computes a single employment relationship with standard koszty uzyskania
-     przychodu and a filed PIT-2. Above the monthly share of the 85 528 zł relief limit
-     the excess is taxed, with ZUS deductible only in the taxed proportion.
-Why: Those three assumptions cover almost every young person on umowa o pracę. The limit
-     is modelled rather than assumed away because giving a 20 000 zł/month 25-year-old a
-     zero tax bill is a plain correctness bug, and the limit is data the brief required.
-Rules out: Multi-employer months, podwyższone KUP, no-PIT-2 payroll, art. 83 reduction of
-     the health contribution to the tax advance. Each is a later slice, none is silent.
+What: One employment relationship, standard KUP, a filed PIT-2. Above the monthly share
+     of the 85 528 zł relief limit the excess is taxed, ZUS deductible in that proportion.
+Why: Those assumptions cover almost every young person on umowa o pracę. The limit is
+     modelled, not assumed away: a zero tax bill at 20 000 zł/month is a correctness bug.
+Rules out: Multi-employer months, podwyższone KUP, no-PIT-2 payroll, art. 83 health-
+     contribution reduction. Each is a later slice, none is silent.
 Level: 1, do and report, under the run-4 grant.
 
 ## 2026-08-09 — Polish number grouping is forced, against CLDR's own pl default
 What: `formatMoney` sets `useGrouping: 'always'`, so pl-PL prints `6 000,00` and not
      `6000,00`. CLDR's pl locale suppresses grouping below five digits.
-Why: The design spec fixes `6 000,00` and `4 711,43 zł` as measured examples, Polish
-     typographic convention groups from four digits, and a salary is exactly the range
-     where the default would drop the separator. Following the library here would have
-     silently changed the one number the whole screen exists to show.
+Why: The design spec fixes `6 000,00` as a measured example, Polish convention groups
+     from four digits, and a salary is exactly the range where the default drops the
+     separator — silently changing the one number the whole screen exists to show.
 Rules out: Relying on the locale default for money anywhere in this app.
 Level: 1, do and report.
+
+## 2026-08-09 — Every slice ships to GitHub as a tagged version. STAKEHOLDER INSTRUCTION
+What: After a checker PASS, before the summary: push main, then an annotated minor tag
+     per slice (`v0.1.0`, ...), message in Polish, both confirmed with `git ls-remote` and
+     never from an exit code. Push and tag ONLY; anything beyond that is Level 3.
+Why: The stakeholder asked directly: "z każdym slice commituj też jako wersje na github."
+     A tag asserts the slice works, so it never goes over an open P0 or P1.
+Rules out: Tagging before a PASS, and a later run "simplifying" this away — not mine to
+     drop. Not my choice: a standing instruction, recorded so it survives me.
 
