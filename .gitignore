@@ -1,1 +1,11 @@
 .DS_Store
+node_modules/
+dist/
+coverage/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+*.local
+# Derived: copied from node_modules by scripts/copy-fonts.mjs on install.
+public/f/
