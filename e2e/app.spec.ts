@@ -124,3 +124,46 @@ test('criterion 7 — entries survive a reload and nothing leaves the device', a
 
   expect(foreign).toEqual([]);
 });
+
+/**
+ * The label sits between the value span and the meta span as bare text, so the
+ * direct text children of each `<li>` ARE the label. No test hook is added for
+ * this: a hook would let the label be right in the DOM and wrong on screen.
+ */
+async function provenance(page: Page): Promise<{ value: string; label: string }[]> {
+  return page.locator('[data-testid="sources"] li').evaluateAll((items) =>
+    items.map((item) => ({
+      value: (item.querySelector('span')?.textContent ?? '').trim(),
+      label: Array.from(item.childNodes)
+        .filter((node) => node.nodeType === Node.TEXT_NODE)
+        .map((node) => node.textContent ?? '')
+        .join('')
+        .trim(),
+    })),
+  );
+}
+
+test('P2-3 — every entry in the provenance list names what it actually is', async ({ page }) => {
+  await page.goto('/');
+  await page.getByTestId('sources').locator('summary').click();
+
+  const pl = await provenance(page);
+  expect(pl).toHaveLength(12);
+  // Four different numbers under one label is the defect: a reader opening the
+  // disclosure to find where 250 zł came from was told "Zaliczka na PIT".
+  expect(new Set(pl.map((entry) => entry.label)).size).toBe(12);
+  // pl-PL groups with a non-breaking space, so the value is matched on digits.
+  const labelFor = (list: { value: string; label: string }[], amount: string) =>
+    list.find((entry) => digits(entry.value) === amount)?.label;
+
+  expect(labelFor(pl, '250,00')).toMatch(/Koszty uzyskania przychodu/);
+  expect(labelFor(pl, '85528,00')).toMatch(/ulgi dla młodych/);
+
+  await page.getByRole('radio', { name: 'Angielski' }).click();
+
+  const en = await provenance(page);
+  expect(new Set(en.map((entry) => entry.label)).size).toBe(12);
+  expect(labelFor(en, '250.00')).toMatch(/Deductible costs/);
+  // Criterion 5 holds for the keys this fix adds, in both tables.
+  await expect(page.getByTestId('sources')).not.toContainText('⟦');
+});
