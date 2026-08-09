@@ -4,10 +4,13 @@ description: Trigger policy for Claude Code's built-in /security-review. Risk tr
 ---
 <!-- Cap: 40 lines, whole file. Over cap is a bug: cut content, never a rule. -->
 
-This skill decides *when* the built-in `/security-review` runs. It is the trigger policy,
-not a reimplementation of the review — the review itself is Claude Code's, and this skill
-never performs one. It is named `security-gate` so it cannot collide with the built-in.
-The review stays independent: never run by whoever wrote the code.
+Decides *when* a security review runs and *who* performs it. Named `security-gate` so it
+cannot collide with the built-in. The review is never run by whoever wrote the code.
+
+**No agent can execute `/security-review`** — it is a slash command and no `tools:` line
+here carries `SlashCommand`. A step no role can perform is a gate-shaped hole that
+self-certifies, so the review goes to `checker` and the built-in goes to the human, who can
+type it. Rationale and rejected alternatives: R2-F22 in `docs/RUN-001-FINDINGS.md`.
 
 ## Triggers
 
@@ -19,8 +22,11 @@ mutation; LLM tool exposure; deployment or infrastructure.
 
 1. **State which trigger fired**, in the first line. A review that cannot name its
    trigger should not have run.
-2. Run the built-in `/security-review` over the change.
-3. Grade every finding P0, P1 or P2, like any checker finding: P0 escalates, P1 is a
+2. **Delegate the review to `checker`**, briefed to the fired trigger and the diff. Report
+   verbatim, unprompted: **"the built-in /security-review did NOT run — no agent can
+   execute a slash command."** Without it a hand review is read as the built-in's output.
+3. **Hand the human `/security-review`** on its own line, so they can run the real thing.
+4. Grade every finding P0, P1 or P2, like any checker finding: P0 escalates, P1 is a
    bounded fix of at most two cycles, P2 is a deferral the orchestrator records.
 
 ## Refusals
@@ -29,4 +35,6 @@ mutation; LLM tool exposure; deployment or infrastructure.
 Running it anyway manufactures findings out of a diff that has none.
 
 **Mandatory before any release that touched a trigger area.** Where a trigger fired and
-this has not run, the release is blocked — not warned about.
+this has not run, the release is blocked — not warned about. The block is on step 2, which
+is executable; never on the built-in. A rule that must be broken to ship trains everyone
+to break it.

@@ -26,7 +26,15 @@ One decision. The recommended option. What each option costs. What is blocked un
 answered. Never an open design discussion. This governs escalations: a bounded `grill-me`
 or `discovery` interview is not an escalation and is not limited by it. An escalation is
 not a substitute for work the brief already specifies: if the brief answers the question,
-do the work and report it.
+do the work and report it. **And the inverse, which is the direction that has actually cost
+something: work is not a substitute for an instruction the brief bounds.** Where a brief
+names a single action, a required output shape, or a stop condition, that IS the
+deliverable — produce it first and literally. Doing something adjacent when told to stop is
+a **Level 3 violation, not initiative**, and is graded as one. A probe is answered before
+anything is committed: the cost of a probe is what makes it a probe (R2-F28 — a spawn check
+declared free to fail became a revert, because the agent ran the slice instead of the
+check). Returning more than was asked is the silent form, since nothing reads as missing
+and the one requested datum is the only thing absent.
 
 ```
 DECISION NEEDED

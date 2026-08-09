@@ -49,3 +49,10 @@
 - **A cap counts lines wrapped at 90 characters.** Markdown table rows, fenced code blocks
   and YAML frontmatter are exempt. An unwrapped file makes its own cap meaningless: a
   600-character line and a 60-character line both count as one.
+- **A sync that overwrites a harness file names the project-owned files that encode a
+  workaround against the behaviour it just changed, and re-checks each one.** The harness
+  is upstream's and the workaround is the project's, so a sync is the only moment both are
+  in one hand. Skip it and the fix lands while the workaround keeps working around it —
+  the gate stays red, or green, for a reason that no longer exists. R2-F25: a synced
+  harness taught a new declaration and `.env.example` silently defeated it, because the
+  operator reads the template and not the library.

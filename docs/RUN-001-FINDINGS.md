@@ -609,6 +609,20 @@ prefix. If a commit touches source paths, require the test regardless of what it
 itself. That is language-specific and needs a per-project config, so it is a design
 decision, not a five-minute change.
 
+**STAYS OPEN, 2026-08-09 — now measured rather than asserted.** R2-F32 built
+`comparable()`, which already separates bookkeeping (`.agent/`, `docs/`) from everything
+else, so the obvious move was to reuse it: require test-first whenever a commit stages any
+comparable path, whatever prefix it carries. Checked against real history first. The
+`chore:`/`docs:`/`refactor:` commits in the reference clone stage, legitimately and
+repeatedly, `hooks/pre-commit` (4), `CLAUDE.md` (4), `.claude/agents/*.md` (4 each),
+`.gitignore` (3), `PROJECT.md` (3), `README.md` (2), `scripts/capture_fixtures.sh` (2).
+Every one is a comparable path and none should ever demand a preceding `test:`. Extension
+filtering does not rescue it either: excluding `.md` still leaves `hooks/*.sh` and
+`scripts/*.sh` demanding tests, while `warsaw_air/*.py` genuinely needs them — the
+distinction is which directories hold product code, which is exactly the per-project config
+this entry named. Confirmed unresolvable within the hook alone; the original assessment
+stands and now has evidence under it.
+
 ---
 
 ## F14 — no agent verifies which repository it is operating in
@@ -1210,6 +1224,28 @@ a named independent reviewer subagent instead of a slash command.
 built-in `/security-review` over the change", and no `SlashCommand` tool appears in any
 agent's allowlist in this repository.
 
+**FIX LOGGED BEFORE THE EDIT, 2026-08-09. Confirmed first, then chosen.** All four
+`tools:` lines were read: `checker` Read/Grep/Glob/Bash/WebFetch/Skill, `orchestrator`
++Write/Edit/Task, `designer` +WebSearch, `builder` +Edit/Write/WebSearch/WebFetch. `grep -rn
+SlashCommand .claude/` returns nothing. The mandated step is unreachable, as recorded.
+
+**Chosen: delegate the review to the existing `checker` subagent, and require the report to
+state that the built-in did not run.** Rejected alternatives, with reasons. (a) *Drop the
+step* — a triggered release would then get no review at all, which is worse than an
+unexecutable one, because the gate would pass silently instead of failing loudly. (b) *Add
+`SlashCommand` to an allowlist* — R2-F29 established that a `tools:` line is a request, not
+a guarantee; adding a name that may never arrive rebuilds F1's exact silent failure, and
+this repository cannot verify such a tool exists. (c) *A new reviewer agent* — out of scope
+by instruction, and unnecessary: `checker` is already a named, read-only, fresh-context
+reviewer, which is what this entry asked for.
+
+The skill therefore stops calling a release blocked on a step nobody can perform, and
+blocks it instead on a review that CAN be performed. The honesty clause is the load-bearing
+half: the report must say the built-in never ran, so nobody reads a delegated hand review
+as the built-in's output. Where the human wants the real thing, the skill emits the literal
+command for them to type — a human can execute a slash command, which is the asymmetry the
+original step missed.
+
 ---
 
 ## R2-F23 — I composed the PROGRESS.md timestamps instead of measuring them
@@ -1248,6 +1284,21 @@ repository.** `docs/` holds only `DESIGN.md` and this file; `DEPLOY.md` is clone
 rule this finding asks for — query remote state and branch on it, never assume creation —
 therefore has no home upstream yet, which is itself the gap.
 
+**FIX LOGGED BEFORE THE EDIT, 2026-08-09. Chosen: `docs/DEPLOY.md`, not
+`hooks/verify-deploy.sh`.** The reason is what each one can see. `verify-deploy.sh` runs
+AFTER a deploy and asserts against a serving URL; the failure this entry records happens
+BEFORE anything serves, and is invisible from a URL. A duplicate service billing alongside
+the real one still lets `/version` return the expected revision, so `verify-deploy.sh`
+would report PASS over exactly the defect it was asked to catch — it would become another
+check that cannot fail, which this file now records five times (R2-F33).
+
+So the rule lands where it can be read and followed rather than where it would look
+enforced: a runbook precondition in a new `docs/DEPLOY.md`, provider-neutral, because the
+next project deploys to Cloud Run and `railway add` is only one instance of a
+create-unconditionally verb. `DEPLOY.md` states plainly that nothing mechanically enforces
+this, so the rule is not mistaken for a gate. Writing an unenforceable rule into an
+executable file is how a gate acquires a reputation it has not earned.
+
 ---
 
 ## R2-F25 — a pipeline sync fixed the harness and left the project's own template lying
@@ -1273,6 +1324,24 @@ commented example, so the declaration is no longer defeated. Neither half of the
 landed: a sync still lists no project-owned workaround files, and the harness still does not
 report the `NO_PROTECTED_ROUTE=1` + non-empty `PROTECTED_PATH` combination as a contradiction.
 One project was repaired by hand; the next one inherits the same trap.
+
+**FIX LOGGED BEFORE THE EDIT, 2026-08-09 — the general half only.** Measured first: the sync
+process is documented in NO file in this repository. `grep -rln -i sync .claude/ docs/
+CLAUDE.md` hits only `tdd/tests.md` and this findings file, neither of which governs a sync.
+The rule has had no home, which is why it has never bound.
+
+Chosen home: `CLAUDE.md`, under `## Setup`. It is the operative rules file every session in a
+clone reads, and adopting an upstream harness change is a per-clone operation — the same
+category as wiring `core.hooksPath`, which already lives there. `docs/DESIGN.md` §7 was the
+alternative and was rejected: it is a plan document describing what was built, not a file an
+agent follows mid-session.
+
+The clause: **a sync that overwrites a harness file names the project-owned files that encode
+a workaround against the behaviour it just changed, and re-checks each one.** The harness and
+the workaround are owned by different parties, so the sync is the only moment both are in one
+hand. Not implemented: the second half of this entry's proposed fix — the harness reporting
+`NO_PROTECTED_ROUTE=1` with a non-empty `PROTECTED_PATH` as a contradiction — which is a hook
+change and is left open deliberately.
 
 ---
 
@@ -1329,6 +1398,16 @@ carries only the original direction ("an escalation is not a substitute for work
 already specifies"); the inverse clause this entry asks for is absent. The R2-F31 clause
 landed in the same file on the same night and this one did not, because the brief named
 R2-F31 and not this — which is, precisely, the finding.
+
+**FIX LOGGED BEFORE THE EDIT, 2026-08-09.** The inverse clause goes into
+`.claude/policies/autonomy.md` beside the escalation half, in the same paragraph, so the
+two directions are read together and neither can be adopted alone: **work is not a
+substitute for an instruction the brief bounds.** Where a brief names a single action, a
+required output shape, or a stop condition, that IS the deliverable — produced first and
+literally. Doing something adjacent when told to stop is graded as a **Level 3 violation,
+not initiative**, which is the grading this entry's evidence earns: the substituted work
+was committed and pushed to a repo-connected service, so the probe that was framed as free
+to fail cost a revert. One clause, no new file.
 
 ---
 
