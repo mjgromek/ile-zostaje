@@ -125,8 +125,8 @@ DOM probe, never from the `read_page` switch state. `filter: "interactive"` also
 detour here too. Passed to the orchestrator for the checker's method, logged so the next
 run does not re-derive it.
 
-<!-- R4-F6 is reserved: the orchestrator was told it holds the next number and may be
-     writing concurrently. A gap is cheaper than a collision. -->
+<!-- R4-F6 was reserved for a concurrent writer and never used. The gap is deliberate and
+     stays: findings.md forbids renumbering, and a hole beats a reused identifier. -->
 
 ## R4-F7 — the browser `navigate` tool reports a successful navigation that did not happen
 **Observed or inferred:** OBSERVED, by asking two tools about the same tab.
