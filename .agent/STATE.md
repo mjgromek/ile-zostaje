@@ -13,32 +13,35 @@ found`, which reads as "not installed" and is wrong. R4-F3.
 
 **Slice 2 — umowa zlecenie and umowa o dzieło, with student status on zlecenie.**
 
-The contract control's two disabled slots come alive. Zlecenie brings its own ZUS treatment
+The contract control's two disabled slots come alive. Zlecenie brings its own ZUS rules
 and, for a student under 26, the removal of ZUS entirely — the single biggest number this
 audience will see change, and the reason they came. Dzieło is a different animal: no ZUS,
 no health contribution, and koszty uzyskania przychodu at 20% or 50%, where 50% depends on
 transfer of copyright and is capped annually.
 
-`theme-factory` runs FIRST, on the real screen slice 1 built, inside the settled warm
-direction — it does not reopen warm-and-friendly or the no-green-no-red call. Then the
-designer, because student status and two contract types reshape the input; then the builder.
+The screen becomes **variant B**, chosen by the stakeholder from three rendered layouts:
+contract type as a full-width bar above everything, one card holding the amount and the
+Nie/Tak questions, the answer directly below. The lede sentence is CUT — "to wiadomo" —
+not shortened, not moved, and never reintroduced under another name. theme-factory is
+closed: type stays as shipped.
 
-Not in this slice: hour/week/year units (slice 3), the rent-and-food leftover layer
-(slice 4), deployment (slice 5). None is dropped.
+Not in this slice: the brutto/netto toggle and its reverse calculation, which is now
+slice 3 and NOT dropped — it is a new engine capability, not a label, and its round-trip
+is its own verification surface. Then units (4), the leftover layer (5), deployment (6).
 
 ## Acceptance criteria
 
 Checked in a real browser against the running app, not against the diff.
 
 1. All three contract slots are selectable. Choosing zlecenie or dzieło recomputes the net
-   with no page reload, and umowa o pracę returns the same figures as `v0.1.0` for the same
+   with no reload, and umowa o pracę returns the same figures as `v0.1.0` for the same
    inputs — the checker compares against the tagged release, not against a memory.
-2. A student control is offered where it applies. For a student under 26 on zlecenie, every
-   ZUS line disappears from band and ladder and the net rises to match. Both states are
-   observed on screen, and the source for the exemption is cited on the page.
+2. A student control is offered where it applies. For a student under 26 on zlecenie,
+   every ZUS line vanishes from band and ladder and the net rises to match. Both states
+   are observed on screen, and the source for the exemption is cited on the page.
 3. Dzieło shows no ZUS and no health line. Koszty uzyskania przychodu are selectable
    between 20% and 50%; the 50% option is presented as the condition that earns it —
-   transfer of copyright — and not as a bare percentage. Its annual cap comes from the data
+   transfer of copyright — not as a bare percentage. Its annual cap comes from the data
    file, never from a branch.
 4. The under-26 PIT relief applies to exactly the contract types the cited source lists.
    Where a selected contract is outside that list, the interface says so in the active
@@ -53,12 +56,15 @@ Checked in a real browser against the running app, not against the diff.
    the rendered page.
 7. Both languages are complete for every new string, with no untranslated or missing key.
    The settled exception stands: `Zlecenie` and `Dzieło` remain Polish in the EN build.
-8. Evidence: the engine's cases are hand-computed per contract and per relief state, each
+8. The screen is variant B: the contract bar sits above everything, the amount and the
+   Nie/Tak questions share one card, the answer is directly below. The lede sentence is
+   gone from both languages, and no sentence has replaced it that restates it.
+9. Evidence: the engine's cases are hand-computed per contract and per relief state, each
    naming its source; Playwright drives a real browser for criteria 1, 2, 3 and 4.
 
 ## Shipped
 
-**Slice 1 — umowa o pracę, monthly gross to real net.** Checker PASS on all eight criteria,
+**Slice 1 — umowa o pracę, gross to real net.** Checker PASS on all eight criteria,
 no open P0 or P1, after one fix cycle. 16 tests (9 vitest, 7 Playwright). Tagged `v0.1.0`,
 confirmed on origin. Details in `.agent/DECISIONS.md` and `.agent/LAST_CHECK.md`.
 
@@ -80,17 +86,28 @@ verbatim, in `.agent/LAST_CHECK.md`, which is overwritten when slice 2 is checke
 
 ## Next slices, in order
 
-3. Input units: hour, week, month, year.
-4. The leftover layer — rent and food subtracted from the net. Survives every scope cut.
-5. Deploy to a public URL, verified with `hooks/verify-deploy.sh`.
+3. **The brutto/netto toggle**, split out of slice 2 by size. A user says "I want 5 000 on
+   hand — what must I earn?" Its criteria, written now so they cannot be quietly dropped:
+   the toggle sits on the amount input and defaults to brutto; its state persists with the
+   other entries; netto->brutto INVERTS the same cited rates the forward path uses, by
+   solving against the real function, never a second formula or a typical multiplier; the
+   round-trip closes to the grosz for every contract and relief combination, checked in
+   the browser and not only in Vitest; and where the inverse is not unique or undefined —
+   flat and stepped regions from thresholds and rounding — the screen says so rather
+   than printing the first numeric solution as the answer. Both directions carry the
+   estimate-not-advice framing: a gross derived from a target net looks like a stronger
+   claim and is not one.
+4. Input units: hour, week, month, year.
+5. The leftover layer — rent and food subtracted from the net. Survives every scope cut.
+6. Deploy to a public URL, verified with `hooks/verify-deploy.sh`.
 
 ## Checkpoints
 
 - 2026-08-09 22:44 — slice 1 shipped and tagged v0.1.0; slice 2 written here before any
   code, phase-start 1bbffef.
-- 2026-08-09 23:11 — theme-factory closed: stakeholder chose variant A, the shipped control.
+- 2026-08-09 23:11 — theme-factory closed: stakeholder chose variant A, as shipped.
   New standing instruction: page-form variants are rendered and picked by the human.
   P2-6 promoted out of BACKLOG into slice 2 — its condition ("a later slice uses the
   annual cap") fired when KUP arrived. Builder fixes it with the new KUP citations.
-- 2026-08-09 23:29 — three layout variants rendered outside the repo; stopped for the pick.
+- 2026-08-09 23:29 — three layouts rendered outside the repo; stopped for the pick.
   R4-F9 logged: no agent write boundary allows for rendering, resolved via scratchpad.

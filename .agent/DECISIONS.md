@@ -103,3 +103,21 @@ Why: Their words: "ale chcę też warianty stron nie tylko fontów jak coś." Ch
 Rules out: One-proposal design handoffs, and building before the pick. The stop is
      requested, so it is not a Level 3 violation and never to be worked around.
 
+## 2026-08-09 — Layout: the stakeholder chose variant B, and cut the lede sentence
+What: B ships — contract type as a full-width bar above everything, one card with the
+     amount and Nie/Tak questions, answer directly below. The lede sentence is CUT, not
+     shortened and not moved: "to wiadomo."
+Why: B is the only variant that never requires a payroll word to answer a question, and it
+     was picked from three rendered layouts rather than from prose.
+Rules out: Re-opening the page form without new rendered variants, and reintroducing the
+     lede sentence under another name.
+
+## 2026-08-09 — The brutto/netto toggle becomes slice 3, not part of slice 2
+What: Slice 2 keeps three contracts, student status, KUP and layout B. The netto->brutto
+     toggle and its reverse calculation get their own slice, round-trip as the criterion.
+Why: A new engine capability, not a label: it inverts the cited rates and meets flat and
+     stepped regions where a rounded net maps to many gross values or none. Bundled with
+     two unresearched contract types, a P0 in either blocks both.
+Rules out: A "typical multiplier", any parallel formula, and a slice 2 too big to verify.
+Level: 1 under the grant; named in the summary as instructed, not absorbed silently.
+
