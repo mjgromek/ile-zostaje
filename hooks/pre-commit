@@ -9,7 +9,7 @@ TAB=$(printf '\t')
 # Patterns that would otherwise appear here as contiguous literals are assembled
 # from fragments at runtime. A table that matches itself refuses its own source,
 # so a fresh clone can never commit its own hooks and silently ends up with none.
-# See docs/RUN-001-FINDINGS.md, F2. The heredoc below is unquoted for this reason.
+# See archiwum ustaleń w mjgromek/easydev-agentic-pipeline, F2. The heredoc below is unquoted for this reason.
 gcp_a='"private_key'
 gcp_b='_id"'
 

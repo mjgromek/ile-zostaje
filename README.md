@@ -302,7 +302,7 @@ Those ideas belong in `.agent/BACKLOG.md` only when a real project demonstrates 
 - The four hooks are covered by **19 fail-on-purpose cases** in `./hooks/test/run-hook-tests.sh`.
 - The hook test harness builds throwaway repositories and checks refusal cases against resulting Git state rather than trusting exit codes alone.
 - The **builder → checker loop has been run end-to-end**, across multiple slices of a real project, with the checker reproducing each failing test before accepting its fix.
-- That validation run produced its own defect log. Nineteen findings against the pipeline itself are recorded in `docs/RUN-001-FINDINGS.md`, several of them fixed here; the rest carry an urgency condition in `.agent/BACKLOG.md`.
+- That validation run produced its own defect log. Nineteen findings against the pipeline itself are recorded in `archiwum ustaleń w mjgromek/easydev-agentic-pipeline`, several of them fixed here; the rest carry an urgency condition in `.agent/BACKLOG.md`.
 - The pipeline is therefore evidenced, not production-proven. It has been used, measured, and found to have faults worth writing down.
 
 Run the hook suite with:

@@ -13,11 +13,3 @@ Rules out: Any lookup that treats a primary key as an identity claim.
 Level: 2, approved by the human.
 -->
 
-## 2026-08-08 — Our security skill is named `security-gate`, not `security-review`
-What: `.claude/skills/security-review/` renamed to `security-gate/`, frontmatter name with
-      it. A public interface name changed: the skill is invoked under the new name.
-Why: Claude Code ships a built-in `security-review`. Before the rename one entry of that
-      name was listed, ours; after it, both are listed separately — the collision was real.
-      Which one a call resolved to was never tested, and no substitution was ever observed:
-      in the failed run none of our skills loaded. Precaution, not a fix for a proven bug.
-Rules out: Any claim that our skill performs the review. It only decides when to run it.

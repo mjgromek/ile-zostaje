@@ -10,7 +10,7 @@ cannot collide with the built-in. The review is never run by whoever wrote the c
 **No agent can execute `/security-review`** — it is a slash command and no `tools:` line
 here carries `SlashCommand`. A step no role can perform is a gate-shaped hole that
 self-certifies, so the review goes to `checker` and the built-in goes to the human, who can
-type it. Rationale and rejected alternatives: R2-F22 in `docs/RUN-001-FINDINGS.md`.
+type it. Rationale and rejected alternatives: R2-F22 in `archiwum ustaleń w mjgromek/easydev-agentic-pipeline`.
 
 ## Triggers
 

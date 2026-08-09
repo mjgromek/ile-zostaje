@@ -10,7 +10,7 @@ Port 0 (the default) asks the OS for a free port; the chosen one is printed to
 stdout as a single line before serving. A fixed default was worse than noisy: when
 another process already held it, the suite probed that process instead and reported
 a hook failure that was really the wrong server answering — and could as easily have
-reported PASS against it. See docs/RUN-001-FINDINGS.md, F6.
+reported PASS against it. See archiwum ustaleń w mjgromek/easydev-agentic-pipeline, F6.
 """
 import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer

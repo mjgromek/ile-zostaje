@@ -216,7 +216,7 @@ assert_allowed 7 "$d" "fix: correct f with no decision record"
 # 8  an AWS access key in an added line.
 #    Built from two pieces so the fixture is a real match once assembled but never
 #    a literal in this file — otherwise the scanner refuses its own test suite.
-#    See docs/RUN-001-FINDINGS.md, F2.
+#    See archiwum ustaleń w mjgromek/easydev-agentic-pipeline, F2.
 d=$(new_repo 8)
 aws_key="AKIA""AAAAAAAAAAAAAAAA"
 stage "$d" config.txt "key = $aws_key"
@@ -358,7 +358,7 @@ assert_refused 28 "$d" "feat: cap the body, coverage undeclared"
 printf '\nverify-deploy and probe     cases 11-16, 22-23\n'
 
 # Ports come from the OS, never from a constant. A fixed port silently tests
-# whatever else already holds it. See docs/RUN-001-FINDINGS.md, F6.
+# whatever else already holds it. See archiwum ustaleń w mjgromek/easydev-agentic-pipeline, F6.
 started_port=""
 
 start_server() { # mode -> sets started_port to the port the OS assigned
