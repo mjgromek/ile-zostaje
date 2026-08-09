@@ -121,3 +121,21 @@ Why: A new engine capability, not a label: it inverts the cited rates and meets 
 Rules out: A "typical multiplier", any parallel formula, and a slice 2 too big to verify.
 Level: 1 under the grant; named in the summary as instructed, not absorbed silently.
 
+## 2026-08-09 — The lede is deleted as an ELEMENT, not as one contract's string
+What: `app.lede` goes for all three contracts and both languages, not only the zlecenie
+     text the stakeholder quoted. The designer flagged the ambiguity rather than guessing.
+Why: Their reason was "to wiadomo" — it states the obvious — and that is contract-
+     independent. Deleting one string while two others say the same obvious thing would
+     honour the words and miss the point. Cheap now, expensive after the builder starts.
+Rules out: A per-contract lede returning later under another key.
+Level: 1 under the grant. Reversible in one commit if the reading was wrong.
+
+## 2026-08-09 — 50% copyright KUP is modelled on dzieło only, and says so on screen
+What: Slice 2 offers the 20/50% copyright question on umowa o dzieło. Creative work on
+     zlecenie can also carry 50%; that is out of this slice and NAMED on screen.
+Why: The slice's criteria scope KUP to dzieło, and widening it silently would be the
+     hidden-branch defect criterion 4 exists to catch. Saying "this is what we cover" is
+     honest; showing 20% to a creative on zlecenie without a word is not.
+Rules out: Silent under-reporting for zlecenie, and a bare percentage with no condition.
+Level: 1 under the grant. In BACKLOG with its urgency condition.
+

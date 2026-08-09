@@ -70,9 +70,9 @@ confirmed on origin. Details in `.agent/DECISIONS.md` and `.agent/LAST_CHECK.md`
 
 ## In flight
 
-`designer` — two or three structurally different layouts for the slice 2 screen, rendered
-on the real screen for the stakeholder to pick from. theme-factory is CLOSED: variant A,
-the shipped type, won. **The pipeline stops at the pick.** No interface code before it.
+`builder` — slice 2 against `.agent/DESIGN-SLICE-2.md`, which is authoritative and
+persisted. Design is CLOSED: type variant A, layout B, the lede deleted as an element, the
+50% KUP question scoped to dzieło and named on screen. Nothing is reserved for slice 3.
 
 ## Blocked
 
@@ -111,3 +111,5 @@ verbatim, in `.agent/LAST_CHECK.md`, which is overwritten when slice 2 is checke
   annual cap") fired when KUP arrived. Builder fixes it with the new KUP citations.
 - 2026-08-09 23:29 — three layouts rendered outside the repo; stopped for the pick.
   R4-F9 logged: no agent write boundary allows for rendering, resolved via scratchpad.
+- 2026-08-09 23:54 — stakeholder chose layout B and cut the lede; spec persisted to
+  .agent/DESIGN-SLICE-2.md. Toggle split to slice 3. Builder starts.

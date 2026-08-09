@@ -25,6 +25,9 @@ Format:
   citable. Adding a year is a data file, not code; if it is not, invariant one has broken.
 - Side-by-side comparison of the three contract types on one gross figure — Urgent when:
   anyone is observed re-entering the same amount to compare contracts.
+- 50% copyright KUP on umowa zlecenie, not only on dzieło — Urgent when: a user doing
+  creative work on a zlecenie reports the net as too low, or any slice widens KUP. Slice 2
+  scopes it to dzieło and says so on screen rather than under-reporting in silence.
 - The shipped typography carries an ACCEPTED weakness, in the winning variant's own words:
   two grotesques, so the point of view rests on size and weight discipline alone. This is a
   trade the stakeholder chose with the alternatives in front of them, NOT a defect and not

@@ -1,11 +1,11 @@
 SLICE 2 — Zlecenie and dzieło, student status, on layout B
-NOW: Designer is adapting variant B: the cut lede, and where the brutto/netto toggle will sit in slice 3   [23:39]
+NOW: Builder is researching and citing the zlecenie and dzieło rates, then red/green on layout B   [23:54]
 
 [x] Slice 2 and its nine acceptance criteria written to STATE.md
 [x] theme-factory: stakeholder chose type variant A, the shipped control
 [x] Three layouts rendered; stakeholder chose B and cut the lede sentence
-[x] Brutto/netto toggle split out into slice 3 — named, not absorbed
-[ ] Designer: variant B without the lede, and the reserved place for the toggle
+[x] Brutto/netto toggle split out into slice 3 — named, criteria written, not dropped
+[x] Designer: variant B spec persisted to .agent/DESIGN-SLICE-2.md
 [ ] Builder: cited rates for zlecenie and dzieło, student ZUS exemption, KUP 20/50
 [ ] Builder: failing tests as test:, then implementation as feat:
 [ ] Checker: nine criteria in a real browser, v0.1.0 regression, held-out, mutation
