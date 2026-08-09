@@ -62,3 +62,14 @@ Rules out: A stakeholder review before the builder starts. The reversal risk is 
      no-green/no-red call, named by the designer as the one item most likely rejected.
 Level: 2 by autonomy.md — taken at Level 1 under the run-4 brief's explicit grant.
 
+## 2026-08-09 — The engine models one payroll case, and models the relief limit properly
+What: Slice one computes a single employment relationship with standard koszty uzyskania
+     przychodu and a filed PIT-2. Above the monthly share of the 85 528 zł relief limit
+     the excess is taxed, with ZUS deductible only in the taxed proportion.
+Why: Those three assumptions cover almost every young person on umowa o pracę. The limit
+     is modelled rather than assumed away because giving a 20 000 zł/month 25-year-old a
+     zero tax bill is a plain correctness bug, and the limit is data the brief required.
+Rules out: Multi-employer months, podwyższone KUP, no-PIT-2 payroll, art. 83 reduction of
+     the health contribution to the tax advance. Each is a later slice, none is silent.
+Level: 1, do and report, under the run-4 grant.
+
