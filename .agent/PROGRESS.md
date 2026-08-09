@@ -1,14 +1,12 @@
 SLICE 1 — Umowa o pracę: monthly gross in, real net out, both languages
-NOW: Builder done: 13 tests green, dev server serving on :5173 — handing to the checker   [21:45]
+NOW: Builder fix 1/2 — citation quotes checked against the live pages, three quotes not verbatim   [22:10]
 
-[x] Discovery from the brief: PROJECT.md filled, stakeholder language Polish
-[x] Slice one and its eight acceptance criteria written to STATE.md
-[x] Designer: spec persisted to .agent/DESIGN-SLICE-1.md, accepted and authoritative
-[x] Builder: 2026 rate data, every value with an official source and effective date
-[x] Builder: failing engine test committed as test:
-[x] Builder: engine committed as feat:, eight vitest cases green
-[x] Builder: failing browser specs for criteria 1, 3, 5, 6, 7 committed as test:
-[x] Builder: the screen, PL/EN, localStorage, committed as feat:
-[ ] Checker: drives a real browser against all eight criteria, held-out suite, mutation probe
-[ ] Fix cycles if findings — two attempts per finding, then escalate that one
-[ ] Phase summary, then push
+[x] Discovery, PROJECT.md, slice one and its eight criteria
+[x] Designer: spec accepted, persisted to .agent/DESIGN-SLICE-1.md
+[x] Builder: 2026 rates cited, engine and screen, test: then feat:
+[x] Checker: PASS on all eight, 1xP1 + 3xP2, held-out delta 0, mutation probe caught
+[x] P2-1 fixed by the orchestrator: STATE.md was stale about what shipped
+[ ] Builder fix 1/2: tap targets, the chorobowa quote, the provenance labels
+[ ] Checker re-verifies the three fixes and that nothing regressed
+[ ] Push main and tag v0.1.0, both confirmed with git ls-remote
+[ ] Phase summary
