@@ -1,375 +1,214 @@
+<h1 align="center">Ile zostaje</h1>
+
 <p align="center">
-  <img src="assets/easydev-logo.png" alt="EasyDev — Agentic Engineering Pipeline" width="760" />
+  <strong>Wpisujesz, ile masz brutto. Widzisz, ile naprawdę wpłynie na konto.</strong><br />
+  Kalkulator wynagrodzeń dla młodych i studentów w Polsce.
 </p>
 
 <p align="center">
-  <strong>A bounded-autonomy engineering pipeline for Claude Code.</strong><br />
-  Plan → Build → Review → Verify → Ship.
-</p>
-
-<p align="center">
-  <img alt="Status" src="https://img.shields.io/badge/status-V0-12b8b0?style=flat-square" />
-  <img alt="Agents" src="https://img.shields.io/badge/agents-4-12b8b0?style=flat-square" />
-  <img alt="Skills" src="https://img.shields.io/badge/skills-8-12b8b0?style=flat-square" />
-  <img alt="Deterministic hooks" src="https://img.shields.io/badge/hooks-4-12b8b0?style=flat-square" />
-  <img alt="Claude Code" src="https://img.shields.io/badge/runtime-Claude%20Code-30363d?style=flat-square" />
-</p>
-
-<p align="center">
-  You describe the problem. EasyDev turns it into vertical slices, delegates implementation,
-  independently checks the result, and interrupts you only when a decision genuinely needs a human.
+  <img alt="Wersja" src="https://img.shields.io/badge/wersja-v0.1.0-e0a23c?style=flat-square" />
+  <img alt="Rok podatkowy" src="https://img.shields.io/badge/dane-2026-e0a23c?style=flat-square" />
+  <img alt="Języki" src="https://img.shields.io/badge/j%C4%99zyk-PL%20%2F%20EN-e0a23c?style=flat-square" />
+  <img alt="Bez serwera" src="https://img.shields.io/badge/dane-tylko%20w%20przegl%C4%85darce-4a2f4a?style=flat-square" />
+  <img alt="Licencja" src="https://img.shields.io/badge/licencja-MIT-4a2f4a?style=flat-square" />
 </p>
 
 ---
 
-## Why EasyDev exists
+## Problem
 
-AI coding agents can produce a lot of code quickly. The harder problem is making sure they do the **right work**, verify it independently, avoid silent failures, and know when to stop and ask.
+Dostajesz ofertę: **8 000 zł brutto**. I dalej nie wiesz, czy Cię na to stać.
 
-EasyDev was designed around failures observed in a real project:
+Bo brutto to nie jest liczba, którą wydajesz. Między nią a Twoim kontem stoją cztery
+składki i zaliczka na podatek, każda liczona od innej podstawy, w określonej kolejności.
+Jeśli masz mniej niż 26 lat, jedna z nich znika. Jeśli jesteś studentem na zleceniu,
+znika ich znacznie więcej. Kalkulatory w sieci albo o to nie pytają, albo pytają
+o wszystko naraz i pokazują tabelę, której nikt nie czyta.
 
-- features reported as complete even though they did not exist;
-- green test suites that missed a serious session-security flaw;
-- findings produced by unverified measurement tools;
-- scripted edits that exited successfully while changing nothing;
-- repeated design reversals because decisions were not recorded;
-- stale deployments that passed a health check from the wrong revision.
-
-The result is intentionally small: **4 agents, 8 skills, 4 deterministic hooks, and an explicit autonomy policy**.
-
-> EasyDev is not trying to replace engineering judgment. It is trying to spend that judgment only where it matters.
+Ten projekt odpowiada na jedno pytanie: **ile realnie zostaje mi w kieszeni co miesiąc** —
+a potem ile z tego zostaje, kiedy zapłacisz czynsz i kupisz jedzenie.
 
 ---
 
-## How it works
-
-```mermaid
-flowchart LR
-    A[Problem / feature] --> B[Orchestrator]
-    B --> C[Vertical slice]
-    C --> D[Builder]
-    D --> E[Deterministic hooks]
-    E --> F[Checker]
-    F -->|pass| G[Slice complete]
-    F -->|important finding| D
-    F -->|material decision| H[Human escalation]
-    G --> B
-```
-
-EasyDev separates responsibilities so the same agent does not quietly implement, review, and approve its own work.
-
-| Layer | Responsibility | Key constraint |
-| --- | --- | --- |
-| **Orchestrator** | Sequencing, slicing, state, delegation, summaries | Does not write product code or tests |
-| **Designer** | Interface form, then aesthetic direction, as one proposal | Read-only; cannot implement what it proposes |
-| **Builder** | Implements one vertical slice end-to-end | Cannot declare its own slice complete; does not choose form |
-| **Checker** | Reviews acceptance criteria and exercises the artifact | Read-only; cannot fix what it reviews |
-| **Hooks** | Enforce deterministic rules outside the model | Fail closed when an invariant is violated |
-| **Human** | High-impact decisions only | Not used for routine implementation choices |
+<p align="center">
+  <img src="assets/zrzut-etat-ulga.jpg" alt="Ekran kalkulatora: 8 000 zł brutto na umowie o pracę z ulgą dla młodych daje 6 281,91 zł na konto" width="900" />
+</p>
 
 ---
 
-## Quick start
+## Jak to czytać
 
-```bash
-git clone https://github.com/mjgromek/easydev-agentic-pipeline.git my-project
-cd my-project
+Ekran nie zaczyna od tabeli. Zaczyna od **jednej liczby** — tej, która wpłynie na konto.
+Reszta tłumaczy, skąd się wzięła różnica.
 
-git config core.hooksPath hooks
-claude
-```
+**Pasmo** pokazuje proporcję. Jego szerokość *jest* Twoim brutto, więc to, że kawałki
+sumują się do całości, jest faktem geometrycznym, a nie obietnicą.
 
-### 1. Start Claude Code inside the clone
+**Drabina** odejmuje po kolei, z bieżącą resztą po prawej — bo polska lista płac naprawdę
+liczy się sekwencyjnie, a nie jako worek procentów. Przy 8 000 zł brutto na etacie:
 
-The session working directory must be **inside the repository**. Claude Code enumerates agents and skills when the session starts.
+| Krok | Ile | Zostaje |
+| --- | ---: | ---: |
+| Brutto | | **8 000,00 zł** |
+| Składka emerytalna — 9,76% od 8 000,00 zł | − 780,80 zł | 7 219,20 zł |
+| Składka rentowa — 1,5% od 8 000,00 zł | − 120,00 zł | 7 099,20 zł |
+| Składka chorobowa — 2,45% od 8 000,00 zł | − 196,00 zł | 6 903,20 zł |
+| Składka zdrowotna — 9% od 6 903,20 zł, po odjęciu ZUS | − 621,29 zł | 6 281,91 zł |
+| Zaliczka na PIT — 12% od 6 653,00 zł, minus 300,00 zł kwoty zmniejszającej | − 498,00 zł | **5 783,91 zł** |
 
-If the session starts one directory above the clone, `.claude/` will not be loaded and the custom agents/skills may appear to be missing. Definitions added after a session begins also require a restart.
-
-### 2. Run the preflight check
-
-Before any project work, confirm the available agent types include:
-
-```text
-orchestrator
-builder
-checker
-```
-
-If they are missing, restart Claude Code from inside the repository.
-
-### 3. Wire the Git hooks
-
-```bash
-git config core.hooksPath hooks
-```
-
-A clone does not configure `core.hooksPath` automatically.
-
-### 4. Start with the orchestrator
-
-Ask the orchestrator to inspect the repository and state the next action. It should own sequencing from that point onward.
+Włącz **„mam mniej niż 26 lat"** i ostatnia linia znika: PIT spada do zera, a na konto
+wpływa **6 281,91 zł**. To jest 498 zł miesięcznie różnicy, o której wiele osób w tym
+wieku po prostu nie wie.
 
 ---
 
-## The development loop
+## Zasady, na których to stoi
 
-Each phase is a **vertical slice**: something small enough to build and verify end-to-end, but meaningful enough to produce user-visible or system-visible value.
+**Twoje dane nie opuszczają przeglądarki.** Nie ma serwera, konta, logowania ani analityki.
+To, co wpiszesz, siedzi w `localStorage` Twojej przeglądarki i nigdzie indziej — a interfejs
+mówi Ci to wprost, zamiast liczyć na to, że przeczytasz politykę prywatności.
 
-```text
-Discover
-   ↓
-Slice
-   ↓
-Build with tests
-   ↓
-Run deterministic checks
-   ↓
-Independent review + artifact verification
-   ↓
-Fix important findings (bounded loop)
-   ↓
-Record decisions
-   ↓
-Ship / continue
-```
+**Każda stawka ma cytowane źródło urzędowe.** Nie „9,76% bo tak" — tylko 9,76% z datą
+wejścia w życie i linkiem do ZUS albo podatki.gov.pl, rozwijalnym na ekranie. Stawka,
+której nie da się ocytować, nie wchodzi do aplikacji.
 
-A completed slice produces a compact report rather than a long transcript:
+**Rok podatkowy jest danymi, nie kodem.** Stawki żyją w pliku danych z kluczem roku.
+Reguła podatkowa zaszyta w gałęzi `if` jest w tym projekcie traktowana jako defekt,
+a nie jako skrót — bo przepisy zmieniają się co roku, a kod przepisany na kolanie w grudniu
+jest tym, co psuje takie kalkulatory.
 
-```text
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅  SLICE 3 COMPLETE — Warranty Tracker
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-🎁 WHAT YOU CAN DO NOW
-   Add an appliance and see how much cover is left.
-
-🔍 HOW I KNOW IT WORKS
-   Added "Fridge", restarted the app, and confirmed persistence.
-
-📝 FILES CHANGED
-   src/warranty/models.py
-   src/warranty/cli.py
-   tests/test_models.py
-
-⚙️  DECIDED     Dates stored as ISO strings
-📥 DEFERRED    CSV import
-🙋 NEEDS YOU   Nothing
-➡️  NEXT        Warn 30 days before expiry
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-The report must name what was actually exercised. Vague statements such as `all tests pass` are not treated as sufficient evidence.
+**To jest szacunek, nie porada podatkowa.** Ekran mówi to sam. Nie zastąpi księgowej,
+nie złoży PIT-u i nie jest niczym, co urząd potraktuje jako wiążące.
 
 ---
 
-## Agents
+## Co działa dzisiaj
 
-| Agent | Owns | Cannot do |
-| --- | --- | --- |
-| `orchestrator` | Sequencing, slicing, state, delegation, final slice summary | Write product code or tests |
-| `designer` | Interface form from the data's shape, then palette and type, as one Level 2 proposal | **Write anything** — it specifies, the builder implements |
-| `builder` | One slice end-to-end: failing test first, then minimum implementation | Declare a slice complete; write `.agent/` state; choose the interface's form |
-| `checker` | Review against acceptance criteria, then exercise the artifact | **Write anything** — it has no write access |
-
-### Why the checker is read-only
-
-A reviewer that can silently repair the code can also make its own verdict appear correct. EasyDev keeps the checker read-only so its job stays simple: **observe, measure, report**.
-
----
-
-## Skills
-
-| Skill | Purpose | Hard cap |
-| --- | --- | --- |
-| `discovery` | One-time intake; creates `PROJECT.md` and the first slice | 5 rounds × 4 questions |
-| `grill-me` | Resolves one ambiguity that would otherwise be guessed | 1 round, 3–5 questions |
-| `tdd` | Red → green → refactor for the current slice | Acceptance criteria + at most 2 implied guards |
-| `ponytail` | Simplicity gate over a diff | One verdict + one-line reason per item |
-| `architecture-check` | Boundary/scaling review when module boundaries move | At most 2 `FIX NOW` items |
-| `security-gate` | Decides whether the built-in security review is warranted | Risk-triggered; otherwise declines in one line |
-| `theme-factory` | Establishes palette and typography once on the real UI | Once per project; max 2 re-render rounds |
-| `frontend-design` | Visual direction when UI work is in scope | UI slices only |
-
-The skills are intentionally bounded. They exist to improve decisions, not to create endless analysis loops.
-
----
-
-## Deterministic hooks
-
-Model instructions are useful. Some rules are important enough to enforce outside the model.
-
-| Hook | Refuses / verifies |
+| | Stan |
 | --- | --- |
-| `hooks/pre-commit` | Staged lines matching one of seven secret patterns; a staged `.agent/STATE.md` citing a bare commit SHA that does not resolve, or exceeding its 120-line cap |
-| `hooks/commit-msg` | `feat:` / `fix:` without a preceding overlapping `test:`; `feat:` without staged `.agent/DECISIONS.md` |
-| `hooks/verify-deploy.sh` | Declaring deploy success before the expected revision is live or when a live assertion fails |
-| `hooks/probe.sh` | Silent production regressions between deployments |
+| **Umowa o pracę** — brutto → netto, pełne rozbicie | ✅ `v0.1.0` |
+| **Ulga dla młodych** (do 26 lat) | ✅ `v0.1.0` |
+| **Polski i angielski**, cały interfejs | ✅ `v0.1.0` |
+| **Dane w localStorage**, przeżywają przeładowanie | ✅ `v0.1.0` |
+| **Źródła z datami wejścia w życie** | ✅ `v0.1.0` |
+| Umowa zlecenie i o dzieło, status studenta | 🔨 w budowie |
+| Jednostki: godzina, tydzień, miesiąc, rok | 📋 zaplanowane |
+| **Ile zostaje po czynszu i jedzeniu** | 📋 zaplanowane |
+| Publiczny adres | 📋 zaplanowane |
 
-The secret check can be intentionally overridden with `--no-verify`. Other gates are designed around explicit postconditions rather than trusting command exit codes alone.
+Tabela jest szczera celowo. Dopóki ostatnia warstwa nie powstanie, to jest kalkulator
+netto — a sam kalkulator netto to towar, którego w sieci jest sto.
 
----
-
-## Four guardrails
-
-### 1. The reviewer must exercise the artifact
-
-A diff can look correct while the feature is absent or unreachable. The checker validates the acceptance criteria against the running artifact where possible.
-
-### 2. Verify the instrument before trusting the observation
-
-A test, script, screenshot, metric, or visual check can itself be wrong. Findings should state **how they were measured**.
-
-### 3. Exit code is not proof
-
-A command can exit `0` and still fail to produce the intended state. EasyDev checks the postcondition when the result matters.
-
-### 4. Decisions live in one place
-
-Material project decisions are recorded in `.agent/DECISIONS.md`; a feature commit must stage that record. The goal is to stop already-settled decisions from drifting between slices.
+**Poza zakresem, świadomie:** B2B i działalność gospodarcza, składanie PIT-u, konta
+użytkowników, jakikolwiek rok podatkowy poza tym, który jest w danych.
 
 ---
 
-## Bounded autonomy
+## Uruchomienie lokalnie
 
-EasyDev uses four autonomy levels.
-
-| Level | Example | Behaviour |
-| --- | --- | --- |
-| **0 — automatic** | Implementation matching established patterns, tests, docs | Act; report later |
-| **1 — do and report** | Small dependency, internal interface change | Act; include in slice summary |
-| **2 — propose and wait** | Schema migration, auth change, user-visible design direction | Stop; give one recommendation |
-| **3 — explicit approval** | Production deletion, secrets, billing, irreversible effects | Never proceed without a direct yes |
-
-The canonical matrix and escalation format live in `.claude/policies/autonomy.md`, alongside
-three companion policies: `summary.md` (the phase report and its refusal conditions),
-`findings.md` (how defects in the pipeline itself are recorded), and `progress.md` (the live
-board a human can read while a delegated run is still working). Each file declares its own
-line cap in its first line, so the number lives with the file it governs.
-
-The intended human interface is simple: **routine decisions disappear; material decisions become explicit**.
-
----
-
-## Deployment verification
-
-`verify-deploy.sh` and `probe.sh` share assertions through `hooks/lib/live-assertions.sh`.
-
-| Variable | Required | Behaviour if unset |
-| --- | --- | --- |
-| `BASE_URL` | yes | Fails: nothing can be asserted |
-| `PROTECTED_PATH` | yes | Fails: protected-access behavior cannot be verified |
-| `HEALTH_PATH` | no | Defaults to `/health` |
-| `RESOURCE_PATH` | no | Resource assertion skipped |
-| `TEST_USER`, `TEST_PASS` | no | Login/resource assertions skipped |
-| `LOGIN_PATH` | no | Login assertion skipped |
-| `EXPECTED_REVISION` | `verify-deploy` only | Revision gate skipped |
-| `VERSION_PATH` | no | Defaults to `/version` |
-| `REVISION_TIMEOUT` | no | Defaults to `120s` |
-
-Example continuous probe:
-
-```sh
-*/10 * * * * BASE_URL=https://app.example.com PROTECTED_PATH=/api/me \
-  /path/to/hooks/probe.sh >> /var/log/probe.log 2>&1
-```
-
-On Railway, `BASE_URL` is the public domain, `EXPECTED_REVISION` can be the deployment SHA, and `PROTECTED_PATH` remains required. The scripts themselves are platform-agnostic and operate against a URL.
-
----
-
-## What EasyDev deliberately does not do
-
-V0 intentionally excludes:
-
-- branch / pull-request automation;
-- MCP servers;
-- dashboard or web UI;
-- vector memory / embedding stores;
-- task queues;
-- parallel agent swarms;
-- a fourth specialist agent.
-
-Those ideas belong in `.agent/BACKLOG.md` only when a real project demonstrates a concrete need for them.
-
-> **Default rule:** if V0 works without another abstraction, do not add the abstraction.
-
----
-
-## Current status
-
-**V0 is cut and has now been driven on a real build.**
-
-- The four hooks are covered by **19 fail-on-purpose cases** in `./hooks/test/run-hook-tests.sh`.
-- The hook test harness builds throwaway repositories and checks refusal cases against resulting Git state rather than trusting exit codes alone.
-- The **builder → checker loop has been run end-to-end**, across multiple slices of a real project, with the checker reproducing each failing test before accepting its fix.
-- That validation run produced its own defect log. Nineteen findings against the pipeline itself are recorded in `archiwum ustaleń w mjgromek/easydev-agentic-pipeline`, several of them fixed here; the rest carry an urgency condition in `.agent/BACKLOG.md`.
-- The pipeline is therefore evidenced, not production-proven. It has been used, measured, and found to have faults worth writing down.
-
-Run the hook suite with:
+Potrzebujesz Node 20.19+ albo 22.12+ (wymóg Vite 7) i npm. Budowane i sprawdzane
+na Node 25.9.0.
 
 ```bash
-./hooks/test/run-hook-tests.sh
+git clone https://github.com/mjgromek/ile-zostaje.git
+cd ile-zostaje
+npm install
+npm run dev
 ```
 
-The original design specification remains in `docs/DESIGN.md` as a historical record. Runtime behavior is defined by the implementation when the two differ.
+Aplikacja stanie na `http://localhost:5173`.
 
----
-
-## Validation roadmap
-
-The next milestone is not more framework work. It is a real project.
-
-```text
-V0 pipeline
-    ↓
-real project using EasyDev
-    ↓
-measure friction + human interventions
-    ↓
-fix only demonstrated problems
-    ↓
-V0.2
+```bash
+npm test        # silnik: przypadki liczone ręcznie, z podanym źródłem każdej liczby
+npm run e2e     # prawdziwa przeglądarka, przez Playwright
+npm run build   # produkcyjny build
 ```
 
-Useful evidence to collect during validation:
+---
 
-- active human interventions per slice;
-- failed review / verification cycles;
-- defects caught before release;
-- decisions escalated vs handled autonomously;
-- cases where the pipeline added unnecessary process.
+## Jak to jest zbudowane
 
-This is what should decide V1 — not speculative feature ideas.
+TypeScript, Vite, React. Bez frameworka do stanu, bez backendu, bez zależności, które
+nie zarobiły na swoje miejsce.
+
+```
+src/engine/       silnik liczący — czysty, bez UI
+src/engine/rates-2026.ts   stawki na rok, każda ze źródłem i datą
+src/i18n/         wszystkie napisy, PL i EN
+src/components/   pasmo, drabina, karta wejścia, panel źródeł
+src/state/        localStorage i nic poza nim
+e2e/              testy w prawdziwej przeglądarce
+```
+
+Silnik nie wie nic o interfejsie, a interfejs nie liczy podatków. Dzięki temu przypadki
+testowe da się policzyć ręcznie na kartce i porównać co do grosza — i tak właśnie są
+sprawdzane.
 
 ---
 
-## Design principles
+## Jak to powstaje
 
-**Small by default.** Four agents are easier to reason about than an agent hierarchy, and the fourth was added only after a run produced a mistake the other three could not catch.
+Projekt jest budowany pipeline'em agentowym
+[EasyDev](https://github.com/mjgromek/easydev-agentic-pipeline): sekwencjonowanie
+i cięcie na pionowe kawałki, budowa test-first, niezależna weryfikacja na żywej aplikacji,
+i eskalacja do człowieka tylko tam, gdzie decyzja naprawdę jest jego.
 
-**Independent evidence beats self-report.** The builder is not the verifier.
+Dwie zasady stamtąd widać w tym repozytorium gołym okiem:
 
-**Deterministic where possible.** Hooks enforce invariants that should not depend on prompt compliance.
+- **Recenzent uruchamia produkt, nie czyta diffa.** Każdy kawałek jest sprawdzany
+  w prawdziwej przeglądarce — liczby są dodawane ręcznie i porównywane z tym, co widać
+  na ekranie. „Testy przechodzą" jest tu odrzucaną odpowiedzią.
+- **Zanim uwierzysz obserwacji, sprawdź przyrząd.** Defekty samego pipeline'u są
+  zapisywane osobno, w `RUN-004-FINDINGS.md`, razem z tym, czym je zmierzono. W tym
+  przebiegu trzy różne narzędzia zaraportowały stan, którego nie miały — każde z nich
+  o mało nie wyprodukowało błędu w produkcie, którego tam nie było.
 
-**Escalate impact, not uncertainty.** Reversible implementation details stay autonomous; consequential decisions reach the human.
-
-**Real projects drive the roadmap.** New machinery must earn its place by solving an observed failure mode.
+Dokumentacja szablonu, na którym to stoi, została w `docs/`.
 
 ---
 
-## Credits
+## Licencja
 
-`tdd` and `grill-me` are adapted from [mattpocock/skills](https://github.com/mattpocock/skills).
+MIT — [`LICENSE`](LICENSE).
 
-`frontend-design` and `theme-factory` are adapted from [anthropics/skills](https://github.com/anthropics/skills).
-
-The `ponytail` simplicity ladder is adapted from [dietrichgebert/ponytail](https://github.com/dietrichgebert/ponytail) (MIT).
-
-Each vendored skill keeps its own license file. These are tightened forks with no automatic update path; upstream fixes do not arrive automatically.
+Stawki i progi pochodzą z publicznych materiałów ZUS i Ministerstwa Finansów; każda
+pozycja ma link i datę w panelu „Skąd te liczby?" w aplikacji.
 
 ---
 
 <p align="center">
-  <strong>EasyDev</strong><br />
-  Less prompting. More verified progress.
+  <sub><strong>Ile zostaje</strong> · wynik jest szacunkiem, nie poradą podatkową</sub>
 </p>
+
+---
+
+<details>
+<summary><strong>English</strong></summary>
+
+<br />
+
+**Ile zostaje** ("what's left") is a salary calculator for young people and students in
+Poland. You enter your gross pay and your contract type, and it shows the real amount that
+reaches your bank account — then, once that layer ships, what remains after rent and food.
+
+**Why it exists.** Gross pay is not the number you spend. Four separate contributions and
+an income-tax advance sit between the two, each computed on a different base, in a fixed
+order. Under 26, one of them disappears. A student on a *umowa zlecenie* loses far more
+than that. Most calculators either never ask, or ask everything at once and print a table
+nobody reads.
+
+**Principles.** Your data never leaves the browser — no backend, no account, no analytics;
+entries live in `localStorage` and the interface says so. Every rate carries a cited
+official source with an effective date, and a rate that cannot be cited does not ship. The
+tax year is data, not code: a rule buried in an `if` branch is treated as a defect. The
+result is an estimate, not tax advice.
+
+**Today** (`v0.1.0`): employment contract (*umowa o pracę*), the under-26 relief, full
+Polish and English interface, localStorage persistence, cited sources. **In progress:**
+*zlecenie* and *dzieło* with student status. **Planned:** hour/week/month/year input units,
+the rent-and-food leftover layer, and a public URL.
+
+Run it with `npm install && npm run dev`. Tests: `npm test` for the engine,
+`npm run e2e` for a real browser.
+
+</details>
