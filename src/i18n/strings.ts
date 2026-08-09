@@ -57,6 +57,16 @@ const pl: Table = {
   'sources.intro':
     'Stawki na rok {year} z oficjalnych źródeł. Każda pozycja ma datę wejścia w życie.',
   'sources.effective': 'obowiązuje od {date}',
+  // The provenance list names things the ladder never shows, so §7's table has
+  // no key for them. Reusing `line.pit` put four different numbers under one
+  // label; a list whose one job is "where did this come from" cannot do that.
+  'sources.pit.rate1': 'Pierwsza stawka PIT',
+  'sources.pit.rate2': 'Druga stawka PIT',
+  'sources.pit.threshold': 'Próg drugiej stawki PIT (rocznie)',
+  'sources.pit.reducingYear': 'Kwota zmniejszająca podatek (rocznie)',
+  'sources.pit.reducingMonth': 'Kwota zmniejszająca podatek (miesięcznie)',
+  'sources.pit.costs': 'Koszty uzyskania przychodu (miesięcznie)',
+  'sources.relief.limit': 'Limit ulgi dla młodych (rocznie)',
   'empty.answer': 'Wpisz kwotę brutto, a pokażemy, ile zostaje.',
   'empty.band': 'Tu pojawi się podział twojej pensji.',
   'error.range': 'Wpisz kwotę od 0 do 1 000 000 zł.',
@@ -111,6 +121,13 @@ const en: Table = {
   'sources.summary': 'Where do these numbers come from?',
   'sources.intro': '{year} rates from official sources. Each carries its effective date.',
   'sources.effective': 'in force from {date}',
+  'sources.pit.rate1': 'First income-tax rate',
+  'sources.pit.rate2': 'Second income-tax rate',
+  'sources.pit.threshold': 'Second-rate threshold (annual)',
+  'sources.pit.reducingYear': 'Tax-reducing amount (annual)',
+  'sources.pit.reducingMonth': 'Tax-reducing amount (monthly)',
+  'sources.pit.costs': 'Deductible costs (monthly)',
+  'sources.relief.limit': 'Under-26 relief limit (annual)',
   'empty.answer': "Enter a gross amount and we'll show what's left.",
   'empty.band': 'Your pay breakdown will appear here.',
   'error.range': 'Enter an amount between 0 and 1,000,000 zł.',
