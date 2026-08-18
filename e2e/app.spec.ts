@@ -485,3 +485,108 @@ test('P1-E — a chip stops claiming a figure the entry has moved past', async (
   await expect(net).not.toHaveText(/4\D?711,43/);
   await expect(chip, 'the 6 000 zł chip survived the entry becoming 20 000 zł').toHaveCount(0);
 });
+
+// P1-F. DESIGN-SLICE-2 §8: "contract, student and copyright changes announce
+// immediately, one utterance each, never debounced." Latency is measured in the
+// page, from the event's own timestamp — a round trip through the test runner
+// would be counted as announcement delay.
+
+type Utterance = { dt: number; text: string };
+type ProbeWindow = { __t0: number; __live: { t: number; text: string }[] };
+
+/** Announced at once means well inside the 500 ms typing debounce. */
+const IMMEDIATE_MS = 250;
+
+async function installLiveProbe(page: Page) {
+  await page.evaluate(() => {
+    const w = window as unknown as ProbeWindow;
+    const region = document.querySelector('[role="status"]');
+    if (region === null) throw new Error('no role="status" region on the page');
+    w.__t0 = performance.now();
+    w.__live = [];
+    let last = region.textContent ?? '';
+    new MutationObserver(() => {
+      const text = region.textContent ?? '';
+      if (text === last) return;
+      last = text;
+      w.__live.push({ t: performance.now(), text });
+    }).observe(region, { childList: true, characterData: true, subtree: true });
+    const mark = () => {
+      w.__t0 = performance.now();
+      w.__live = [];
+    };
+    document.addEventListener('click', mark, true);
+    document.addEventListener('input', mark, true);
+  });
+}
+
+/** Every non-empty text the live region held since the last click or keystroke. */
+async function utterances(page: Page, settleMs = 1_200): Promise<Utterance[]> {
+  await page.waitForTimeout(settleMs);
+  return page.evaluate(() => {
+    const w = window as unknown as ProbeWindow;
+    return w.__live
+      .filter((entry) => entry.text.trim() !== '')
+      .map((entry) => ({ dt: entry.t - w.__t0, text: entry.text }));
+  });
+}
+
+function latency(said: Utterance[]): number {
+  return said[0]?.dt ?? Number.POSITIVE_INFINITY;
+}
+
+function announcedAtOnce(said: Utterance[], what: string) {
+  expect(said, `${what}: ${said.length} utterances, not one — ${JSON.stringify(said)}`).toHaveLength(
+    1,
+  );
+  expect(latency(said), `${what} reached the live region after ${latency(said)} ms`).toBeLessThan(
+    IMMEDIATE_MS,
+  );
+}
+
+test('P1-F — contract, student and copyright announce at once, one utterance each', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await enterGross(page, '6000');
+  const live = page.getByRole('status');
+  await expect(live).toHaveText(/4\D?420,43/);
+  await installLiveProbe(page);
+
+  // The two that already announce at once. They are the control: the same
+  // instrument reads both the fast and the slow controls on the same page.
+  await answer(page, Q_UNDER26, 'Tak').click();
+  announcedAtOnce(await utterances(page), 'the under-26 answer');
+
+  await contract(page, 'Zlecenie').click();
+  announcedAtOnce(await utterances(page), 'a contract change');
+
+  await answer(page, Q_STUDENT, 'Tak').click();
+  announcedAtOnce(await utterances(page), 'the student answer');
+
+  await contract(page, 'Dzieło').click();
+  announcedAtOnce(await utterances(page), 'a contract change onto dzieło');
+
+  await answer(page, Q_COPYRIGHT, 'Tak').click();
+  announcedAtOnce(await utterances(page), 'the copyright answer');
+});
+
+test('P1-F — typing is still debounced, so no keystroke is its own utterance', async ({ page }) => {
+  // The failure mode on the other side: announcing immediately everywhere reads
+  // every keystroke aloud. The debounce must survive the fix.
+  await page.goto('/');
+  await enterGross(page, '6000');
+  await expect(page.getByRole('status')).toHaveText(/4\D?420,43/);
+  await installLiveProbe(page);
+
+  const input = page.getByLabel(GROSS_LABEL_PL);
+  await input.fill('');
+  await input.pressSequentially('20000', { delay: 20 });
+
+  const said = await utterances(page);
+  expect(said, `typing said ${said.length} things, not one — ${JSON.stringify(said)}`).toHaveLength(
+    1,
+  );
+  expect(latency(said), `typing announced after ${latency(said)} ms`).toBeGreaterThan(400);
+  expect(latency(said), `typing announced after ${latency(said)} ms`).toBeLessThan(900);
+});
