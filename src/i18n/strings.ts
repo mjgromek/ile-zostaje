@@ -167,7 +167,7 @@ const en: Table = {
     '{rate}% of {base} zł — after {kup}, minus the {kwota} zł tax-reducing amount',
   'why.pit.dzielo':
     '{rate}% of {base} zł — after {kup}, minus the {kwota} zł tax-reducing amount',
-  'why.relief.chip': 'Ulga dla młodych — 0 zł',
+  'why.relief.chip': 'Under-26 relief — 0 zł',
   'total.from': 'from {gross} zł gross',
   'sources.summary': 'Where do these numbers come from?',
   'sources.intro': '{year} rates from official sources. Each carries its effective date.',
