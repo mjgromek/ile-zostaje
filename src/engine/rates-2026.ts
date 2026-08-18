@@ -50,8 +50,10 @@ export const RATES_2026: YearRates = {
     },
     rentowa: {
       value: 1.5,
+      // The page prints this as a lead-in and two list items, the second ending
+      // in a comma. It ends in a comma here too: the sentence is the page's.
       quote:
-        'Składki na ubezpieczenia rentowe finansujecie: Ty – w wysokości 1,5 proc. podstawy wymiaru, Twój płatnik składek – w wysokości 6,5 proc. podstawy wymiaru.',
+        'Składki na ubezpieczenia rentowe finansujecie: Ty – w wysokości 1,5 proc. podstawy wymiaru, Twój płatnik składek – w wysokości 6,5 proc. podstawy wymiaru,',
       source: ZUS_FINANCING,
       sourceTitle: 'ZUS — Finansowanie składek na ubezpieczenia społeczne',
       effective: '2026-01-01',
@@ -62,7 +64,8 @@ export const RATES_2026: YearRates = {
       // The second half of this quote used to say who finances the składka.
       // True, and printed — on the sibling financing page, not this one. A
       // quote is evidence for the page beside it or it is nothing.
-      quote: 'na ubezpieczenie chorobowe – 2,45% podstawy wymiaru.',
+      // A list item in the rates table, and it ends in a comma there.
+      quote: 'na ubezpieczenie chorobowe – 2,45% podstawy wymiaru,',
       source: ZUS_RATES,
       sourceTitle: 'ZUS — Wysokość składek na ubezpieczenia społeczne',
       effective: '2026-01-01',
