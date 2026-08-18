@@ -96,14 +96,11 @@ held-out 4/5, C4 path B failing). Verbatim report in `.agent/LAST_CHECK.md`.
   live vite pid but is NOT listening (curl 000, lsof empty) — not killed, other ports used.
 - 2026-08-18 22:48 — builder handed over: 7 commits df2b307..d75fe30, vitest 26 passed,
   playwright 11 passed, build ok. Three deferrals in BACKLOG. Checker starts.
-- 2026-08-18 23:04 — checker cycle 1: FINDINGS, 1 P1 + 3 P2, delta 20. Criterion 4 met in data,
-  contradicted on screen (P1-A, delta chip on dzielo). Full report in LAST_CHECK.md.
-  Fix cycle 1 of at most 2 starts.
-- 2026-08-18 23:11 — fix cycle 1 done: 6 commits dee069f..bbd5899, all three findings closed with a
-  test each first. vitest 27, playwright 12. P2-5 deleted from BACKLOG, fixed. Re-check.
-- 2026-08-18 23:28 — re-check: P2-B and P2-C closed, P1-A closed on its own path; new P1-E, the same
-  false claim reached by a stale chip surviving a contract or amount change. Delta still 20.
-  Fix cycle 2 — the second and final attempt on this root cause.
-- 2026-08-18 23:37 — fix cycle 2: P1-E closed at c316bbe, deps [under26,student] -> [result]. Two red
-  browser cases first. Over-correction check 19/19 on the built app. playwright 12 -> 14.
-  R4-F11 logged. Final re-check.
+- 2026-08-18 23:04 — check 1: 1 P1 + 3 P2, Δ 20. Criterion 4 met in data, contradicted on
+  screen. Fix cycle 1 of at most 2 starts.
+- 2026-08-18 23:11 — fix 1: dee069f..bbd5899, all three closed, a red test each first.
+  P2-5 deleted from BACKLOG, fixed.
+- 2026-08-18 23:28 — check 2: two P2 closed, P1-A closed on its path; new P1-E — the same
+  false claim from a stale chip surviving a contract or amount change. Δ still 20.
+- 2026-08-18 23:37 — fix 2, the final attempt on this root cause: P1-E closed at c316bbe,
+  deps [under26,student] -> [result]. Over-correction 19/19 on the built app. R4-F11 logged.
