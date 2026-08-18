@@ -98,12 +98,14 @@ const PAGE_TEXT: Record<string, string[]> = {
 
 /**
  * Collapses whitespace — the pages use non-breaking spaces inside amounts and
- * markup boundaries turn into ordinary ones — and drops one trailing mark, so a
- * list item printed with a comma may be quoted as a sentence. Nothing inside
- * the passage is touched: the words must be the page's own.
+ * markup boundaries turn into ordinary ones — and nothing else. It used to drop
+ * one trailing mark so a list item printed with a comma could be quoted as a
+ * sentence; that is the licence two slice 1 quotes took, and a quote that
+ * normalises the page's punctuation is the page's words in someone else's
+ * voice. Whitespace is the markup's; punctuation is the page's.
  */
 function normalise(text: string): string {
-  return text.normalize('NFC').replace(/\s+/g, ' ').trim().replace(/[.,;:]$/, '');
+  return text.normalize('NFC').replace(/\s+/g, ' ').trim();
 }
 
 function citedValues(rates: YearRates): { path: string; cited: Cited<unknown> }[] {
