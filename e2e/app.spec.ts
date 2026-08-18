@@ -191,6 +191,10 @@ test('slice 2, criterion 2 — a student under 26 on a zlecenie pays no ZUS at a
   await expect(page.getByTestId('line-zdrowotna')).toBeVisible();
   await expect(page.getByTestId('band-emerytalna')).toBeAttached();
 
+  // The why-line has to add up on paper: the base it names and the koszty it
+  // names must come from the same subtraction.
+  await expect(page.getByTestId('line-pit')).toContainText(/20% kosztów \(1\D?064,88 zł\)/);
+
   // State two: every ZUS line is gone from both, and the net has risen to match.
   await answer(page, Q_STUDENT, 'Tak').click();
 
@@ -212,7 +216,7 @@ test('slice 2, criterion 2 — a student under 26 on a zlecenie pays no ZUS at a
     'Nie obejmiemy Cię ubezpieczeniami, jeśli jesteś uczniem lub studentem i nie skończyłeś 26 lat.',
   );
   await expect(
-    page.getByTestId('sources').getByRole('link', { name: /Umowy zlecenia i umowy o dzieło/ }),
+    page.getByTestId('sources').getByRole('link', { name: /Umowy zlecenia i umowy o dzieło/ }).first(),
   ).toHaveAttribute('href', 'https://www.zus.pl/-/umowy-cywilnoprawne-w-ubezpieczeniach-spolecznych');
 });
 

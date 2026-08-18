@@ -381,6 +381,24 @@ describe('the monthly breakdown, 2026 rates', () => {
     );
   });
 
+  // Found by looking at the rendered ladder: under the relief the PIT row shows
+  // the base the relief REMOVED — slice 1's choice, so the reader sees what it
+  // is worth — while the koszty came from the relieved computation and read
+  // "20% kosztów (0,00 zł)" against a base of 4 260 zł. The two numbers in one
+  // sentence have to come from the same arithmetic or the row cannot be checked
+  // on paper.
+  it('reports the koszty that belong to the base the ladder shows', () => {
+    const zlecenie = answers('zlecenie', { under26: true });
+    const result = computeContract(600_000, zlecenie, RATES_2026);
+    const pitLine = result.lines.find((line) => line.key === 'pit');
+
+    // 600 000 − 67 560 składek = 532 440 ; 20% of it = 106 488
+    expect(result.costsGrosz).toBe(106_488);
+    // and the base is that same subtraction, to full złote: 425 952 → 4 260 zł
+    expect(pitLine?.baseGrosz).toBe(426_000);
+    expect(600_000 - 67_560 - result.costsGrosz).toBe(425_952);
+  });
+
   // The delta chip and the live region both quote this number, so it is the
   // engine's job and not the screen's. 769,86 zł on a 4 000 zł zlecenie is the
   // single biggest number this audience will see change.
