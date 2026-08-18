@@ -27,6 +27,7 @@ export function Answer({ lang, result }: Props) {
   const under26 = result?.under26 ?? false;
   const student = result?.student ?? false;
   const netGrosz = result?.netGrosz ?? null;
+  const reliefCovers = result?.reliefCovers ?? false;
   const reliefApplies = result?.reliefApplies ?? false;
   const reliefWorth = result?.reliefWorthGrosz ?? 0;
   const pitWithoutRelief = result?.pitWithoutReliefGrosz ?? 0;
@@ -75,7 +76,10 @@ export function Answer({ lang, result }: Props) {
         key: student ? 'answer.delta.student.on' : 'answer.delta.student.off',
         amountGrosz: studentWorth,
       };
-    } else if (previous.under26 !== under26) {
+    } else if (previous.under26 !== under26 && reliefCovers) {
+      // Only where the cited list covers this contract. Off the list the answer
+      // is worth nothing, and `pitWithoutReliefGrosz` is then the whole PIT
+      // advance — a chip built from it would price a relief that never applied.
       const amountGrosz = under26 ? reliefWorth : pitWithoutRelief;
       if (amountGrosz > 0) {
         next = { key: under26 ? 'answer.delta.on' : 'answer.delta.off', amountGrosz };
