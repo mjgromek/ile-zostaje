@@ -1,89 +1,91 @@
 <!-- Overwritten every phase. The checker cannot write; this is its report, preserved. -->
 
-# LAST CHECK — slice 2, cycle 1
+# LAST CHECK — slice 2, cycle 2 (re-check after fix cycle 1)
 
-Measured 2026-08-18, commits `df2b307..af498a3`, phase-start `1bbffef`.
+Measured 2026-08-18, commits `af498a3..077ba74`, fix cycle `dee069f..bbd5899`, phase-start
+`1bbffef`. Cycle 1's report is superseded; its three findings are resolved below.
 
-## VERDICT: FINDINGS — 1 x P1, 3 x P2
+## VERDICT: FINDINGS — 1 x P1 (P1-E), 1 x P2 (Δ = 20, caused by P1-E alone)
 
-Criteria 1, 2, 3, 5, 6, 7, 8, 9 met. Criterion 4 met in the engine and contradicted on
-screen. STATE.md validated first: all 9 cited SHAs resolve, `v0.1.0` -> `f8fdf09`.
+Criteria 1, 2, 3, 6, 7, 8 re-verified and met. Criterion 4 is still contradicted on screen,
+by a second path. STATE.md validated first: all 9 cited SHAs resolve, `v0.1.0` -> `f8fdf09`.
 
-## Criterion by criterion, as reported
+## Cycle 1's three findings
 
-1. PASS, OBSERVED. Three slots selectable, recompute with no reload. Regression against the
-   tag itself: 602 uop cases (gross 0..400 000 zl x under26) — line amounts, bases and net
-   identical to `v0.1.0`, 0 mismatches.
-2. PASS, OBSERVED at 390 px. Student question only on zlecenie; `Nie`->`Tak` collapses the
-   band from `Na konto 80,8%` (5 segments) to `100,0%` (1), four ZUS/health rows to a single
-   `Skladki ZUS · 0 zl`, net 4 845,20 -> 6 000,00 zl. Exemption quote cited on the page.
-3. PASS, OBSERVED. Dzielo renders zero ZUS/health rows. 50% is reached through
-   `Przenosisz prawa autorskie?`; the rate appears only as a consequence, with the cap and
-   the creative-work condition. Cap reads `120 000,00 zl` from data.
-4. MET IN DATA, CONTRADICTED ON SCREEN. `youthRelief.contracts.value` is data, the note
-   fires in PL and EN and never on uop/zlecenie. See P1-A.
-5. PASS, OBSERVED. All 20 citations fetched live: 20/20 quotes genuinely printed on their
-   page, each with URL, effective date, `verified: 2026-08-18`. The 50% cap is its own entry
-   with its own quote and source, not an alias of `pit.thresholdAnnualGrosz`. P2-6 fixed.
-6. PASS, OBSERVED by adding the rendered numbers. 8 states at gross 6 000: every one sums
-   deductions + net to exactly 6 000,00 zl.
-7. PASS for new strings. 82 keys in both tables, none missing, none empty, interpolation
-   slots match. Only `Zlecenie`/`Dzielo` untranslated among new strings. See P2-B.
-8. PASS, OBSERVED at 390/1280/320. Bar fully above the card, amount + Nie/Tak in one card,
-   answer directly below, order answer->band->ladder, no overlap, no lede in either language.
-9. PASS. 14 hand-computed cases per contract and relief state, arithmetic written out and
-   source named; Playwright drives Chromium for criteria 1, 2, 3, 4.
+**P1-A — PARTIALLY CLOSED.** OBSERVED, production build on :5181, both languages: on
+dzieło, `Tak`/`Nie`/`Tak` on under-26 produces no chip at all (count 0 each time), net holds
+5 724,00 and `subst.relief.dzielo` renders in the active language. No over-correction: the
+chip is still truthful on etat (±291,00) and zlecenie (±211,00) in PL and EN, and the
+student chip on zlecenie (±1 154,80) still fires. Still reachable by a second path — P1-E.
 
-## Findings
+**P2-B — CLOSED.** OBSERVED on the EN screen: the ladder chip reads
+`Under-26 relief — 0 zł`. The allowlist is not decorative: mutating EN `total.from` to the
+PL value on a copy outside the repo made `no English string is its Polish original` FAIL.
+Known limit, not graded: it catches an EN value identical to its PL original, so a Polish EN
+string that differs from the PL table would still pass. A full EN body scan found none
+beyond `Zlecenie`, `Dzieło` and `zł`.
 
-**P1-A — the delta chip claims the under-26 relief is worth money on umowa o dzielo, which
-it does not cover.** OBSERVED, driven from a fresh load in both languages; screenshots
-`repro-dzielo-PL.png` / `repro-dzielo-EN.png` in the session scratchpad. On dzielo, toggling
-under-26 to `Nie` renders `-276,00 zl bez ulgi dla mlodych` while the net is identical in
-both states (5 724,00 zl) and the outlined note two blocks below says the relief does not
-cover dzielo. Control: the same toggle on uop moves the net 4 711,43 -> 4 420,43, so the
-chip is truthful there and the instrument distinguishes the two. Root cause
-`src/components/Answer.tsx:78-82` — the branch has no `reliefCovers` guard and uses
-`pitWithoutRelief`, which `computeContract` sets equal to the whole PIT advance when the
-relief does not apply. Exactly the failure criterion 4 exists to catch; the visible e2e test
-for criterion 4 passes because it asserts the note and never the chip.
+**P2-C — CLOSED.** OBSERVED against both live pages fetched today (HTTP 200, ~985 kB): both
+quotes are byte-exact including the trailing comma. The frozen `PAGE_TEXT` fixture was NOT
+edited to accommodate the fix, and reverting the comma to a full stop fails the verbatim
+test.
 
-**P2-B — `why.relief.chip` renders Polish in the EN build.** OBSERVED on screen: EN shows
-`Ulga dla mlodych — 0 zl`. Carried unchanged from `v0.1.0`, outside criterion 7's "every new
-string". Urgent when: any slice touches EN copy, or an English speaker sees the under-26
-state.
+## Open finding
 
-**P2-C — two slice-1 quotes normalise the page's punctuation.** `contributions.rentowa` and
-`contributions.chorobowa` end with a full stop where the page prints a comma; both are list
-items. Words, values and rates verbatim. Measured by punctuation-insensitive matching
-against the live HTML, which separates this from an absent quote. This is slice 1's P2-5,
-resurfaced by criterion 5's re-verification requirement.
+**P1-E — the delta chip is never cleared when an input other than the two answers changes,
+so the false claim P1-A named still reaches the dzieło screen.** OBSERVED, real browser,
+screenshot `/private/tmp/checker-kADRIz/carry-dzielo.png`: answer under-26 on etat, then
+click Dzieło within the chip's 6 s life, and the dzieło screen shows
+`+291,00 zł z ulgą dla młodych` two blocks above `Ulga dla młodych nie obejmuje umowy o
+dzieło`. Same in EN (`−291,00 zł`). The student chip `+1 154,80 zł, bo studiujesz` reaches
+dzieło the same way, which has no student control at all. Wider than contracts: typing
+6000 -> 20000 leaves `+291,00 zł` up while the relief is worth a different amount at 20 000.
+Root cause `src/components/Answer.tsx:113` plus the effect's `[under26, student]` deps —
+`setDelta(null)` only ever fires on the 6 s timeout. Aim: clear `delta` whenever `result`
+changes for any reason other than the two answers.
 
-**P2-D — delta 20 points.** Above zero, and caused by P1-A alone.
+**P2 — Δ = 20 points.** Above zero, and P1-E is its only cause.
 
-## Counts and delta
+## Criteria re-verified — the six the touched files could break
 
-- `npm test` -> `vitest run`: 26 passed, 3 files. `npx playwright test`: 11 passed, chromium.
-  `npm run build`: `tsc -b && vite build` clean, 53 modules.
-- Visible 37/37 = 100%. Held-out 4/5 = 80%, one test per criterion written from STATE's
-  criteria and run in a temp dir outside the repo: C1, C2, C3, C6 PASS, **C4 FAIL** (P1-A).
-  **Delta = 20 points.**
-- Held-out engine arithmetic hand-computed from the cited pages: 15/15, including dzielo
-  4 000 @20% = 3 916,00, @50% = 4 000,00, 30 000 @50% capped = 25 900,00, zlecenie 4 000 =
-  3 189,14, and the student delta 769,86 zl — independently reproducing DESIGN-SLICE-2 §2.
+1. PASS. 1 602 uop cases (0..40 000 zł step 50 x under26) run against `v0.1.0`'s OWN
+   `uop.ts` and its own `rates-2026.ts`: net, every line's amount/base/remainder,
+   `pitWithoutRelief`, `reliefWorth` — 0 mismatches. Signatures checked before comparing
+   and a control proved the comparator can fail. Three slots selectable, no reload.
+2. PASS. Zlecenie student: net 4 845,20 -> 6 000,00, ladder 4 rows -> 2, band paints 0 px
+   of ZUS, the `uczniem lub studentem` quote is on the page.
+3. PASS. Dzieło ladder has no emerytalna/rentowa/chorobowa/zdrowotna row; 20% -> 50% only
+   via `Przenosisz prawa autorskie?`; 5 724,00 -> 5 940,00; cap `120 000,00 zł` and the
+   creative-work condition on screen.
+6. PASS. 9 rendered states, effective amounts added off the page (struck pre-relief figures
+   excluded): every one sums to exactly 6 000,00 zł.
+7. PASS. Key parity and the new allowlist green; the EN screen carries no untranslated
+   Polish.
+8. PASS. Variant B intact: bar full width above everything (1088/1280, 288/320, 358/390),
+   amount + Nie/Tak in one card, no overlap, no lede. The desktop two-column is the spec's
+   own.
 
-## Mutation probe
+## Counts, Δ, mutation probe
 
-Run on a copy outside the repository. Five mutations to `src/engine/contract.ts`, all five
-caught: dropping the `answers.student &&` guard in `isZusExempt` (3 failures); 50%->20% KUP
-(3, incl. the cap-from-its-own-entry test); removing the annual cap from `Math.min` (2);
-`reliefCovers = true` (caught by the relief-list test); charging chorobowa on zlecenie (5).
-Baseline restored, repo clean.
+- `npm test` -> 27 passed, 3 files. `npx playwright test` -> 12 passed, chromium.
+  `npm run build` -> `tsc -b && vite build` clean, 53 modules, 231.54 kB.
+- Visible 39/39 = 100%. Held-out 4/5 = 80%, written from STATE's criteria in a temp dir
+  outside the repo, run against the production build: C1, C2, C3, C6 PASS; **C4 FAIL** —
+  path A (answer on dzieło) passes in both languages, path B (answer on a covered contract,
+  then switch) fails on `−291,00 zł bez ulgi dla młodych`. **Δ = 20 points.**
+- Mutation probe on a copy outside the repo, 3 mutations, 3 caught: dropping
+  `&& reliefCovers` in `Answer.tsx` failed the new e2e case (11 passed, 1 failed); the
+  chorobowa comma -> full stop failed the verbatim-quote test; EN `total.from` -> the PL
+  value failed the allowlist test. Repo never mutated, `git status --porcelain` empty,
+  :5181 shut down, :5180 untouched and still HTTP 200.
+- tdd cap: the fix cycle added exactly 2 tests, each bound to a graded finding and named in
+  its commit. Within cap.
 
-## Instruments the checker corrected before trusting them
+## Instruments the checker discarded rather than reported — five would-be findings
 
-Four of its own measurements were wrong and are NOT findings: calling `computeUop` with an
-object where `v0.1.0` takes a boolean (274 false mismatches); a money regex reading
-`4,420.43` as `4.42`; reading a collapsed `<details>` with `innerText`; grepping `const PL`
-where the tables are `pl`/`en`, which reported all 82 strings identical while the EN screen
-was plainly English.
+`band-zusOff` in the DOM read as "a ZUS line survived" when it renders at 0 px and the spec
+mandates that row; `/120 000,00 zł/` written with an ordinary space against the page's
+non-breaking space; a C4 failure message calling `innerText()` unconditionally, so a genuine
+PASS timed out and read as FAIL; the ladder sum reading the struck pre-relief figure; and
+bounding-box y-ordering reading the spec's two-column desktop as "answer not directly
+below". A sixth survived re-measurement and became P1-E.

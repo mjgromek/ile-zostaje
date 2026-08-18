@@ -106,3 +106,6 @@ Slice 1's four checkpoints are settled and live in DECISIONS.md and the git hist
   Fix cycle 1 of at most 2 starts.
 - 2026-08-18 23:11 — fix cycle 1 done: 6 commits dee069f..bbd5899, all three findings closed with a
   test each first. vitest 27, playwright 12. P2-5 deleted from BACKLOG, fixed. Re-check.
+- 2026-08-18 23:28 — re-check: P2-B and P2-C closed, P1-A closed on its own path; new P1-E, the same
+  false claim reached by a stale chip surviving a contract or amount change. Delta still 20.
+  Fix cycle 2 — the second and final attempt on this root cause.
