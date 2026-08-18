@@ -25,9 +25,8 @@ Nie/Tak questions, the answer directly below. The lede sentence is CUT — "to w
 not shortened, not moved, and never reintroduced under another name. theme-factory is
 closed: type stays as shipped.
 
-Not in this slice: the brutto/netto toggle and its reverse calculation, which is now
-slice 3 and NOT dropped — it is a new engine capability, not a label, and its round-trip
-is its own verification surface. Then units (4), the leftover layer (5), deployment (6).
+Not in this slice: the brutto/netto toggle and its reverse calculation — slice 3, NOT
+dropped. A new engine capability, not a label, with its own verification surface.
 
 ## Acceptance criteria
 
