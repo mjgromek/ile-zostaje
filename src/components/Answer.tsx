@@ -85,15 +85,24 @@ export function Answer({ lang, result }: Props) {
         next = { key: under26 ? 'answer.delta.on' : 'answer.delta.off', amountGrosz };
       }
     }
-    if (next === null) return;
+    // Anything else that moved the result — another contract, another amount —
+    // leaves the standing chip pricing a screen that is no longer there, so it
+    // goes. The timeout is only the last of the ways a chip ends, not the only
+    // one.
+    if (next === null) {
+      setDelta(null);
+      return;
+    }
 
     setDelta(next);
     const reduced = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
     const id = setTimeout(() => setDelta(null), reduced ? DELTA_MS_REDUCED : DELTA_MS);
     return () => clearTimeout(id);
-    // Only a change of an answer opens this moment; typing must not.
+    // Every change of the result is examined; only a change of an answer opens
+    // the moment, and every other one closes it. A language switch does not
+    // recompute the result, so it leaves a truthful chip standing.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [under26, student]);
+  }, [result]);
 
   return (
     <section className={s.answer} data-testid="answer">
