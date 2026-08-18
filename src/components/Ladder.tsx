@@ -1,12 +1,12 @@
 import type { CSSProperties } from 'react';
-import type { Line, UopResult } from '../engine/uop';
+import type { ContractResult, Line } from '../engine/contract';
 import type { YearRates } from '../engine/rates';
 import { formatMoney, formatRate, t, type Lang } from '../i18n/strings';
 import css from './Ladder.module.css';
 
 type Props = {
   lang: Lang;
-  result: UopResult | null;
+  result: ContractResult | null;
   rates: YearRates;
 };
 

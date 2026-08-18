@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import type { UopResult } from '../engine/uop';
+import type { ContractResult } from '../engine/contract';
 import { formatMoney, t, type Lang } from '../i18n/strings';
 import s from './Answer.module.css';
 
 type Props = {
   lang: Lang;
-  result: UopResult | null;
+  result: ContractResult | null;
 };
 
 const DELTA_MS = 6_000;

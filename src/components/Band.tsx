@@ -1,11 +1,11 @@
-import type { UopResult } from '../engine/uop';
+import type { ContractResult } from '../engine/contract';
 import { formatMoney, formatPercent, t, type Lang } from '../i18n/strings';
 import s from './Band.module.css';
 
 type Props = {
   lang: Lang;
   year: number;
-  result: UopResult | null;
+  result: ContractResult | null;
 };
 
 /**

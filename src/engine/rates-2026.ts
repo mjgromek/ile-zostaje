@@ -127,6 +127,24 @@ export const RATES_2026: YearRates = {
     },
   },
 
+  // STUB — the eight entries below are not cited yet. They carry no value and
+  // no quote on purpose: the tests in contract.test.ts and rates-2026.test.ts
+  // fail against them on the numbers and on the missing page text, which is
+  // where the implementation commit starts.
+  contracts: {
+    zlecenie: {
+      chorobowaVoluntary: { value: false, quote: '', source: '', sourceTitle: '', effective: '', verified: '' },
+      studentUnder26Exempt: { value: false, quote: '', source: '', sourceTitle: '', effective: '', verified: '' },
+      costsPercent: { value: 0, quote: '', source: '', sourceTitle: '', effective: '', verified: '' },
+    },
+    dzielo: {
+      outsideZus: { value: false, quote: '', source: '', sourceTitle: '', effective: '', verified: '' },
+      costsPercent: { value: 0, quote: '', source: '', sourceTitle: '', effective: '', verified: '' },
+      copyrightCostsPercent: { value: 0, quote: '', source: '', sourceTitle: '', effective: '', verified: '' },
+      copyrightCostsAnnualCapGrosz: { value: 0, quote: '', source: '', sourceTitle: '', effective: '', verified: '' },
+    },
+  },
+
   youthRelief: {
     annualLimitGrosz: {
       value: 8_552_800,
@@ -137,6 +155,7 @@ export const RATES_2026: YearRates = {
       effective: '2026-01-01',
       verified: VERIFIED,
     },
+    contracts: { value: [], quote: '', source: '', sourceTitle: '', effective: '', verified: '' },
   },
 
   minimumWageMonthlyGrosz: {

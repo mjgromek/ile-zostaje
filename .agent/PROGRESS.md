@@ -1,14 +1,15 @@
 SLICE 2 — Zlecenie and dzieło, student status, on layout B
-NOW: Builder is researching and citing the zlecenie and dzieło rates, then red/green on layout B   [23:54]
+NOW: Red is on the board: 16 new engine and citation tests fail on the numbers, committing them   [22:28]
 
-[x] Slice 2 and its nine acceptance criteria written to STATE.md
-[x] theme-factory: stakeholder chose type variant A, the shipped control
-[x] Three layouts rendered; stakeholder chose B and cut the lede sentence
-[x] Brutto/netto toggle split out into slice 3 — named, criteria written, not dropped
-[x] Designer: variant B spec persisted to .agent/DESIGN-SLICE-2.md
-[ ] Builder: cited rates for zlecenie and dzieło, student ZUS exemption, KUP 20/50
-[ ] Builder: failing tests as test:, then implementation as feat:
-[ ] Checker: nine criteria in a real browser, v0.1.0 regression, held-out, mutation
-[ ] Fix cycles if findings — two attempts per finding, then escalate that one
-[ ] Push main and tag v0.2.0, both confirmed with git ls-remote
-[ ] Phase summary
+[x] Re-fetch and re-verify slice 1's eight cited sources
+[x] Cite zlecenie ZUS, student exemption, KUP 20/50, the 50% annual cap, the relief contract list
+[x] Capture the v0.1.0 umowa o pracę baseline from the tag
+[x] Red: engine, citation and rendering tests as test:
+[ ] Green: per-contract costs in YearRates, zlecenie and dzieło engines as feat:
+[ ] Green: layout B, contract bar, Nie/Tak pills, notes, strings both languages as feat:
+[ ] Playwright: criteria 1, 2, 3, 4 in a real browser
+[ ] npm test and npm run build green, builder hands over
+[ ] Checker: nine criteria in a real browser, v0.1.0 regression, held-out
+[ ] Fix cycles — two attempts per finding, then escalate that one
+[ ] Push main, annotated tag v0.2.0, both confirmed with git ls-remote
+[ ] README updated to v0.2.0, phase summary

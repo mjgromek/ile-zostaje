@@ -1,6 +1,13 @@
-import type { YearRates } from './rates';
+import type { ContractKind, YearRates } from './rates';
 
-export type LineKey = 'emerytalna' | 'rentowa' | 'chorobowa' | 'zdrowotna' | 'pit';
+export type LineKey =
+  | 'emerytalna'
+  | 'rentowa'
+  | 'chorobowa'
+  | 'zdrowotna'
+  /** The one row that replaces the ZUS lines a student under 26 does not pay. */
+  | 'zusOff'
+  | 'pit';
 
 export type Line = {
   key: LineKey;
@@ -13,15 +20,41 @@ export type Line = {
   remainderGrosz: number;
 };
 
-export type UopResult = {
+/** Everything the person answered. One shape for all three contracts. */
+export type Answers = {
+  contract: ContractKind;
+  under26: boolean;
+  student: boolean;
+  /** Transfer of copyright, which is what earns the higher costs rate. */
+  copyright: boolean;
+};
+
+export type ContractResult = {
   grossGrosz: number;
+  contract: ContractKind;
   lines: Line[];
   netGrosz: number;
   under26: boolean;
+  student: boolean;
+  copyright: boolean;
+  /** True when the cited relief list covers this contract, whatever the age. */
+  reliefCovers: boolean;
+  /** True when it covers this contract AND this person is under 26. */
+  reliefApplies: boolean;
   /** The PIT advance that would be due with the relief switched off. */
   pitWithoutReliefGrosz: number;
   /** What the relief is worth this month. Zero when it changes nothing. */
   reliefWorthGrosz: number;
+  /** True when the student answer removed every contribution. */
+  zusExempt: boolean;
+  /** What the student answer is worth this month, in either direction. */
+  studentWorthGrosz: number;
+  /** Koszty uzyskania przychodu applied to this month. */
+  costsGrosz: number;
+  /** The percentage they were computed at, or null for the flat uop quota. */
+  costsPercent: number | null;
+  /** True when the annual cap on 50% costs bit this month. */
+  costsCapped: boolean;
 };
 
 const MONTHS_PER_YEAR = 12;
@@ -59,10 +92,10 @@ function pitAdvance(
   zusGrosz: number,
   exemptGrosz: number,
   rates: YearRates,
-): { amountGrosz: number; baseGrosz: number } {
+): { amountGrosz: number; baseGrosz: number; costsGrosz: number } {
   const { pit } = rates;
   const taxedIncome = grossGrosz - exemptGrosz;
-  if (taxedIncome <= 0) return { amountGrosz: 0, baseGrosz: 0 };
+  if (taxedIncome <= 0) return { amountGrosz: 0, baseGrosz: 0, costsGrosz: 0 };
 
   // Contributions attach to the income they were withheld from: the share that
   // sits under the relief is not deductible, so only the taxed proportion is.
@@ -80,21 +113,27 @@ function pitAdvance(
     applyRate(secondBracket, pit.secondRatePercent.value) -
     pit.taxReducingMonthlyGrosz.value;
 
-  return { amountGrosz: toWholeZloty(Math.max(0, tax)), baseGrosz: base };
+  return { amountGrosz: toWholeZloty(Math.max(0, tax)), baseGrosz: base, costsGrosz: costs };
 }
 
 /**
- * The monthly breakdown of a gross salary on umowa o pracę.
+ * The monthly breakdown of a gross amount, for one contract type.
  *
- * Assumes the one case slice one ships: a single employment relationship, the
- * standard koszty uzyskania przychodu, and a filed PIT-2 so the payer applies
- * the monthly kwota zmniejszająca.
+ * NOT IMPLEMENTED YET for zlecenie and dzieło: every contract is still computed
+ * as umowa o pracę, no student exemption, no percentage costs, and the relief
+ * list is not consulted. The cases in contract.test.ts fail against this stub
+ * on the numbers, which is where the next commit starts.
  *
  * Every rate arrives in `rates`. There is no rate literal below this line.
  */
-export function computeUop(grossGrosz: number, under26: boolean, rates: YearRates): UopResult {
+export function computeContract(
+  grossGrosz: number,
+  answers: Answers,
+  rates: YearRates,
+): ContractResult {
   const gross = Math.max(0, Math.round(grossGrosz));
   const { contributions, youthRelief } = rates;
+  const { contract, under26, student, copyright } = answers;
 
   const emerytalna = applyRate(gross, contributions.emerytalna.value);
   const rentowa = applyRate(gross, contributions.rentowa.value);
@@ -137,10 +176,20 @@ export function computeUop(grossGrosz: number, under26: boolean, rates: YearRate
   // the lines sum back to the gross exactly, at every amount.
   return {
     grossGrosz: gross,
+    contract,
     lines,
     netGrosz: remainder,
     under26,
+    student,
+    copyright,
+    reliefCovers: true,
+    reliefApplies: under26,
     pitWithoutReliefGrosz: pitWithoutRelief.amountGrosz,
     reliefWorthGrosz: Math.max(0, pitWithoutRelief.amountGrosz - pit.amountGrosz),
+    zusExempt: false,
+    studentWorthGrosz: 0,
+    costsGrosz: pit.costsGrosz,
+    costsPercent: null,
+    costsCapped: false,
   };
 }

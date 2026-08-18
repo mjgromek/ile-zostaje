@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { computeUop } from './engine/uop';
+import { computeContract } from './engine/contract';
 import { RATES_2026 } from './engine/rates-2026';
 import { formatMoney, t, type Lang } from './i18n/strings';
 import { parseGross } from './state/gross';
@@ -45,7 +45,7 @@ export function App() {
 
   const parsed = useMemo(() => parseGross(grossText), [grossText]);
   const result = useMemo(
-    () => (parsed.kind === 'ok' ? computeUop(parsed.grosz, under26, rates) : null),
+    () => (parsed.kind === 'ok' ? computeContract(parsed.grosz, { contract: 'uop', under26, student: false, copyright: false }, rates) : null),
     [parsed, under26],
   );
 
