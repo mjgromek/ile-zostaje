@@ -1,6 +1,7 @@
 import type { YearRates } from './rates';
 
-// Rates for the 2026 tax year, umowa o pracę, employee-financed share.
+// Rates for the 2026 tax year — umowa o pracę, umowa zlecenia and umowa o
+// dzieło — employee-financed share.
 //
 // Every entry was read off the page named in `source` on the date in `verified`;
 // `quote` is what that page prints. Nothing here comes from memory, and a value
@@ -23,8 +24,16 @@ const PIT_2 =
   'https://www.podatki.gov.pl/poradniki-i-informatory/pit-2-pit-2a-pit-3-zasady-skladania-oswiadczen-o-stosowaniu-pomniejszenia-zaliczki-o-kwote-zmniejszajaca-podatek-112-124-lub-136';
 const YOUTH_RELIEF = 'https://www.podatki.gov.pl/ulgi-i-odliczenia/ulga-dla-mlodych-pit';
 const MINIMUM_WAGE = 'https://www.gov.pl/web/rodzina/minimalne-wynagrodzenie-za-prace';
+const ZUS_CIVIL = 'https://www.zus.pl/-/umowy-cywilnoprawne-w-ubezpieczeniach-spolecznych';
+const PIT_CIVIL =
+  'https://www.podatki.gov.pl/podatki-osobiste/pit/informacje-podstawowe/co-jest-opodatkowane/dochody-z-umowy-zlecenia-lub-o-dzielo';
+const PIT_COPYRIGHT =
+  'https://www.podatki.gov.pl/podatki-osobiste/pit/informacje-podstawowe/co-jest-opodatkowane/dochody-z-praw-autorskich';
 
-const VERIFIED = '2026-08-09';
+// Every page below was re-fetched and re-read on this date, including the eight
+// slice 1 already cited: a citation that passed once is not a citation that is
+// still true. The frozen passages in rates-2026.test.ts came from the same run.
+const VERIFIED = '2026-08-18';
 
 export const RATES_2026: YearRates = {
   year: 2026,
@@ -118,8 +127,11 @@ export const RATES_2026: YearRates = {
     },
     deductibleCostsMonthlyGrosz: {
       value: 25_000,
+      // P2-6: the quote used to stop at "3000 zł", which printed a limit that
+      // holds for ONE employment relationship as an absolute one. The page
+      // prints the condition in the same sentence, so the quote carries it.
       quote:
-        'W 2026 roku zryczałtowane koszty uzyskania przychodów z pracy wynoszą: 250 zł miesięcznie, a za rok podatkowy łącznie nie więcej niż: 3000 zł.',
+        'W 2026 roku zryczałtowane koszty uzyskania przychodów z pracy wynoszą: 250 zł miesięcznie, a za rok podatkowy łącznie nie więcej niż: 3000 zł - w przypadku uzyskiwania przychodów z jednego stosunku pracy,',
       source: PIT_WORK,
       sourceTitle: 'podatki.gov.pl — Dochody z pracy',
       effective: '2026-01-01',
@@ -127,21 +139,79 @@ export const RATES_2026: YearRates = {
     },
   },
 
-  // STUB — the eight entries below are not cited yet. They carry no value and
-  // no quote on purpose: the tests in contract.test.ts and rates-2026.test.ts
-  // fail against them on the numbers and on the missing page text, which is
-  // where the implementation commit starts.
+  // What changes when the contract is not umowa o pracę. Each of these is a
+  // RULE, and each is cited, because the engine reads them instead of
+  // branching on a contract name.
   contracts: {
     zlecenie: {
-      chorobowaVoluntary: { value: false, quote: '', source: '', sourceTitle: '', effective: '', verified: '' },
-      studentUnder26Exempt: { value: false, quote: '', source: '', sourceTitle: '', effective: '', verified: '' },
-      costsPercent: { value: 0, quote: '', source: '', sourceTitle: '', effective: '', verified: '' },
+      chorobowaVoluntary: {
+        value: true,
+        quote:
+          'Wykonujesz umowę zlecenia bądź umowę o świadczenie usług? Obejmiemy Cię ubezpieczeniami: emerytalnym, rentowymi, wypadkowym i zdrowotnym. Ubezpieczenie chorobowe jest dobrowolne.',
+        source: ZUS_CIVIL,
+        sourceTitle: 'ZUS — Umowy zlecenia i umowy o dzieło w ubezpieczeniach społecznych',
+        effective: '2026-01-01',
+        verified: VERIFIED,
+      },
+      studentUnder26Exempt: {
+        value: true,
+        quote:
+          'Nie obejmiemy Cię ubezpieczeniami, jeśli jesteś uczniem lub studentem i nie skończyłeś 26 lat.',
+        source: ZUS_CIVIL,
+        sourceTitle: 'ZUS — Umowy zlecenia i umowy o dzieło w ubezpieczeniach społecznych',
+        effective: '2026-01-01',
+        verified: VERIFIED,
+      },
+      costsPercent: {
+        value: 20,
+        quote:
+          'Do przychodów z umów zlecenia/o dzieło możesz zastosować koszty uzyskania przychodów ustalone według normy procentowej w wysokości 20% uzyskanego przychodu, pomniejszonego o potrącone przez płatnika z Twoich środków w danym miesiącu składki na ubezpieczenia społeczne, których podstawę wymiaru stanowi ten przychód.',
+        source: PIT_CIVIL,
+        sourceTitle: 'podatki.gov.pl — Dochody z umowy zlecenia lub o dzieło',
+        effective: '2026-01-01',
+        verified: VERIFIED,
+      },
     },
     dzielo: {
-      outsideZus: { value: false, quote: '', source: '', sourceTitle: '', effective: '', verified: '' },
-      costsPercent: { value: 0, quote: '', source: '', sourceTitle: '', effective: '', verified: '' },
-      copyrightCostsPercent: { value: 0, quote: '', source: '', sourceTitle: '', effective: '', verified: '' },
-      copyrightCostsAnnualCapGrosz: { value: 0, quote: '', source: '', sourceTitle: '', effective: '', verified: '' },
+      outsideZus: {
+        value: true,
+        quote:
+          'Zawarłeś umowę o dzieło? Nie obejmiemy Cię ubezpieczeniami społecznymi i ubezpieczeniem zdrowotnym ani obowiązkowo, ani dobrowolnie.',
+        source: ZUS_CIVIL,
+        sourceTitle: 'ZUS — Umowy zlecenia i umowy o dzieło w ubezpieczeniach społecznych',
+        effective: '2026-01-01',
+        verified: VERIFIED,
+      },
+      costsPercent: {
+        value: 20,
+        quote:
+          'Do przychodów z umów zlecenia/o dzieło możesz zastosować koszty uzyskania przychodów ustalone według normy procentowej w wysokości 20% uzyskanego przychodu, pomniejszonego o potrącone przez płatnika z Twoich środków w danym miesiącu składki na ubezpieczenia społeczne, których podstawę wymiaru stanowi ten przychód.',
+        source: PIT_CIVIL,
+        sourceTitle: 'podatki.gov.pl — Dochody z umowy zlecenia lub o dzieło',
+        effective: '2026-01-01',
+        verified: VERIFIED,
+      },
+      copyrightCostsPercent: {
+        value: 50,
+        quote:
+          'Do przychodów z praw autorskich i pokrewnych możesz zastosować koszty uzyskania przychodów w wysokości 50% uzyskanego przychodu.',
+        source: PIT_COPYRIGHT,
+        sourceTitle: 'podatki.gov.pl — Dochody z praw autorskich',
+        effective: '2026-01-01',
+        verified: VERIFIED,
+      },
+      copyrightCostsAnnualCapGrosz: {
+        // 120 000 zł, the same number as pit.thresholdAnnualGrosz above and NOT
+        // the same fact. Two sentences on two pages that happen to agree; an
+        // alias would move both the day one of them changes.
+        value: 12_000_000,
+        quote:
+          '50% koszty uzyskania przychodów ze wszystkich tytułów nie mogą przekroczyć w roku podatkowym kwoty 120 000 zł.',
+        source: PIT_COPYRIGHT,
+        sourceTitle: 'podatki.gov.pl — Dochody z praw autorskich',
+        effective: '2026-01-01',
+        verified: VERIFIED,
+      },
     },
   },
 
@@ -155,7 +225,19 @@ export const RATES_2026: YearRates = {
       effective: '2026-01-01',
       verified: VERIFIED,
     },
-    contracts: { value: [], quote: '', source: '', sourceTitle: '', effective: '', verified: '' },
+    // The list is the source's, narrowed to the contract types this app offers:
+    // the page also names praktyka absolwencka, staż uczniowski and zasiłek
+    // macierzyński, which are not contracts a user can pick here. Umowa o
+    // dzieło is absent from the page, which is why the screen says so.
+    contracts: {
+      value: ['uop', 'zlecenie'],
+      quote:
+        'Ulga obejmuje przychody z: pracy na etacie (umowa o pracę, stosunek służbowy, praca nakładcza, spółdzielczy stosunek pracy), umowy zlecenia zawartej przez osobę fizyczną z: podmiotem prowadzącym działalność gospodarczą, właścicielem (posiadaczem) nieruchomości, w której lokale są wynajmowane lub działającym w jego imieniu zarządcą albo administratorem – jeżeli usługi są wykonywane wyłącznie dla potrzeb związanych z tą nieruchomością albo przedsiębiorstwem w spadku, Pamiętaj! Ulga nie dotyczy przychodów uzyskanych na podstawie umów o zarządzanie przedsiębiorstwem, kontraktów menedżerskich lub umów o podobnym charakterze. tytułu odbywania praktyki absolwenckiej , o której mowa w ustawie z dnia 17 lipca 2009 r. o praktykach absolwenckich, tytułu odbywania stażu uczniowskiego , o którym mowa w art. 121a ustawy z dnia 14 grudnia 2016 r. – Prawo oświatowe, zasiłku macierzyńskiego , o którym mowa w ustawie z dnia 25 czerwca 1999 r. o świadczeniach pieniężnych z ubezpieczenia społecznego w razie choroby i macierzyństwa.',
+      source: YOUTH_RELIEF,
+      sourceTitle: 'podatki.gov.pl — Ulga dla młodych',
+      effective: '2026-01-01',
+      verified: VERIFIED,
+    },
   },
 
   minimumWageMonthlyGrosz: {

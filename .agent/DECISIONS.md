@@ -139,3 +139,12 @@ Why: The slice's criteria scope KUP to dzieło, and widening it silently would b
 Rules out: Silent under-reporting for zlecenie, and a bare percentage with no condition.
 Level: 1 under the grant. In BACKLOG with its urgency condition.
 
+
+## 2026-08-18 — One engine for three contracts, every per-contract RULE cited as data
+What: `computeUop` becomes `computeContract(gross, answers, rates)`. Which contributions exist,
+     chorobowa's voluntariness, the student-under-26 ZUS exemption, the contracts the
+     under-26 relief covers and the 20/50% koszty are all `Cited` entries in the year file.
+Why: Criterion 4 fails any rule that lives in an `if`. One engine also makes sum-to-the-
+     grosz one property instead of three, and keeps etat on the arithmetic v0.1.0 shipped.
+Rules out: A second formula per contract, and a rule readable only by reading the engine.
+Level: 0 — slice 1's data-as-citation shape, widened from numbers to rules.

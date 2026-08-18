@@ -83,6 +83,53 @@ function toWholeZloty(amountGrosz: number): number {
 }
 
 /**
+ * Koszty uzyskania przychodu, as the contract's own cited rule states them.
+ * Umowa o pracę has a flat monthly quota; zlecenie and dzieło take a
+ * percentage of the przychód after contributions, and the 50% rate carries an
+ * annual ceiling. Nothing here is a literal: every number arrives from `rates`.
+ */
+type CostsRule = {
+  flatGrosz: number | null;
+  percent: number | null;
+  monthlyCapGrosz: number;
+};
+
+function costsRule(answers: Answers, rates: YearRates): CostsRule {
+  const { zlecenie, dzielo } = rates.contracts;
+  if (answers.contract === 'uop') {
+    return {
+      flatGrosz: rates.pit.deductibleCostsMonthlyGrosz.value,
+      percent: null,
+      monthlyCapGrosz: Number.POSITIVE_INFINITY,
+    };
+  }
+  if (answers.contract === 'zlecenie') {
+    return {
+      flatGrosz: null,
+      percent: zlecenie.costsPercent.value,
+      monthlyCapGrosz: Number.POSITIVE_INFINITY,
+    };
+  }
+  if (!answers.copyright) {
+    return {
+      flatGrosz: null,
+      percent: dzielo.costsPercent.value,
+      monthlyCapGrosz: Number.POSITIVE_INFINITY,
+    };
+  }
+  return {
+    flatGrosz: null,
+    percent: dzielo.copyrightCostsPercent.value,
+    // The cap is stated per tax year; a month gets one twelfth of it, the same
+    // way the PIT bracket and the relief limit are shared out.
+    monthlyCapGrosz: divRoundHalfUp(
+      dzielo.copyrightCostsAnnualCapGrosz.value,
+      MONTHS_PER_YEAR,
+    ),
+  };
+}
+
+/**
  * The monthly advance, and the base it was computed on. The screen shows that
  * base in the why-line, so it has to be the base the arithmetic actually used —
  * the one already rounded to full złote — or the row does not add up on paper.
@@ -91,18 +138,26 @@ function pitAdvance(
   grossGrosz: number,
   zusGrosz: number,
   exemptGrosz: number,
+  costs: CostsRule,
   rates: YearRates,
-): { amountGrosz: number; baseGrosz: number; costsGrosz: number } {
+): { amountGrosz: number; baseGrosz: number; costsGrosz: number; costsCapped: boolean } {
   const { pit } = rates;
   const taxedIncome = grossGrosz - exemptGrosz;
-  if (taxedIncome <= 0) return { amountGrosz: 0, baseGrosz: 0, costsGrosz: 0 };
+  if (taxedIncome <= 0) {
+    return { amountGrosz: 0, baseGrosz: 0, costsGrosz: 0, costsCapped: false };
+  }
 
   // Contributions attach to the income they were withheld from: the share that
   // sits under the relief is not deductible, so only the taxed proportion is.
   const deductibleZus =
     grossGrosz === 0 ? 0 : divRoundHalfUp(zusGrosz * taxedIncome, grossGrosz);
-  const costs = Math.min(pit.deductibleCostsMonthlyGrosz.value, Math.max(0, taxedIncome - deductibleZus));
-  const base = toWholeZloty(Math.max(0, taxedIncome - deductibleZus - costs));
+  // Both rules are computed on the przychód after contributions: the flat quota
+  // is only bounded by it, the percentage is taken of it. Both pages say so.
+  const costsBase = Math.max(0, taxedIncome - deductibleZus);
+  const uncapped =
+    costs.flatGrosz === null ? applyRate(costsBase, costs.percent ?? 0) : costs.flatGrosz;
+  const applied = Math.min(uncapped, costsBase, costs.monthlyCapGrosz);
+  const base = toWholeZloty(Math.max(0, taxedIncome - deductibleZus - applied));
 
   const monthlyThreshold = divRoundHalfUp(pit.thresholdAnnualGrosz.value, MONTHS_PER_YEAR);
   const firstBracket = Math.min(base, monthlyThreshold);
@@ -113,55 +168,104 @@ function pitAdvance(
     applyRate(secondBracket, pit.secondRatePercent.value) -
     pit.taxReducingMonthlyGrosz.value;
 
-  return { amountGrosz: toWholeZloty(Math.max(0, tax)), baseGrosz: base, costsGrosz: costs };
+  return {
+    amountGrosz: toWholeZloty(Math.max(0, tax)),
+    baseGrosz: base,
+    costsGrosz: applied,
+    costsCapped: applied === costs.monthlyCapGrosz && uncapped > costs.monthlyCapGrosz,
+  };
 }
 
+type SocialKey = 'emerytalna' | 'rentowa' | 'chorobowa';
+
 /**
- * The monthly breakdown of a gross amount, for one contract type.
- *
- * NOT IMPLEMENTED YET for zlecenie and dzieło: every contract is still computed
- * as umowa o pracę, no student exemption, no percentage costs, and the relief
- * list is not consulted. The cases in contract.test.ts fail against this stub
- * on the numbers, which is where the next commit starts.
- *
- * Every rate arrives in `rates`. There is no rate literal below this line.
+ * Which contributions this contract carries, read off the cited rules. Three
+ * absences, never mixed: a dzieło has no ZUS at all, a student under 26 on a
+ * zlecenie has theirs removed, and chorobowa on a zlecenie is voluntary and
+ * modelled off. The screen distinguishes them; the engine only says which
+ * lines exist.
  */
-export function computeContract(
-  grossGrosz: number,
-  answers: Answers,
-  rates: YearRates,
-): ContractResult {
+function socialKeys(answers: Answers, rates: YearRates, zusExempt: boolean): SocialKey[] {
+  const all: SocialKey[] = ['emerytalna', 'rentowa', 'chorobowa'];
+  if (zusExempt) return [];
+  if (answers.contract === 'dzielo') {
+    return rates.contracts.dzielo.outsideZus.value ? [] : all;
+  }
+  if (answers.contract === 'zlecenie') {
+    return rates.contracts.zlecenie.chorobowaVoluntary.value
+      ? ['emerytalna', 'rentowa']
+      : all;
+  }
+  return all;
+}
+
+/** A pupil or student under 26 is outside ZUS on a zlecenie. Both answers. */
+function isZusExempt(answers: Answers, rates: YearRates): boolean {
+  return (
+    answers.contract === 'zlecenie' &&
+    answers.under26 &&
+    answers.student &&
+    rates.contracts.zlecenie.studentUnder26Exempt.value
+  );
+}
+
+function core(grossGrosz: number, answers: Answers, rates: YearRates) {
   const gross = Math.max(0, Math.round(grossGrosz));
   const { contributions, youthRelief } = rates;
-  const { contract, under26, student, copyright } = answers;
+  const { under26 } = answers;
 
-  const emerytalna = applyRate(gross, contributions.emerytalna.value);
-  const rentowa = applyRate(gross, contributions.rentowa.value);
-  const chorobowa = applyRate(gross, contributions.chorobowa.value);
-  const zus = emerytalna + rentowa + chorobowa;
+  const zusExempt = isZusExempt(answers, rates);
+  const social = socialKeys(answers, rates, zusExempt);
+  const percentOf: Record<SocialKey, number> = {
+    emerytalna: contributions.emerytalna.value,
+    rentowa: contributions.rentowa.value,
+    chorobowa: contributions.chorobowa.value,
+  };
+  const socialAmounts = social.map(
+    (key) => [key, applyRate(gross, percentOf[key])] as const,
+  );
+  const zus = socialAmounts.reduce((total, [, amount]) => total + amount, 0);
 
   // The health contribution is not 9% of the gross: ZUS is taken off first.
   const healthBase = gross - zus;
-  const zdrowotna = applyRate(healthBase, contributions.zdrowotna.value);
+  const healthApplies =
+    !zusExempt &&
+    !(answers.contract === 'dzielo' && rates.contracts.dzielo.outsideZus.value);
+  const zdrowotna = healthApplies ? applyRate(healthBase, contributions.zdrowotna.value) : 0;
 
+  const reliefCovers = youthRelief.contracts.value.includes(answers.contract);
+  const reliefApplies = reliefCovers && under26;
   const monthlyReliefLimit = divRoundHalfUp(
     youthRelief.annualLimitGrosz.value,
     MONTHS_PER_YEAR,
   );
-  const exempt = under26 ? Math.min(gross, monthlyReliefLimit) : 0;
+  const exempt = reliefApplies ? Math.min(gross, monthlyReliefLimit) : 0;
 
-  const pit = pitAdvance(gross, zus, exempt, rates);
-  const pitWithoutRelief = under26 ? pitAdvance(gross, zus, 0, rates) : pit;
+  const costs = costsRule(answers, rates);
+  // Only the social contributions reduce the PIT base; zdrowotna has not been
+  // deductible since 2022, which is why it is not in this sum.
+  const pit = pitAdvance(gross, zus, exempt, costs, rates);
+  const pitWithoutRelief = reliefApplies ? pitAdvance(gross, zus, 0, costs, rates) : pit;
 
   const amounts: Array<[LineKey, number, number, number]> = [
-    ['emerytalna', emerytalna, gross, contributions.emerytalna.value],
-    ['rentowa', rentowa, gross, contributions.rentowa.value],
-    ['chorobowa', chorobowa, gross, contributions.chorobowa.value],
-    ['zdrowotna', zdrowotna, healthBase, contributions.zdrowotna.value],
+    ...socialAmounts.map(
+      ([key, amount]) => [key, amount, gross, percentOf[key]] as [LineKey, number, number, number],
+    ),
+    ...(healthApplies
+      ? ([['zdrowotna', zdrowotna, healthBase, contributions.zdrowotna.value]] as Array<
+          [LineKey, number, number, number]
+        >)
+      : []),
+    // One row at zero carrying the reason, never five zero rows and never a
+    // silent absence: the rule is about who this person is, not about the
+    // contract, so it is collapsed rather than omitted.
+    ...(zusExempt
+      ? ([['zusOff', 0, gross, 0]] as Array<[LineKey, number, number, number]>)
+      : []),
     [
       'pit',
       pit.amountGrosz,
-      under26 ? pitWithoutRelief.baseGrosz : pit.baseGrosz,
+      reliefApplies ? pitWithoutRelief.baseGrosz : pit.baseGrosz,
       rates.pit.firstRatePercent.value,
     ],
   ];
@@ -172,24 +276,68 @@ export function computeContract(
     return { key, amountGrosz, baseGrosz: Math.max(0, baseGrosz), ratePercent, remainderGrosz: remainder };
   });
 
-  // The net is what is left after the lines, by subtraction. That is what makes
-  // the lines sum back to the gross exactly, at every amount.
   return {
-    grossGrosz: gross,
-    contract,
+    gross,
     lines,
+    // The net is what is left after the lines, by subtraction. That is what
+    // makes the lines sum back to the gross exactly, at every amount.
     netGrosz: remainder,
-    under26,
-    student,
-    copyright,
-    reliefCovers: true,
-    reliefApplies: under26,
-    pitWithoutReliefGrosz: pitWithoutRelief.amountGrosz,
-    reliefWorthGrosz: Math.max(0, pitWithoutRelief.amountGrosz - pit.amountGrosz),
-    zusExempt: false,
-    studentWorthGrosz: 0,
-    costsGrosz: pit.costsGrosz,
-    costsPercent: null,
-    costsCapped: false,
+    reliefCovers,
+    reliefApplies,
+    zusExempt,
+    pit,
+    pitWithoutRelief,
+    costsPercent: costs.percent,
+  };
+}
+
+/**
+ * The monthly breakdown of a gross amount, for one contract type.
+ *
+ * Assumes the cases slice one and two ship: one contract at a time, a filed
+ * PIT-2 so the payer applies the monthly kwota zmniejszająca, and chorobowa
+ * left off where it is voluntary.
+ *
+ * Every rate and every rule arrives in `rates`. There is no rate literal and no
+ * contract name in a condition that decides an amount below this line.
+ */
+export function computeContract(
+  grossGrosz: number,
+  answers: Answers,
+  rates: YearRates,
+): ContractResult {
+  const result = core(grossGrosz, answers, rates);
+
+  // What the student answer is worth this month, in either direction: the same
+  // month computed with the other answer. The delta chip and the live region
+  // both quote it, so it is computed once, here, and not on the screen.
+  const studentMatters = answers.contract === 'zlecenie' && answers.under26;
+  const studentWorthGrosz = studentMatters
+    ? Math.abs(
+        core(grossGrosz, { ...answers, student: true }, rates).netGrosz -
+          core(grossGrosz, { ...answers, student: false }, rates).netGrosz,
+      )
+    : 0;
+
+  return {
+    grossGrosz: result.gross,
+    contract: answers.contract,
+    lines: result.lines,
+    netGrosz: result.netGrosz,
+    under26: answers.under26,
+    student: answers.student,
+    copyright: answers.copyright,
+    reliefCovers: result.reliefCovers,
+    reliefApplies: result.reliefApplies,
+    pitWithoutReliefGrosz: result.pitWithoutRelief.amountGrosz,
+    reliefWorthGrosz: Math.max(
+      0,
+      result.pitWithoutRelief.amountGrosz - result.pit.amountGrosz,
+    ),
+    zusExempt: result.zusExempt,
+    studentWorthGrosz,
+    costsGrosz: result.pit.costsGrosz,
+    costsPercent: result.costsPercent,
+    costsCapped: result.pit.costsCapped,
   };
 }
