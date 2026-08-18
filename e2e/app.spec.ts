@@ -460,8 +460,9 @@ test('P1-E — a chip earned on one contract never survives onto another', async
   await page.getByRole('radio', { name: 'Angielski' }).click();
   await page.getByTestId('contract-bar').getByRole('radio', { name: 'Employment' }).click();
   await answerEn(page, 'Are you under 26?', 'No').click();
-  await expect(net).toHaveText(/4\D?420,43/);
-  await expect(chip).toHaveText(/291,00/);
+  // en-GB groups and points the other way round: 4,420.43.
+  await expect(net).toHaveText(/4\D?420\.43/);
+  await expect(chip).toHaveText(/291\.00/);
 
   await contract(page, 'Dzieło').click();
   await expect(chip, 'the English chip carried onto dzieło').toHaveCount(0);
