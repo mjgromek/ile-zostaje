@@ -89,14 +89,11 @@ Measured 2026-08-19, slice 2 cycle 4, the release check — **PASS**, nine crite
 
 ## Checkpoints
 
-- 2026-08-18 22:48 — builder handed over: df2b307..d75fe30, vitest 26, playwright 11, build
-  ok. Three deferrals in BACKLOG. Port 5180 is the stakeholder's; agents used 5181+.
-- 2026-08-18 23:04 — check 1: 1 P1 + 3 P2, Δ 20. Criterion 4 met in data, contradicted on
-  screen. 23:11 fix 1: dee069f..bbd5899, all three closed, a red test each first.
-- 2026-08-18 23:28 — check 2: two P2 closed, P1-A closed on its path; new P1-E — the same
-  false claim from a stale chip surviving a contract or amount change. Δ still 20.
-- 2026-08-18 23:37 — fix 2, the final attempt on that root cause: P1-E closed at c316bbe.
-  Over-correction 19/19 on the built app. R4-F11 logged.
+- 2026-08-18 22:48 — builder handed over df2b307..d75fe30. Port 5180 is the stakeholder's;
+  every agent used 5181+.
+- 2026-08-18 23:04 — check 1: 1 P1 + 3 P2, Δ 20; 23:11 fix 1 dee069f..bbd5899 closed all
+  three, a red test each first. 23:28 check 2: new P1-E, the same false claim from a stale
+  chip. 23:37 fix 2, the final attempt on that root cause: P1-E closed at c316bbe.
 - 2026-08-18 23:55 — check 3: P1-E CLOSED, nine criteria PASS, Δ 0 (41/41, 5/5). New P1-F:
   §8's immediate announcement dropped for contract and copyright, 579/581 ms vs 79/85 ms.
 - 2026-08-19 00:02 — P1-F fix 01389cd: the announce key names all four answers. Latencies
