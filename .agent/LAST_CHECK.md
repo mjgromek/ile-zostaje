@@ -93,3 +93,48 @@ renders U+00A0, making the 120 000,00 zł cap look absent; an EN "stray Polish" 
 the verbatim source quotes criterion 5 requires; an EN selector matching the Polish `Etat`.
 One real behaviour re-checked and cleared: an amount above 1 000 000 zł clears the live
 region, which is `parseGross`'s range-error path with its own on-screen message.
+
+## PROBE after the release check — P1-J, CONFIRMED. The release is BLOCKED.
+
+Raised by the orchestrator at the architecture gate as an INFERENCE FROM CODE, handed to a
+checker as a question, and measured 2026-08-19 in Chromium against the production build.
+The chip text is read from `[data-testid="delta-chip"]` after a 250 ms settle; the first
+probe without the wait read a stale chip, which is why the settle is in the measurement.
+
+**P1-J — the `Nie` delta chip prints the whole PIT advance as what the under-26 relief
+would be worth, so it OVERSTATES the relief above the relief's monthly limit.** OBSERVED:
+
+| gross, uop | `Tak` chip | `Nie` chip | overstatement |
+| --- | --- | --- | --- |
+| 6 000 | +291,00 | −291,00 | 0 |
+| 10 318 | +738,00 | −738,00 | 0 |
+| 10 320 | +738,00 | −739,00 | 1,00 |
+| 12 000 | +759,00 | −934,00 | 175,00 |
+| 20 000 | +1 968,00 | −3 143,00 | 1 175,00 |
+
+Zlecenie has the same shape: 12 000 -> +607,00 vs −722,00; 20 000 -> +1 446,00 vs
+−2 243,00. English identical: `−934.00 zł without the under-26 relief`, `−3,143.00 zł`.
+
+**Hand arithmetic, uop 12 000 zł, from `rates-2026.ts` only.** ZUS 9,76+1,5+2,45% =
+1 645,20. Monthly relief limit `divRoundHalfUp(8 552 800, 12)` = 712 733 gr = 7 127,33 zł.
+Without relief: base = round-to-zloty(12 000 − 1 645,20 − 250) = 10 105,00; 12% on 10 000
+plus 32% on 105 minus 300 = **934,00**. With relief: taxed 4 872,67, proportional ZUS
+668,04, base 3 955,00, 12% minus 300 = 175,00, so the relief is worth **759,00**. Every
+figure reproduces the screen exactly, so the `Tak` chip is the truth and the `Nie` chip
+prints the whole advance.
+
+**Cause, OBSERVED in source.** `src/engine/contract.ts:248` —
+`const pitWithoutRelief = reliefApplies ? pitAdvance(gross, zus, 0, costs, rates) : pit;`
+With `under26 = false`, `reliefApplies` is false, so `pitWithoutReliefGrosz` is the whole
+advance, and `src/components/Answer.tsx:97` prints it as the relief's worth. The comment at
+:94-96 anticipates exactly this for off-list contracts, but not for the annual-limit case.
+
+**Grade P1.** Divergence begins at about 10 319 zł/month on uop (10 318 identical, 10 320
+differs: above the 7 127,33 zł limit the exempt share still absorbs all tax until the
+residual base clears the kwota zmniejszająca), and it grows without bound — 37% at 20 000
+zł. Only the `Nie` chip is wrong: net figures, the `Tak` chip and the live region are
+correct. Bounded fix: the `Nie` branch needs the counterfactual, `core` run with
+`under26: true`, the way `studentWorthGrosz` is already computed at `contract.ts:314-320`.
+
+**Why four checker cycles missed it:** every observed figure was at 6 000 zł, below the
+relief's monthly limit, where the whole advance and the relief's worth coincide exactly.

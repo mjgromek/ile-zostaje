@@ -104,3 +104,6 @@ Measured 2026-08-19, slice 2 cycle 4, the release check — **PASS**, nine crite
 - 2026-08-19 00:24 — security-gate, trigger USER-SUPPLIED INPUT: PASS, one P2 (no CSP, in
   BACKLOG). No innerHTML path, input bounded, storage holds only what was typed, the built
   artifact's nine requests are all same-origin, deps unchanged.
+- 2026-08-19 00:26 — PROBE CONFIRMED, P1-J: the `Nie` delta chip prints the whole PIT advance as the
+  relief worth, overstating it above ~10 319 zl/month — 37% at 20 000. Release BLOCKED,
+  tag held. First cycle on this root cause.
