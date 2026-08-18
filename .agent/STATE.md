@@ -99,11 +99,11 @@ Measured 2026-08-19, slice 2 cycle 4, the release check — **PASS**, nine crite
   Over-correction 19/19 on the built app. R4-F11 logged.
 - 2026-08-18 23:55 — check 3: P1-E CLOSED, nine criteria PASS, Δ 0 (41/41, 5/5). New P1-F:
   §8's immediate announcement dropped for contract and copyright, 579/581 ms vs 79/85 ms.
-- 2026-08-19 00:02 — P1-F fix 01389cd, first cycle: the announce key names all four answers.
-  Latencies 11-25 ms, typing still 503.7 ms. playwright 14 -> 16. Release check.
-- 2026-08-19 00:21 — release check PASS. Two gates before the tag: security-gate, fired on
-  user input; and a probe on the `Nie` delta chip above the relief's monthly limit, inferred
-  from code at the architecture gate and NOT measured. P2-I in BACKLOG.
-- 2026-08-19 00:24 — security-gate, trigger USER-SUPPLIED INPUT: PASS, no P0, no P1, one P2 (no CSP,
-  in BACKLOG). No innerHTML path, hostile input bounded, localStorage holds only what was
-  typed, and the built artifact makes nine requests, all same-origin. Deps unchanged.
+- 2026-08-19 00:02 — P1-F fix 01389cd: the announce key names all four answers. Latencies
+  11-25 ms, typing still 503.7 ms. playwright 14 -> 16.
+- 2026-08-19 00:21 — release check PASS. Architecture gate: NO CHANGE, one deferral.
+  Probe opened on the `Nie` delta chip above the relief's monthly limit — inferred from
+  code, NOT measured.
+- 2026-08-19 00:24 — security-gate, trigger USER-SUPPLIED INPUT: PASS, one P2 (no CSP, in
+  BACKLOG). No innerHTML path, input bounded, storage holds only what was typed, the built
+  artifact's nine requests are all same-origin, deps unchanged.
