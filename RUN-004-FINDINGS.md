@@ -219,3 +219,31 @@ on a miss, so it fails loudly the way the editing tool does. No `sed -i` was run
 — "this rule outranks any harness preference for `sed`; a Bash edit is allowed only if it
 exits non-zero on a non-match" — so the next agent does not have to adjudicate it. Do NOT
 implement here: contract and root-file edits in this run are the stakeholder's call (R4-F1).
+
+## R4-F11 — the commit-msg hook demands a trailer the builder contract forbids
+**Observed or inferred:** OBSERVED, this session, on the P1-E fix commit.
+**Evidence:** `.claude/agents/builder.md` reads "**Every commit ends with the trailer
+`Agent: builder`**, on its own line, after a blank line. Exactly that format, no other
+trailers." The hook refused that exact commit:
+
+```
+REFUSED  rule A, test-first ordering
+  Nearest test: commit 7fd3eb5 touches no overlapping path.
+  staged:      src/components/Answer.tsx
+  test commit: e2e/app.spec.ts
+  Satisfy it either way:
+    - the test shares a directory or a filename stem with the code, or
+    - the message carries a trailer  Covers: <path> [<path>...]
+```
+
+**Who it hits:** every builder in a project whose browser tests live outside the source
+tree — here `e2e/app.spec.ts` covers `src/components/*.tsx`, so no path rule can ever see
+the link and rule A always demands the trailer the contract bans. It bites hardest in a
+fix cycle, where the covering test is by definition an e2e case.
+**How this run handled it:** the hook won on the mechanism and the contract won on the
+shape — `Covers: src/components/Answer.tsx` above, `Agent: builder` still the last line,
+so the commit still ends with the trailer the contract names.
+**Proposed fix:** one clause in `.claude/agents/builder.md` — "plus `Covers:` where the
+commit-msg hook's rule A requires it, ordered above `Agent:`" — so the next builder does
+not adjudicate a contract against a hook. Do NOT implement here: contract edits in this
+run are the stakeholder's call (R4-F1).
