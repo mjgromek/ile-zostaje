@@ -74,3 +74,7 @@ Format:
   (`Bez składek ZUS…` and `Z ulgą dla młodych…`), both true — Urgent when: a user or the
   checker reads the pair as redundant, or a third relief would make it three lines.
   Raised by the builder in slice 2.
+- A language switch deliberately leaves the delta chip standing, because `result` does not
+  change and the chip's numerals are formatted per locale at render — Urgent when: a chip's
+  text becomes locale-derived beyond number formatting, which would make the standing chip
+  read in the previous language. Raised by the builder in slice 2's fix cycle 2.

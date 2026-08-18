@@ -104,3 +104,6 @@ held-out 4/5, C4 path B failing). Verbatim report in `.agent/LAST_CHECK.md`.
 - 2026-08-18 23:28 — re-check: P2-B and P2-C closed, P1-A closed on its own path; new P1-E, the same
   false claim reached by a stale chip surviving a contract or amount change. Delta still 20.
   Fix cycle 2 — the second and final attempt on this root cause.
+- 2026-08-18 23:37 — fix cycle 2: P1-E closed at c316bbe, deps [under26,student] -> [result]. Two red
+  browser cases first. Over-correction check 19/19 on the built app. playwright 12 -> 14.
+  R4-F11 logged. Final re-check.
