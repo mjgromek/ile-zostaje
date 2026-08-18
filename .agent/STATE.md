@@ -64,8 +64,8 @@ Checked in a real browser against the running app, not against the diff.
 
 ## In flight
 
-`builder` — fix cycle 1 of at most 2: P1-A, plus P2-B and P2-C which are one-line and
-adjacent. Design is CLOSED and not reopened by any finding.
+`builder` — fix cycle 2 of 2 on P1-E, the stale delta chip. A third attempt on this root
+cause is not allowed; it escalates instead. Design is CLOSED and not reopened.
 
 ## Blocked
 
@@ -73,22 +73,19 @@ Nothing. Slice 2 proceeds under the run-4 autonomy grant, recorded in DECISIONS.
 
 ## Last verification result
 
-Measured 2026-08-18, slice 2 cycle 1 — FINDINGS: 1 P1, 3 P2, Δ = 20 (visible 37/37,
-held-out 4/5, the C4 case failing). Verbatim report in `.agent/LAST_CHECK.md`.
+Measured 2026-08-18, slice 2 cycle 2 — FINDINGS: 1 P1 (P1-E), 1 P2, Δ = 20 (visible 39/39,
+held-out 4/5, C4 path B failing). Verbatim report in `.agent/LAST_CHECK.md`.
 
 ## Next slices, in order
 
-3. **The brutto/netto toggle**, split out of slice 2 by size. A user says "I want 5 000 on
-   hand — what must I earn?" Its criteria, written now so they cannot be quietly dropped:
-   the toggle sits on the amount input and defaults to brutto; its state persists with the
-   other entries; netto->brutto INVERTS the same cited rates the forward path uses, by
-   solving against the real function, never a second formula or a typical multiplier; the
-   round-trip closes to the grosz for every contract and relief combination, checked in
-   the browser and not only in Vitest; and where the inverse is not unique or undefined —
-   flat and stepped regions from thresholds and rounding — the screen says so rather
-   than printing the first numeric solution as the answer. Both directions carry the
-   estimate-not-advice framing: a gross derived from a target net looks like a stronger
-   claim and is not one.
+3. **The brutto/netto toggle** — "I want 5 000 on hand, what must I earn?" Criteria written
+   now so they cannot be quietly dropped: it sits on the amount input, defaults to brutto
+   and persists with the other entries; netto->brutto INVERTS the cited rates by solving
+   against the real function; the round-trip closes to the grosz for every contract and
+   relief combination, in the browser and not only in Vitest; where the inverse is not
+   unique or is undefined the screen says so instead of printing the first solution; both
+   directions keep the estimate-not-advice framing. Place, copy and the measured
+   non-uniqueness are settled in DESIGN-SLICE-2 §3; what it rules out is in DECISIONS.
 4. Input units: hour, week, month, year.
 5. The leftover layer — rent and food subtracted from the net. Survives every scope cut.
 6. Deploy to a public URL, verified with `hooks/verify-deploy.sh`.
