@@ -13,17 +13,15 @@ found`, which reads as "not installed" and is wrong. R4-F3.
 
 **Slice 2 — umowa zlecenie and umowa o dzieło, with student status on zlecenie.**
 
-The contract control's two disabled slots come alive. Zlecenie brings its own ZUS rules
-and, for a student under 26, the removal of ZUS entirely — the single biggest number this
-audience will see change, and the reason they came. Dzieło is a different animal: no ZUS,
-no health contribution, and koszty uzyskania przychodu at 20% or 50%, where 50% depends on
-transfer of copyright and is capped annually.
+The contract control's two disabled slots come alive. Zlecenie has its own ZUS rules and,
+for a student under 26, no ZUS at all — the biggest number this audience will see change.
+Dzieło has no ZUS and no health contribution, and koszty uzyskania przychodu at 20% or
+50%, where 50% turns on transfer of copyright and is capped annually.
 
 The screen becomes **variant B**, chosen by the stakeholder from three rendered layouts:
-contract type as a full-width bar above everything, one card holding the amount and the
-Nie/Tak questions, the answer directly below. The lede sentence is CUT — "to wiadomo" —
-not shortened, not moved, and never reintroduced under another name. theme-factory is
-closed: type stays as shipped.
+the contract bar above everything, one card holding the amount and the Nie/Tak questions,
+the answer directly below. The lede sentence is CUT — "to wiadomo" — not shortened, not
+moved, never reintroduced under another name. theme-factory is closed: type as shipped.
 
 Not in this slice: the brutto/netto toggle and its reverse calculation — slice 3, NOT
 dropped. A new engine capability, not a label, with its own verification surface.
