@@ -41,7 +41,10 @@ export function Answer({ lang, result }: Props) {
       setLive('');
       return;
     }
-    const state = `${under26}/${student}`;
+    // Every answer, not just two of them. Spec §8 binds contract, student and
+    // copyright to an immediate utterance; a key that names only under-26 and
+    // student drops the other two into the typing debounce, silently.
+    const state = `${result?.contract}/${under26}/${student}/${result?.copyright}`;
     const answered = announced.current !== null && announced.current !== state;
     announced.current = state;
 
@@ -58,7 +61,18 @@ export function Answer({ lang, result }: Props) {
     }
     const id = setTimeout(() => setLive(sentence), 500);
     return () => clearTimeout(id);
-  }, [netGrosz, under26, student, reliefApplies, reliefWorth, zusExempt, studentWorth, lang]);
+  }, [
+    netGrosz,
+    result?.contract,
+    under26,
+    student,
+    result?.copyright,
+    reliefApplies,
+    reliefWorth,
+    zusExempt,
+    studentWorth,
+    lang,
+  ]);
 
   // The delta chip: what the answer was worth, shown for a few seconds and then
   // replaced by a quiet permanent line so the state stays legible. Two triggers
