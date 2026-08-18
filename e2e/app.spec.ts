@@ -283,6 +283,39 @@ test('slice 2, criterion 4 — the relief covers the contracts its source lists'
   await expect(page.getByTestId('net-amount')).toHaveText(/4\D?845,20/);
 });
 
+test('P1-A — the delta chip never prices the relief on a contract it does not cover', async ({
+  page,
+}) => {
+  // Criterion 4 on screen rather than in the engine: the note two blocks below
+  // says the relief does not cover umowa o dzieło, so no chip may claim the
+  // answer was worth money there. The net is the arbiter — it does not move.
+  await page.goto('/');
+  await enterGross(page, '6000');
+  await contract(page, 'Dzieło').click();
+
+  const net = page.getByTestId('net-amount');
+  const chip = page.getByTestId('delta-chip');
+  await expect(net).toHaveText(/5\D?724,00/);
+
+  for (const value of ['Tak', 'Nie'] as const) {
+    await answer(page, Q_UNDER26, value).click();
+    await expect(answer(page, Q_UNDER26, value)).toHaveAttribute('aria-checked', 'true');
+    // The chip lives for six seconds, so a settle far shorter than that is
+    // enough to catch one: absence asserted immediately would pass on a race.
+    await page.waitForTimeout(300);
+    await expect(net).toHaveText(/5\D?724,00/);
+    await expect(chip, `chip shown after answering "${value}" on dzieło`).toHaveCount(0);
+  }
+
+  // Control: on umowa o pracę the same answer really does move the net, so the
+  // chip must appear there. Without this the test would pass on a chip that
+  // never renders at all.
+  await contract(page, 'Etat').click();
+  await answer(page, Q_UNDER26, 'Tak').click();
+  await expect(net).toHaveText(/4\D?711,43/);
+  await expect(chip).toHaveText(/291,00/);
+});
+
 /** Scrolls the control into view and measures it where it will be clicked. */
 async function target(locator: ReturnType<Page['locator']>) {
   await locator.scrollIntoViewIfNeeded();
