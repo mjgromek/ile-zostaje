@@ -103,3 +103,6 @@ BACKLOG. Verbatim report in `.agent/LAST_CHECK.md`.
   §8's immediate announcement dropped for contract and copyright, 579/581 ms vs 79/85 ms.
 - 2026-08-19 00:02 — P1-F fix 01389cd, first cycle: the announce key names all four answers.
   Latencies 11-25 ms, typing still 503.7 ms. playwright 14 -> 16. Release check.
+- 2026-08-19 00:21 — release check: PASS, nine criteria, delta 0, no open P0/P1. Two gates before the
+  tag: security-gate fired on user input, and one probe on the "Nie" delta chip above the
+  relief limit — inferred from code at the architecture gate, not measured. P2-I in BACKLOG.

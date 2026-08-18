@@ -1,110 +1,95 @@
 <!-- Overwritten every phase. The checker cannot write; this is its report, preserved. -->
 
-# LAST CHECK — slice 2, cycle 3 (final re-check after fix cycle 2)
+# LAST CHECK — slice 2, cycle 4, the release check
 
-Measured 2026-08-18 against `afd76ef`, fix cycle 2 `dc22f78..e691a6e`, production build
-served on :5181, headless Chromium, PL and EN. Phase-start `1bbffef`. STATE validated
-first: every cited SHA resolves, `v0.1.0` -> `f8fdf09`, and the one-line change STATE
-claims is present in the tree.
+Measured 2026-08-19 against `3ac5c90`, phase-start `1bbffef`, production build on :5181,
+headless Chromium, PL and EN. STATE validated before use: every SHA it cites resolves
+(`1bbffef`, `d6b943c`, `01389cd`, `44afef5`, `3ac5c90`), `v0.1.0` -> `f8fdf09`, and the
+one-line change it claims is present at `src/components/Answer.tsx:47`.
+`git status --porcelain` empty at start and end.
 
-## VERDICT: FINDINGS — 1 x P1 (P1-F, NEW, different root cause), 2 x P2. Δ = 0.
+## VERDICT: PASS. P1-F CLOSED. Δ = 0. No open P0 or P1. Two P2, both deferred.
 
-**P1-E is CLOSED. All nine criteria PASS.** The slice does not release yet: P1-F is a spec
-constraint silently dropped, not the P1-A/P1-E root cause, so it is a FIRST cycle on a new
-finding, not a forbidden third.
+## P1-F — CLOSED, OBSERVED with the checker's own instrument
 
-## P1-E — CLOSED, OBSERVED in a real browser, both languages
+Instrument: an in-page capture-phase listener stamps `performance.now()`, a
+`MutationObserver` on the `role="status"` node stamps the announcement; no CDP in the
+interval. Second, independent instrument: Node-side 25 ms polling — the same method that
+read 579/581 ms at cycle 3.
 
-- (a) under-26 `Tak` on etat -> chip `+291,00 zł z ulgą dla młodych`; click Dzieło inside
-  the dwell -> no chip, substitution note on screen. Absence re-read 900 ms later, so it is
-  not a paint race.
-- (b) under-26 `Tak` at 6 000, then type 20 000 -> chip gone, net `14 529,78 zł`, both
-  languages. (c) etat chip then switch to zlecenie (covered, worth 211 not 291) -> gone.
-- (d) student chip `+1 154,80 zł, bo studiujesz` on zlecenie -> Dzieło -> copyright `Tak`:
-  gone at every step. Re-clicking the same answer prices nothing and correctly leaves a
-  truthful chip standing.
+| control | in-page ms | 25 ms poll | utterances |
+| --- | --- | --- | --- |
+| contract -> Zlecenie / Dzieło / Etat | 14.3 / 14.9 / 13.3 | 58 / 57 / 57 | 1 each |
+| copyright -> Tak / Nie | 11.6 / 12.6 | 61 / 74 | 1 each |
+| under-26 -> Tak / Nie | 27.5 / 14.2 | 82 / 72 | 1 each |
+| student -> Tak | 13.5 | 59 | 1 |
+| EN: contract, under-26, copyright x2 | 13.0-15.2 | — | 1 each |
 
-## No over-correction — the chip still fires where it is true
+The same probe read 504.1 ms on the same page for typing, so it can produce a slow value;
+it did not.
 
-etat ±291,00, zlecenie ±211,00, student on zlecenie ±1 154,80, all in PL and EN, exact
-strings read off the page. Dwell measured by polling to detachment: **6 420 ms** normal,
-**10 455 ms** under `reducedMotion: reduce` (`matchMedia` confirmed `true` in-page) — spec
-§4's 6 s and 10 s. The permanent line stands after the chip goes. The builder's 19/19 was
-not taken on trust: 10 independent browser scenarios against the production build.
+## The debounce and the utterance count
 
-## The nine criteria
+A 5-keystroke burst: **504.1 ms PL, 506.4 ms EN, one utterance each** — no keystroke is its
+own utterance. Re-clicking the same contract or answer: **0 utterances**. Two different
+answers 100 ms apart: 2 utterances, one per real change. Exactly one
+`role="status" aria-live="polite" aria-atomic="true"` node in the tree; the visible numeral
+is still `aria-hidden="true"`.
 
-1. PASS. 1 602 uop cases (0..40 000 zł step 50 x under-26) against `v0.1.0`'s OWN `uop.ts`
-   and `rates-2026.ts`: 0 mismatches on net, every line amount/base and the relief fields.
-   A control proved the comparator can fail. Three slots, three distinct nets, no reload.
-2. PASS. Student control on zlecenie only. Student under 26: net 4 845,20 -> 6 000,00,
-   ladder 4 rows -> 2, zero ZUS rows and zero ZUS band segments, exemption quote on page.
-3. PASS. Dzieło has no emerytalna/rentowa/chorobowa/zdrowotna row. 5 724,00 -> 5 940,00 via
-   `Przenosisz prawa autorskie?`; the control label carries no `50%`; cap `120 000,00 zł`
-   and the creative-work condition printed. The cap is its own entry, not the PIT alias.
-4. PASS, both routes, both languages. `youthRelief.contracts` = `['uop','zlecenie']` in data
-   with its quote; on dzieło the outlined note states the limit in the active language and
-   the answer block claims no relief — by answering on dzieło AND by answering first and
-   switching, the route that failed at cycle 2.
-5. PASS. All 20 cited entries carry source/quote/effective/verified; all 11 pages re-fetched
-   today, HTTP 200. 18 quotes matched verbatim by machine; the 2 misses were the checker's
-   own HTML stripper inserting a space at a link boundary — both re-read by hand in the raw
-   HTML and verbatim. A fabricated control quote was not found.
-6. PASS. 9 rendered states (3 contracts x relief/student/20%/50%), amounts added off the
-   page with struck pre-relief figures excluded: every one sums to exactly 6 000,00 zł.
-7. PASS. 6 EN states across all three contracts: no `⟦key⟧` marker, no Polish beyond the
-   settled `Zlecenie` / `Dzieło` / `zł`. Key-parity and allowlist tests green.
-8. PASS. Variant B at 390x844 and 1280x800: bar full width above the field (358/390,
-   1088/1280), amount and both Nie/Tak groups in one `<section>`, answer below, no lede and
-   no replacement sentence.
-9. PASS. Engine cases hand-computed with the arithmetic in comments per contract and relief
-   state; the baseline is taken from the tag; Playwright drives a real browser for 1-4.
+## Criteria re-verified in a real browser, and the chip
 
-## P1-F — NEW. Spec §8's immediate announcement was dropped for two of the three controls
+1. PASS. Three slots, three distinct nets (4 420,43 / 4 634,20 / 5 724,00), **0 page loads**
+   across the clicks. Umowa o pracę compared against the v0.1.0 ARTIFACT built from the tag
+   and served on :5182 — 16 inputs (8 amounts x under-26 on/off), 0 mismatches.
+2. PASS. Student control on zlecenie only (1/0/0). Under 26 + student: 4 845,20 ->
+   6 000,00, no emerytalna/rentowa/chorobowa/zdrowotna row and no such band segment; the
+   `zusOff` row is the deliberate 0 zł explanatory row, not a charge; quote and link on page.
+3. PASS. No ZUS or health row on dzieło. Control reads `Przenosisz prawa autorskie?` with
+   no `50%` in the label; 20% -> 50% moves the net 5 724,00 -> 5 940,00; the cap prints
+   `50% liczy się do 120 000,00 zł kosztów rocznie.` from `copyrightCostsAnnualCapGrosz`
+   (12 000 000), consumed at `contract.ts:126`.
+4. PASS. Under-26 moves the net on etat and zlecenie and not on dzieło; both languages say
+   so on dzieło.
+6. PASS. 8 rendered ladders (3 contracts x relief/student/20%/50%), struck pre-relief
+   figures excluded: every one sums to exactly 6 000,00 zł.
+7 and 8 spot-checked: 0 `⟦key⟧` markers and 0 stray Polish in EN once the verbatim source
+quotes are excluded; bar 1088/1280 and 358/390 above the card, each contract's Nie/Tak
+groups inside the amount `<section>`.
 
-OBSERVED, PL, production build, polling the `role="status"` region every 50 ms: under-26
-answer **79 ms**, student answer **85 ms**, **contract change 579 ms**, **copyright answer
-581 ms**, typing 550 ms. The instrument reported both fast and slow values on the same page,
-so it can produce either. DESIGN-SLICE-2 §8 binds the builder: "contract, student and
-copyright changes announce immediately, one utterance each, never debounced." Contract and
-copyright are debounced exactly like typing. Root cause `src/components/Answer.tsx:44` —
-`const state = ${under26}/${student}` — so only those two answers set `answered` and
-everything else falls to the 500 ms timeout; `result.contract` and `result.copyright` are
-already on the props, so the fix is that one line. Recorded nowhere as a deferral, and no
-acceptance criterion could catch it — this is the spec-vs-criteria gap. A screen-reader user
-is told the truth, 500 ms late. First cycle on this root cause, unrelated to P1-A/P1-E.
-
-## P2s
-
-**P2-G, new.** With the amount cleared and retyped, the chip re-fires without any answer
-having changed: the ref guarding the moment resets to `false/false` while `result` is null.
-OBSERVED `6 000 -> empty -> 20 000` prints `+1 968,00 zł z ulgą dla młodych`, which IS the
-relief's true worth at 20 000 (engine: 1 968,00), so no false claim today.
-
-**P2-H.** Δ = 0. Reported as required; nothing to act on.
-
-Informational, not graded: during the dwell the chip and the permanent line are both on
-screen where §4 says "after 6 s replaced by" — identical to what shipped and passed in
-`v0.1.0`, and the end state matches the spec.
+**The chip, unchanged from cycle 3:** ±291,00 zł (etat), ±211,00 zł (zlecenie),
+±1 154,80 zł (student). Never on dzieło. Earned on etat then Dzieło clicked inside the dwell
+-> none, re-read 900 ms later still none. Earned then amount changed to 20 000 -> none.
 
 ## Counts, Δ, mutation probe
 
-- `npm test` -> **27 passed, 3 files**. `npx playwright test` -> **14 passed, chromium**.
-  `npm run build` -> `tsc -b && vite build` clean, 53 modules, 231.55 kB. Collected counts
-  read from the runners' own output, not from the builder's report.
-- Visible **41/41 = 100%**. Held-out **5/5 = 100%** — one case per criterion (1, 2, 3, 4, 6)
-  written from STATE's criteria and run from a temp dir outside the repo against the
-  production build. **Δ = 0.** Held-out proven able to fail: against the mutated build it
-  scored 4/5, H4 failing on exactly the cycle-2 symptom.
-- Mutation: `if (next === null) { setDelta(null); return; }` reverted on a copy outside the
-  repo — caught by both new P1-E cases (2 failed, 12 passed). Repo never mutated,
-  `git status --porcelain` empty, :5181 and :5182 shut down, :5180 never bound or killed and
-  still HTTP 200.
+- `npm test` -> **27 passed / 27 collected, 3 files**. `npx playwright test` -> **16 passed
+  / 16 collected, chromium**. `npm run build` -> `tsc -b && vite build` clean, 53 modules,
+  231.61 kB. Counts read off the runners.
+- **Visible 43/43 = 100%. Held-out 5/5 = 100%. Δ = 0.** Held-out written from STATE's
+  criteria (1, 2, 3, 4, 6) in a temp dir, run against the production build, deleted. Proven
+  able to fail: against mutant M2 it scored 2/5, H2 failing on the exact symptom.
+- Mutation M1, this slice's fix line: `const state` reverted to `${under26}/${student}` on a
+  copy outside the repo -> the P1-F test FAILED at 514 ms against its 250 ms bound, and the
+  debounce test correctly stayed green. M2: `answers.student &&` dropped from `isZusExempt`
+  -> held-out H2 failed. Repo never mutated, porcelain empty, :5181/:5182/:5183 shut down,
+  **:5180 never bound or killed and still HTTP 200**.
 
-## Instruments discarded rather than reported — four would-be findings
+## P2 — deferred, nothing blocking
 
-Chip reads taken before React painted (five scenarios read `<none>` where a chip was present
-200 ms later); an EN contract-bar selector matching the Polish `Etat`; the HTML stripper
-that inserted a space at a tag boundary and made two verbatim quotes look wrong; a page
-cache whose base64 filenames collided at 40 chars, hiding a sentence that is on the live
-page. Each was re-measured against the raw artifact before being dropped.
+**P2-I, new.** Clear the amount, change an answer while the field is empty, then retype: the
+first keystroke announces immediately, then the rest debounce — 2 utterances for one entry.
+`announced.current` is not reset when the result goes null. Pre-existing for
+under-26/student; the P1-F fix widens it to contract and copyright. No false figure.
+
+**P2-G, carried, still reproduces.** `6 000 -> empty -> 20 000` with under-26 on prints
+`+1 968,00 zł z ulgą dla młodych`, the relief's true worth at 20 000. Same root-cause family
+as P2-I — a ref surviving a null result — so one fix closes both.
+
+## Instruments discarded rather than reported — five would-be findings
+
+A second `MutationObserver` installed by the checker's own probe, doubling every EN record;
+reload arithmetic counting its own `goto` calls; a regex with an ASCII space where the page
+renders U+00A0, making the 120 000,00 zł cap look absent; an EN "stray Polish" hit that was
+the verbatim source quotes criterion 5 requires; an EN selector matching the Polish `Etat`.
+One real behaviour re-checked and cleared: an amount above 1 000 000 zł clears the live
+region, which is `parseGross`'s range-error path with its own on-screen message.

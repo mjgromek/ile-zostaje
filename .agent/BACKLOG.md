@@ -83,3 +83,10 @@ Format:
   relief's true worth at the new amount, so nothing false is claimed today — Urgent when: a
   chip's text stops being derivable from the current result, e.g. a second relief or copy
   that names the previous state. Raised by the checker at slice 2's final re-check.
+- P2-I: clear the amount, change an answer while the field is empty, then retype — the first
+  keystroke announces at once and the rest debounce, so one entry produces two utterances.
+  `announced.current` is not reset when the result goes null; pre-existing for under-26 and
+  student, widened to contract and copyright by the P1-F fix. No false figure — Urgent when:
+  slice 3's toggle makes clear-and-retype a normal entry mode, or the announced sentence
+  ever carries a relief clause computed on the partial value. Same root-cause family as
+  P2-G above, so one fix closes both. Raised by the checker at slice 2's release check.
