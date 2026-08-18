@@ -134,7 +134,8 @@ const en: Table = {
   'error.digits': 'Enter the amount in digits, for example 6000.',
 };
 
-const TABLES: Record<Lang, Table> = { pl, en };
+/** Exported so a test can walk every key rather than the ones a screen visits. */
+export const TABLES: Record<Lang, Table> = { pl, en };
 
 export type Params = Record<string, string | number>;
 
