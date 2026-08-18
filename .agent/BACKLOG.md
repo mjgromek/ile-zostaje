@@ -90,3 +90,9 @@ Format:
   slice 3's toggle makes clear-and-retype a normal entry mode, or the announced sentence
   ever carries a relief clause computed on the partial value. Same root-cause family as
   P2-G above, so one fix closes both. Raised by the checker at slice 2's release check.
+- No Content-Security-Policy on the built page, so the product's headline promise — nothing
+  leaves the browser — holds by convention rather than mechanically. OBSERVED at slice 2's
+  security gate: no CSP in index.html, vite.config.ts, public/ or dist/index.html; the built
+  artifact makes nine requests, all to its own origin — Urgent when: slice 6 puts this on a
+  host, where it belongs as a `default-src 'self'` HEADER and not a meta tag, or the moment
+  any third-party asset enters index.html.

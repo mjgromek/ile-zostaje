@@ -104,3 +104,6 @@ Measured 2026-08-19, slice 2 cycle 4, the release check — **PASS**, nine crite
 - 2026-08-19 00:21 — release check PASS. Two gates before the tag: security-gate, fired on
   user input; and a probe on the `Nie` delta chip above the relief's monthly limit, inferred
   from code at the architecture gate and NOT measured. P2-I in BACKLOG.
+- 2026-08-19 00:24 — security-gate, trigger USER-SUPPLIED INPUT: PASS, no P0, no P1, one P2 (no CSP,
+  in BACKLOG). No innerHTML path, hostile input bounded, localStorage holds only what was
+  typed, and the built artifact makes nine requests, all same-origin. Deps unchanged.
