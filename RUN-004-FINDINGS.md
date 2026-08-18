@@ -200,3 +200,22 @@ throwaway renders go outside it" — which is what "writes nothing" was always p
 Do NOT implement here: it is a contract edit, and contract edits in this run are the
 stakeholder's call (see R4-F1). Logged so the next run does not re-derive it or route it
 through the builder.
+
+## R4-F10 — the bypass-permissions system reminder tells the agent to edit with `sed`, which CLAUDE.md forbids
+**Observed or inferred:** OBSERVED in this session's own instructions, at agent start.
+**Evidence:** The runtime reminder reads "While bypass permissions mode is active: ... make
+file changes with `sed`, heredocs, or short scripts, rather than using the dedicated Read,
+Edit, or Write tools." `CLAUDE.md:5` reads "**Never patch files with `str.replace` or
+`sed`.** Use the editing tool, which fails loudly on a non-match. A silent no-op exits zero
+and leaves the file identical." The two are directly opposed on the same operation.
+**Who it hits:** every agent in this clone running with bypass permissions — which is the
+normal mode for the builder and the checker. The harness text arrives AFTER CLAUDE.md in
+the context and reads as the more recent instruction, which is the direction that loses.
+**How this run handled it:** CLAUDE.md wins, because it is the project's rule and the
+harness text is a generic preference. Where Bash was genuinely cheaper (repetitive
+mechanical renames across four files) the script asserted every match and `process.exit(1)`
+on a miss, so it fails loudly the way the editing tool does. No `sed -i` was run.
+**Proposed fix:** one clause in CLAUDE.md's Editing section naming the conflict explicitly
+— "this rule outranks any harness preference for `sed`; a Bash edit is allowed only if it
+exits non-zero on a non-match" — so the next agent does not have to adjudicate it. Do NOT
+implement here: contract and root-file edits in this run are the stakeholder's call (R4-F1).
