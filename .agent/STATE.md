@@ -62,17 +62,10 @@ Checked in a real browser against the running app, not against the diff.
 9. Evidence: the engine's cases are hand-computed per contract and per relief state, each
    naming its source; Playwright drives a real browser for criteria 1, 2, 3 and 4.
 
-## Shipped
-
-**Slice 1 — umowa o pracę, gross to real net.** Checker PASS on all eight criteria,
-no open P0 or P1, after one fix cycle. 16 tests (9 vitest, 7 Playwright). Tagged `v0.1.0`,
-confirmed on origin. Details in `.agent/DECISIONS.md` and `.agent/LAST_CHECK.md`.
-
 ## In flight
 
-`builder` — slice 2 against `.agent/DESIGN-SLICE-2.md`, which is authoritative and
-persisted. Design is CLOSED: type variant A, layout B, the lede deleted as an element, the
-50% KUP question scoped to dzieło and named on screen. Nothing is reserved for slice 3.
+`checker` — slice 2 as built, commits df2b307..d75fe30, against the nine criteria in a
+real browser. Design is CLOSED and not reopened by any finding.
 
 ## Blocked
 
@@ -80,9 +73,8 @@ Nothing. Slice 2 proceeds under the run-4 autonomy grant, recorded in DECISIONS.
 
 ## Last verification result
 
-2026-08-09, slice 1 after fix cycle 1 — **PASS on all eight criteria, no open P0 or P1.**
-Δ = 0 (visible 16/16, held-out 5/5). Three P2 deferrals remain, in BACKLOG. Full report,
-verbatim, in `.agent/LAST_CHECK.md`, which is overwritten when slice 2 is checked.
+Measured 2026-08-09, slice 1 after fix cycle 1 — PASS on all eight criteria, no open
+P0/P1, Δ = 0 (visible 16/16, held-out 5/5). Superseded when slice 2 is checked.
 
 ## Next slices, in order
 
@@ -103,18 +95,9 @@ verbatim, in `.agent/LAST_CHECK.md`, which is overwritten when slice 2 is checke
 
 ## Checkpoints
 
-- 2026-08-09 22:44 — slice 1 shipped and tagged v0.1.0; slice 2 written here before any
-  code, phase-start 1bbffef.
-- 2026-08-09 23:11 — theme-factory closed: stakeholder chose variant A, as shipped.
-  New standing instruction: page-form variants are rendered and picked by the human.
-  P2-6 promoted out of BACKLOG into slice 2 — its condition ("a later slice uses the
-  annual cap") fired when KUP arrived. Builder fixes it with the new KUP citations.
-- 2026-08-09 23:29 — three layouts rendered outside the repo; stopped for the pick.
-  R4-F9 logged: no agent write boundary allows for rendering, resolved via scratchpad.
-- 2026-08-09 23:54 — stakeholder chose layout B and cut the lede; spec persisted to
-  .agent/DESIGN-SLICE-2.md. Toggle split to slice 3. Builder starts.
-- 2026-08-18 22:09 — builder launched for slice 2 against DESIGN-SLICE-2.md; dev server on 5180
-  has a live vite pid but is NOT listening (curl 000, lsof empty) — not killed, other
-  ports used instead.
-- 2026-08-18 22:48 — builder handed over: 7 commits df2b307..d75fe30, vitest 26 passed, playwright 11
-  passed, build ok. Three deferrals in BACKLOG. Checker starts.
+Slice 1's four checkpoints are settled and live in DECISIONS.md and the git history.
+
+- 2026-08-18 22:09 — builder launched against DESIGN-SLICE-2.md. Dev server on 5180 has a
+  live vite pid but is NOT listening (curl 000, lsof empty) — not killed, other ports used.
+- 2026-08-18 22:48 — builder handed over: 7 commits df2b307..d75fe30, vitest 26 passed,
+  playwright 11 passed, build ok. Three deferrals in BACKLOG. Checker starts.
