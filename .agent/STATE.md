@@ -64,8 +64,8 @@ Checked in a real browser against the running app, not against the diff.
 
 ## In flight
 
-`builder` — fix cycle 2 of 2 on P1-E, the stale delta chip. A third attempt on this root
-cause is not allowed; it escalates instead. Design is CLOSED and not reopened.
+`builder` — P1-F, first cycle: contract and copyright changes must announce immediately,
+not on the typing debounce. Design is CLOSED and not reopened.
 
 ## Blocked
 
@@ -73,8 +73,9 @@ Nothing. Slice 2 proceeds under the run-4 autonomy grant, recorded in DECISIONS.
 
 ## Last verification result
 
-Measured 2026-08-18, slice 2 cycle 2 — FINDINGS: 1 P1 (P1-E), 1 P2, Δ = 20 (visible 39/39,
-held-out 4/5, C4 path B failing). Verbatim report in `.agent/LAST_CHECK.md`.
+Measured 2026-08-18, slice 2 cycle 3 — all nine criteria PASS, Δ = 0 (visible 41/41,
+held-out 5/5). One P1 open: P1-F, spec §8's immediate announcement, first cycle. Two P2 in
+BACKLOG. Verbatim report in `.agent/LAST_CHECK.md`.
 
 ## Next slices, in order
 
@@ -92,10 +93,8 @@ held-out 4/5, C4 path B failing). Verbatim report in `.agent/LAST_CHECK.md`.
 
 ## Checkpoints
 
-- 2026-08-18 22:09 — builder launched against DESIGN-SLICE-2.md. Dev server on 5180 has a
-  live vite pid but is NOT listening (curl 000, lsof empty) — not killed, other ports used.
-- 2026-08-18 22:48 — builder handed over: 7 commits df2b307..d75fe30, vitest 26 passed,
-  playwright 11 passed, build ok. Three deferrals in BACKLOG. Checker starts.
+- 2026-08-18 22:48 — builder handed over: df2b307..d75fe30, vitest 26, playwright 11, build
+  ok. Three deferrals in BACKLOG. Port 5180 is the stakeholder's; agents used 5181+.
 - 2026-08-18 23:04 — check 1: 1 P1 + 3 P2, Δ 20. Criterion 4 met in data, contradicted on
   screen. Fix cycle 1 of at most 2 starts.
 - 2026-08-18 23:11 — fix 1: dee069f..bbd5899, all three closed, a red test each first.
