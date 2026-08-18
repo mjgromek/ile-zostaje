@@ -1,5 +1,5 @@
 SLICE 2 — Zlecenie and dzieło, student status, on layout B
-NOW: Green: 26 vitest and 11 browser specs pass; committing layout B   [22:45]
+NOW: Handing over: 26 vitest, 11 Playwright, build green; checker next   [22:46]
 
 [x] Re-fetch and re-verify slice 1's eight cited sources
 [x] Cite zlecenie ZUS, student exemption, KUP 20/50, the 50% annual cap, the relief contract list
@@ -8,7 +8,7 @@ NOW: Green: 26 vitest and 11 browser specs pass; committing layout B   [22:45]
 [x] Green: per-contract costs in YearRates, zlecenie and dzieło engines as feat:
 [x] Green: layout B, contract bar, Nie/Tak pills, notes, strings both languages as feat:
 [x] Playwright: criteria 1, 2, 3, 4 in a real browser
-[ ] npm test and npm run build green, builder hands over
+[x] npm test and npm run build green, builder hands over
 [ ] Checker: nine criteria in a real browser, v0.1.0 regression, held-out
 [ ] Fix cycles — two attempts per finding, then escalate that one
 [ ] Push main, annotated tag v0.2.0, both confirmed with git ls-remote
