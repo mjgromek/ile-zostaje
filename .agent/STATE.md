@@ -105,3 +105,5 @@ BACKLOG. Verbatim report in `.agent/LAST_CHECK.md`.
 - 2026-08-18 23:55 — check 3: P1-E CLOSED, all nine criteria PASS, delta 0 (41/41 visible, 5/5
   held-out). New P1-F: spec §8 immediate announcement dropped for contract and copyright,
   measured 579/581 ms against 79/85 ms. First cycle on a new root cause, so it is fixed.
+- 2026-08-19 00:02 — P1-F fix: 01389cd, the announce key names all four answers. Red test first,
+  latencies now 11-25 ms with typing still 503.7 ms. playwright 14 -> 16. Release check.

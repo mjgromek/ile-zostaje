@@ -1,5 +1,5 @@
 SLICE 2 — Zlecenie and dzieło, student status, on layout B
-NOW: Builder is closing P1-F — a contract or copyright change must announce immediately, not on the 500 ms typing debounce   [23:55]
+NOW: Release check: the checker is confirming P1-F closed, the typing debounce intact and none of the nine criteria regressed   [00:02]
 
 [x] Re-fetch and re-verify slice 1's eight cited sources
 [x] Cite zlecenie ZUS, student exemption, KUP 20/50, the 50% annual cap, the relief contract list
@@ -12,5 +12,5 @@ NOW: Builder is closing P1-F — a contract or copyright change must announce im
 [x] Checker: nine criteria in a real browser, v0.1.0 regression, held-out — 1 P1, 3 P2
 [x] Fix cycle 1: P1-A, P2-B and P2-C closed; re-check found P1-E, a second path
 [x] Fix cycle 2 of 2: P1-E closed; final re-check PASSES all nine criteria, Δ = 0
-[ ] P1-F: contract and copyright must announce immediately; then re-check
-[ ] Push main, annotated tag v0.2.0, README at v0.2.0, phase summary
+[x] P1-F closed: contract and copyright announce at once, typing still debounced
+[ ] Release check, then push main, annotated tag v0.2.0, README at v0.2.0, summary
