@@ -1,5 +1,5 @@
 SLICE 2 — Zlecenie and dzieło, student status, on layout B
-NOW: Handing over: 26 vitest, 11 Playwright, build green; checker next   [22:46]
+NOW: Checker is driving the running app in a real browser against the nine criteria, plus the v0.1.0 regression and a held-out set   [22:48]
 
 [x] Re-fetch and re-verify slice 1's eight cited sources
 [x] Cite zlecenie ZUS, student exemption, KUP 20/50, the 50% annual cap, the relief contract list

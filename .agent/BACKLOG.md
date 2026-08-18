@@ -62,3 +62,14 @@ Format:
   earners late in the year, who are not this product's audience. Raised by the designer at
   slice 1, recorded before it could become a defect discovered later.
 
+- The flat 12% ryczałt on a zlecenie or dzieło of 200 zł or less is not modelled, so the
+  app over-reports the net below that amount — Urgent when: any supported input or unit
+  makes small amounts routine (slice 4's hour and week units do), or a user compares the
+  figure against a real rachunek. Raised by the builder in slice 2.
+- The student ZUS exemption's own exception — a zlecenie signed with one's own employer —
+  is not modelled — Urgent when: a user in that position reports a net that is too high.
+  Raised by the builder in slice 2.
+- On a student zlecenie the `Zaliczka na PIT` row carries two persistent why-lines at once
+  (`Bez składek ZUS…` and `Z ulgą dla młodych…`), both true — Urgent when: a user or the
+  checker reads the pair as redundant, or a third relief would make it three lines.
+  Raised by the builder in slice 2.

@@ -113,3 +113,8 @@ verbatim, in `.agent/LAST_CHECK.md`, which is overwritten when slice 2 is checke
   R4-F9 logged: no agent write boundary allows for rendering, resolved via scratchpad.
 - 2026-08-09 23:54 — stakeholder chose layout B and cut the lede; spec persisted to
   .agent/DESIGN-SLICE-2.md. Toggle split to slice 3. Builder starts.
+- 2026-08-18 22:09 — builder launched for slice 2 against DESIGN-SLICE-2.md; dev server on 5180
+  has a live vite pid but is NOT listening (curl 000, lsof empty) — not killed, other
+  ports used instead.
+- 2026-08-18 22:48 — builder handed over: 7 commits df2b307..d75fe30, vitest 26 passed, playwright 11
+  passed, build ok. Three deferrals in BACKLOG. Checker starts.
