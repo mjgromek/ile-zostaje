@@ -419,3 +419,68 @@ test('P2-3 — every entry in the provenance list names what it actually is', as
   // Criterion 5 holds for the keys this fix adds, in both tables.
   await expect(page.getByTestId('sources')).not.toContainText('⟦');
 });
+
+/** A Nie/Tak question in the English build. */
+function answerEn(page: Page, question: string, value: 'No' | 'Yes') {
+  return page.getByRole('radiogroup', { name: question }).getByRole('radio', { name: value });
+}
+
+test('P1-E — a chip earned on one contract never survives onto another', async ({ page }) => {
+  // The chip prices an answer against what is on screen. Switch contract inside
+  // its six-second life and the screen underneath it changed: on dzieło the note
+  // two blocks below says the relief does not cover this contract at all.
+  await page.goto('/');
+  await enterGross(page, '6000');
+
+  const net = page.getByTestId('net-amount');
+  const chip = page.getByTestId('delta-chip');
+
+  // Earned on etat, where it is true — and the control for the whole test.
+  await answer(page, Q_UNDER26, 'Tak').click();
+  await expect(net).toHaveText(/4\D?711,43/);
+  await expect(chip).toHaveText(/291,00/);
+
+  await contract(page, 'Dzieło').click();
+  await expect(net).toHaveText(/5\D?724,00/);
+  await expect(page.getByTestId('note-substitution')).toBeVisible();
+  await expect(chip, 'the etat chip carried onto dzieło').toHaveCount(0);
+
+  // The student chip reaches dzieło by the same path, and dzieło has no student
+  // control at all. It must still fire on zlecenie, where it is true.
+  await contract(page, 'Zlecenie').click();
+  await answer(page, Q_STUDENT, 'Tak').click();
+  await expect(net).toHaveText(/6\D?000,00/);
+  await expect(chip).toHaveText(/1\D?154,80/);
+
+  await contract(page, 'Dzieło').click();
+  await expect(net).toHaveText(/5\D?724,00/);
+  await expect(chip, 'the student chip carried onto dzieło').toHaveCount(0);
+
+  // Both languages: the same carry-over, and the same truthful chip before it.
+  await page.getByRole('radio', { name: 'Angielski' }).click();
+  await page.getByTestId('contract-bar').getByRole('radio', { name: 'Employment' }).click();
+  await answerEn(page, 'Are you under 26?', 'No').click();
+  await expect(net).toHaveText(/4\D?420,43/);
+  await expect(chip).toHaveText(/291,00/);
+
+  await contract(page, 'Dzieło').click();
+  await expect(chip, 'the English chip carried onto dzieło').toHaveCount(0);
+});
+
+test('P1-E — a chip stops claiming a figure the entry has moved past', async ({ page }) => {
+  // Wider than contracts: the relief is worth a different amount at 20 000 zł,
+  // so a chip that names 291,00 is false of what is now on screen.
+  await page.goto('/');
+  await enterGross(page, '6000');
+
+  const net = page.getByTestId('net-amount');
+  const chip = page.getByTestId('delta-chip');
+
+  await answer(page, Q_UNDER26, 'Tak').click();
+  await expect(net).toHaveText(/4\D?711,43/);
+  await expect(chip).toHaveText(/291,00/);
+
+  await enterGross(page, '20000');
+  await expect(net).not.toHaveText(/4\D?711,43/);
+  await expect(chip, 'the 6 000 zł chip survived the entry becoming 20 000 zł').toHaveCount(0);
+});
