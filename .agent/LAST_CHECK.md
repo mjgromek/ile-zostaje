@@ -1,80 +1,89 @@
-<!-- Overwritten each phase. Persisted verbatim from the checker, which has no write access. -->
+<!-- Overwritten every phase. The checker cannot write; this is its report, preserved. -->
 
-# LAST_CHECK — slice 1, run 4, re-verification after fix cycle 1, 2026-08-09
+# LAST CHECK — slice 2, cycle 1
 
-**VERDICT: PASS on all eight acceptance criteria. No open P0 and no open P1.** Δ = 0 points
-(visible 16/16 = 100 %, held-out 5/5 = 100 %). P1-1, P2-2 and P2-3 are CLOSED, each confirmed
-by driving the artifact, not by reading the diff. Three P2 deferrals remain, all graded below.
-No live deployment exists in slice 1, so the held-out suite ran locally only. **This is a PASS
-with no open P0 or P1: the slice works, and a version tag asserting that is warranted.**
+Measured 2026-08-18, commits `df2b307..af498a3`, phase-start `1bbffef`.
 
-Tools that did not arrive for the checker: `Grep`, `Glob` (used Bash `grep`/`find`, R4-F1),
-and `Edit`/`Write`/`Task` — the two temporary file mutations used a `python3` heredoc that
-asserts the pattern matches exactly once, restored from a `cp` backup and confirmed by
-`shasum`.
+## VERDICT: FINDINGS — 1 x P1, 3 x P2
 
-## Test count — verified by the checker, not accepted
+Criteria 1, 2, 3, 5, 6, 7, 8, 9 met. Criterion 4 met in the engine and contradicted on
+screen. STATE.md validated first: all 9 cited SHAs resolve, `v0.1.0` -> `f8fdf09`.
 
-`vitest run` -> 9 (2 files), `playwright test --list` -> 7, **16 COLLECTED**, matching the
-builder's report exactly. All 16 map to a named criterion or a named DESIGN-SLICE-1 element
-(the 3 new ones: §6 tap targets, criterion 4's quote invariant, criterion 4+5's provenance
-labels). Zero unnamed implied guards. Within `tdd`'s cap; not a finding. Note, ungraded:
-`.agent/STATE.md` still reads "13 tests are committed"; the orchestrator overwrites it next.
+## Criterion by criterion, as reported
 
-## Fix-by-fix confirmation
-
-- **P1-1 CLOSED.** Row-by-row real `mouse.click` scan at 390x844, one click per CSS pixel:
-  gross row 56 px, **55 of 56 rows focus `#gross`**; quick chip 151x44, **44/44 fill 4 806**;
-  summary 358x44.3, **44/44 toggle** (also 44/44 at 1280); lang button 48x44, **44/44 switch**;
-  switch row 48 px, **48/48 toggle**; segmented button 105x44. My first summary reading said
-  0/44 — the element was below the fold and unscrolled; that was my instrument, corrected.
-- **P2-2 CLOSED.** Re-fetched all four cited pages and substring-matched the de-tagged text:
-  `pit.threshold` (new PIT_SCALE sentence), `pit.rate1`, `pit.rate2`, `pit.reducingYear` are
-  **exact**; `chorobowa` and `emerytalna` verified verbatim too (see P2-5 for the one mark).
-- **P2-3 CLOSED.** Read the rendered `<details>` in both languages: **12 entries, 12 distinct
-  and accurate labels in PL and 12 in EN**, no missing or untranslated key. `250,00 zł` now
-  reads *Koszty uzyskania przychodu (miesięcznie)* / *Deductible costs (monthly)*.
-
-## Criteria re-checked in a real browser
-
-- **C2, arithmetic from the rendered page** (struck original excluded): exact to the grosz at
-  6 000, 4 806, 3 333,33, 19 999,99, 25 000 and 8 543,21 (833,82+128,15+209,31+663,47+555,00
-  +6 153,46 = 854 321 grosz).
-- **C1** one net figure, rises with the amount, zero main-frame navigations. **C3** from the
-  rendered output only, never a Chrome a11y snapshot: net 4 420,43 -> 4 711,43, PIT line shows
-  `0 zł` with the struck original beside it, and net delta = |PIT|, both states seen, restored
-  on toggle back. **C5/C6** both languages whole, estimate and storage lines present, no
-  placeholder or missing key. **C7** value, switch and net survive reload; zero foreign
-  requests. **C4** unchanged: no `value:` line moved in this cycle, only quotes and sources.
-- Regression: no earlier slice exists to break. Geographic rules do not apply — no map.
-
-## Mutation probe
-
-`src/components/GrossCard.module.css:40`, a line this fix cycle added: `align-self: stretch`
--> `align-self: center` (local only). **Caught by `e2e/app.spec.ts:136` "P1-1 — every control
-takes a click across the 44 px the spec promises"** at line 150, field height 24 not 44.
-Restored from backup, `shasum` identical, suite green again (9 vitest, 7 Playwright), and
-`git status --porcelain` back to its baseline: 4 modified, `.agent/LAST_CHECK.md` untracked.
+1. PASS, OBSERVED. Three slots selectable, recompute with no reload. Regression against the
+   tag itself: 602 uop cases (gross 0..400 000 zl x under26) — line amounts, bases and net
+   identical to `v0.1.0`, 0 mismatches.
+2. PASS, OBSERVED at 390 px. Student question only on zlecenie; `Nie`->`Tak` collapses the
+   band from `Na konto 80,8%` (5 segments) to `100,0%` (1), four ZUS/health rows to a single
+   `Skladki ZUS · 0 zl`, net 4 845,20 -> 6 000,00 zl. Exemption quote cited on the page.
+3. PASS, OBSERVED. Dzielo renders zero ZUS/health rows. 50% is reached through
+   `Przenosisz prawa autorskie?`; the rate appears only as a consequence, with the cap and
+   the creative-work condition. Cap reads `120 000,00 zl` from data.
+4. MET IN DATA, CONTRADICTED ON SCREEN. `youthRelief.contracts.value` is data, the note
+   fires in PL and EN and never on uop/zlecenie. See P1-A.
+5. PASS, OBSERVED. All 20 citations fetched live: 20/20 quotes genuinely printed on their
+   page, each with URL, effective date, `verified: 2026-08-18`. The 50% cap is its own entry
+   with its own quote and source, not an alias of `pit.thresholdAnnualGrosz`. P2-6 fixed.
+6. PASS, OBSERVED by adding the rendered numbers. 8 states at gross 6 000: every one sums
+   deductions + net to exactly 6 000,00 zl.
+7. PASS for new strings. 82 keys in both tables, none missing, none empty, interpolation
+   slots match. Only `Zlecenie`/`Dzielo` untranslated among new strings. See P2-B.
+8. PASS, OBSERVED at 390/1280/320. Bar fully above the card, amount + Nie/Tak in one card,
+   answer directly below, order answer->band->ladder, no overlap, no lede in either language.
+9. PASS. 14 hand-computed cases per contract and relief state, arithmetic written out and
+   source named; Playwright drives Chromium for criteria 1, 2, 3, 4.
 
 ## Findings
 
-**P2-4 — the gross field's focus ring is `outline-offset: -3px` where §6 says `2px`.**
-Measured by computed style on every Tab stop plus a screenshot of the focused row: the other
-six stops are `3px solid rgb(43,33,28) offset 2px`; `#gross` alone is `-3px`. No ancestor has
-`overflow: hidden`, and the screenshot shows a full, unclipped 3 px ink ring inside the field,
-so the constraint's purpose is met and only its placement differs. Urgent when: theme-factory
-revisits focus in slice 2, or a second inset ring makes the inconsistency visible side by side.
+**P1-A — the delta chip claims the under-26 relief is worth money on umowa o dzielo, which
+it does not cover.** OBSERVED, driven from a fresh load in both languages; screenshots
+`repro-dzielo-PL.png` / `repro-dzielo-EN.png` in the session scratchpad. On dzielo, toggling
+under-26 to `Nie` renders `-276,00 zl bez ulgi dla mlodych` while the net is identical in
+both states (5 724,00 zl) and the outlined note two blocks below says the relief does not
+cover dzielo. Control: the same toggle on uop moves the net 4 711,43 -> 4 420,43, so the
+chip is truthful there and the instrument distinguishes the two. Root cause
+`src/components/Answer.tsx:78-82` — the branch has no `reliefCovers` guard and uses
+`pitWithoutRelief`, which `computeContract` sets equal to the whole PIT advance when the
+relief does not apply. Exactly the failure criterion 4 exists to catch; the visible e2e test
+for criterion 4 passes because it asserts the note and never the chip.
 
-**P2-5 — two quotes end with `.` where the page prints `,`.** `rentowa` and `chorobowa` are
-list items ending in a comma on zus.pl; the app renders them as sentences. Measured by exact
-substring search over the raw HTML of both live pages. **Correction to the brief's premise:
-`emerytalna` is not affected** — the page prints "…podstawy wymiaru składek)." with a period;
-my earlier mismatch was a space my tag-stripper inserted. Urgent when: anyone diffs quotes
-character-for-character against the source, which the builder's new test deliberately does not.
+**P2-B — `why.relief.chip` renders Polish in the EN build.** OBSERVED on screen: EN shows
+`Ulga dla mlodych — 0 zl`. Carried unchanged from `v0.1.0`, outside criterion 7's "every new
+string". Urgent when: any slice touches EN copy, or an English speaker sees the under-26
+state.
 
-**P2-6 — `pit.costs`' quote truncates a qualifying clause and changes what it claims.** The
-page prints "…nie więcej niż: 3000 zł - w przypadku uzyskiwania przychodów z jednego stosunku
-pracy, 4500 zł - …"; the app prints "…nie więcej niż: 3000 zł." Measured against the live
-page's raw HTML. The cited value (250 zł/month) is correct and unaffected, but the displayed
-evidence states a conditional annual cap as absolute. Urgent when: a user with two employers
-reads the disclosure, or a later slice uses the annual cap.
+**P2-C — two slice-1 quotes normalise the page's punctuation.** `contributions.rentowa` and
+`contributions.chorobowa` end with a full stop where the page prints a comma; both are list
+items. Words, values and rates verbatim. Measured by punctuation-insensitive matching
+against the live HTML, which separates this from an absent quote. This is slice 1's P2-5,
+resurfaced by criterion 5's re-verification requirement.
+
+**P2-D — delta 20 points.** Above zero, and caused by P1-A alone.
+
+## Counts and delta
+
+- `npm test` -> `vitest run`: 26 passed, 3 files. `npx playwright test`: 11 passed, chromium.
+  `npm run build`: `tsc -b && vite build` clean, 53 modules.
+- Visible 37/37 = 100%. Held-out 4/5 = 80%, one test per criterion written from STATE's
+  criteria and run in a temp dir outside the repo: C1, C2, C3, C6 PASS, **C4 FAIL** (P1-A).
+  **Delta = 20 points.**
+- Held-out engine arithmetic hand-computed from the cited pages: 15/15, including dzielo
+  4 000 @20% = 3 916,00, @50% = 4 000,00, 30 000 @50% capped = 25 900,00, zlecenie 4 000 =
+  3 189,14, and the student delta 769,86 zl — independently reproducing DESIGN-SLICE-2 §2.
+
+## Mutation probe
+
+Run on a copy outside the repository. Five mutations to `src/engine/contract.ts`, all five
+caught: dropping the `answers.student &&` guard in `isZusExempt` (3 failures); 50%->20% KUP
+(3, incl. the cap-from-its-own-entry test); removing the annual cap from `Math.min` (2);
+`reliefCovers = true` (caught by the relief-list test); charging chorobowa on zlecenie (5).
+Baseline restored, repo clean.
+
+## Instruments the checker corrected before trusting them
+
+Four of its own measurements were wrong and are NOT findings: calling `computeUop` with an
+object where `v0.1.0` takes a boolean (274 false mismatches); a money regex reading
+`4,420.43` as `4.42`; reading a collapsed `<details>` with `innerText`; grepping `const PL`
+where the tables are `pl`/`en`, which reported all 82 strings identical while the EN screen
+was plainly English.

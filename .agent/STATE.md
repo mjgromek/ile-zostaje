@@ -101,3 +101,6 @@ Slice 1's four checkpoints are settled and live in DECISIONS.md and the git hist
   live vite pid but is NOT listening (curl 000, lsof empty) — not killed, other ports used.
 - 2026-08-18 22:48 — builder handed over: 7 commits df2b307..d75fe30, vitest 26 passed,
   playwright 11 passed, build ok. Three deferrals in BACKLOG. Checker starts.
+- 2026-08-18 23:04 — checker cycle 1: FINDINGS, 1 P1 + 3 P2, delta 20. Criterion 4 met in data,
+  contradicted on screen (P1-A, delta chip on dzielo). Full report in LAST_CHECK.md.
+  Fix cycle 1 of at most 2 starts.
