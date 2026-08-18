@@ -28,6 +28,34 @@ test('both language tables carry exactly the same keys, none of them empty', () 
   }
 });
 
+// Identical keys are not a translated table: `why.relief.chip` shipped Polish
+// into the EN build and survived a release, because parity counts keys and a
+// browser test only sees the states it visits. The exceptions are deliberate
+// and few, so they are named here — anything else identical in both tables is
+// a string nobody translated.
+const PL_IN_EN = new Set([
+  // The product's own name, not a phrase.
+  'app.name',
+  // Two legal contract types keep their Polish names in the EN build; the
+  // helper text glosses them.
+  'contract.zlecenie',
+  'contract.dzielo',
+]);
+
+test('no English string is its Polish original, outside a named allowlist', () => {
+  const untranslated = Object.keys(TABLES.pl).filter(
+    (key) => TABLES.en[key] === TABLES.pl[key] && !PL_IN_EN.has(key),
+  );
+  expect(untranslated, 'these keys render Polish on the English screen').toEqual([]);
+
+  // An allowlist that outlives its entries is the next silent leak: every name
+  // on it must still exist and still be identical.
+  for (const key of PL_IN_EN) {
+    expect(TABLES.pl[key], `${key} is allowlisted but gone`).toBeDefined();
+    expect(TABLES.en[key], `${key} is allowlisted but now differs`).toBe(TABLES.pl[key]);
+  }
+});
+
 // The lede is CUT, all three contracts, both languages, and nothing replaces
 // it. `contract.help` said "wkrótce", which is now false. The under-26 switch
 // became a question, so its label and hint went with it. A deleted key that
