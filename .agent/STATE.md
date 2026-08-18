@@ -64,8 +64,8 @@ Checked in a real browser against the running app, not against the diff.
 
 ## In flight
 
-`checker` — slice 2 as built, commits df2b307..d75fe30, against the nine criteria in a
-real browser. Design is CLOSED and not reopened by any finding.
+`builder` — fix cycle 1 of at most 2: P1-A, plus P2-B and P2-C which are one-line and
+adjacent. Design is CLOSED and not reopened by any finding.
 
 ## Blocked
 
@@ -73,8 +73,8 @@ Nothing. Slice 2 proceeds under the run-4 autonomy grant, recorded in DECISIONS.
 
 ## Last verification result
 
-Measured 2026-08-09, slice 1 after fix cycle 1 — PASS on all eight criteria, no open
-P0/P1, Δ = 0 (visible 16/16, held-out 5/5). Superseded when slice 2 is checked.
+Measured 2026-08-18, slice 2 cycle 1 — FINDINGS: 1 P1, 3 P2, Δ = 20 (visible 37/37,
+held-out 4/5, the C4 case failing). Verbatim report in `.agent/LAST_CHECK.md`.
 
 ## Next slices, in order
 
@@ -104,3 +104,5 @@ Slice 1's four checkpoints are settled and live in DECISIONS.md and the git hist
 - 2026-08-18 23:04 — checker cycle 1: FINDINGS, 1 P1 + 3 P2, delta 20. Criterion 4 met in data,
   contradicted on screen (P1-A, delta chip on dzielo). Full report in LAST_CHECK.md.
   Fix cycle 1 of at most 2 starts.
+- 2026-08-18 23:11 — fix cycle 1 done: 6 commits dee069f..bbd5899, all three findings closed with a
+  test each first. vitest 27, playwright 12. P2-5 deleted from BACKLOG, fixed. Re-check.

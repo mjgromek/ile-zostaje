@@ -44,9 +44,10 @@ Format:
   conditional annual cap (3 000 zł, one employment relationship) as absolute — Urgent when:
   a user with two employers reads the disclosure, or a later slice uses the annual cap. The
   250 zł/month value it cites is correct and unaffected.
-- P2-5: the `rentowa` and `chorobowa` quotes end with `.` where zus.pl prints `,` — they are
-  list items rendered as sentences — Urgent when: anyone diffs the quotes character-for-
-  character against the source, which the builder's quote test deliberately does not.
+- The frozen ZUS passages are cleaned of the page's raw-HTML spacing: the financing page
+  prints `podstawy wymiaru składek )` with a space before the bracket where
+  `rates-2026.test.ts` records `składek).` — Urgent when: a quote check runs against live
+  HTML instead of the frozen passages. Raised by the builder in slice 2's fix cycle.
 - P2-4: the gross field's focus ring is `outline-offset: -3px` where DESIGN-SLICE-1 §6 says
   `2px`; the ring is present, 3 px and unclipped, so only its placement differs — Urgent
   when: theme-factory revisits focus in slice 2, or a second inset ring makes the
