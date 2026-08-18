@@ -104,3 +104,6 @@ held-out 4/5, C4 path B failing). Verbatim report in `.agent/LAST_CHECK.md`.
   false claim from a stale chip surviving a contract or amount change. Δ still 20.
 - 2026-08-18 23:37 — fix 2, the final attempt on this root cause: P1-E closed at c316bbe,
   deps [under26,student] -> [result]. Over-correction 19/19 on the built app. R4-F11 logged.
+- 2026-08-18 23:55 — check 3: P1-E CLOSED, all nine criteria PASS, delta 0 (41/41 visible, 5/5
+  held-out). New P1-F: spec §8 immediate announcement dropped for contract and copyright,
+  measured 579/581 ms against 79/85 ms. First cycle on a new root cause, so it is fixed.

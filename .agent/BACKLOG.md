@@ -78,3 +78,8 @@ Format:
   change and the chip's numerals are formatted per locale at render — Urgent when: a chip's
   text becomes locale-derived beyond number formatting, which would make the standing chip
   read in the previous language. Raised by the builder in slice 2's fix cycle 2.
+- P2-G: clearing and retyping the amount re-fires the delta chip although no answer changed
+  — the ref guarding the moment resets while `result` is null. The figure it prints is the
+  relief's true worth at the new amount, so nothing false is claimed today — Urgent when: a
+  chip's text stops being derivable from the current result, e.g. a second relief or copy
+  that names the previous state. Raised by the checker at slice 2's final re-check.
