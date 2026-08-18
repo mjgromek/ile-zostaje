@@ -92,8 +92,6 @@ held-out 4/5, C4 path B failing). Verbatim report in `.agent/LAST_CHECK.md`.
 
 ## Checkpoints
 
-Slice 1's four checkpoints are settled and live in DECISIONS.md and the git history.
-
 - 2026-08-18 22:09 — builder launched against DESIGN-SLICE-2.md. Dev server on 5180 has a
   live vite pid but is NOT listening (curl 000, lsof empty) — not killed, other ports used.
 - 2026-08-18 22:48 — builder handed over: 7 commits df2b307..d75fe30, vitest 26 passed,
