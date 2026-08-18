@@ -63,8 +63,7 @@ Checked in a real browser against the running app, not against the diff.
 
 ## In flight
 
-`builder` — P1-F, first cycle: contract and copyright changes must announce immediately,
-not on the typing debounce. Design is CLOSED and not reopened.
+`checker` — the release check on P1-F and the nine criteria. Design is CLOSED.
 
 ## Blocked
 
@@ -95,15 +94,12 @@ BACKLOG. Verbatim report in `.agent/LAST_CHECK.md`.
 - 2026-08-18 22:48 — builder handed over: df2b307..d75fe30, vitest 26, playwright 11, build
   ok. Three deferrals in BACKLOG. Port 5180 is the stakeholder's; agents used 5181+.
 - 2026-08-18 23:04 — check 1: 1 P1 + 3 P2, Δ 20. Criterion 4 met in data, contradicted on
-  screen. Fix cycle 1 of at most 2 starts.
-- 2026-08-18 23:11 — fix 1: dee069f..bbd5899, all three closed, a red test each first.
-  P2-5 deleted from BACKLOG, fixed.
+  screen. 23:11 fix 1: dee069f..bbd5899, all three closed, a red test each first.
 - 2026-08-18 23:28 — check 2: two P2 closed, P1-A closed on its path; new P1-E — the same
   false claim from a stale chip surviving a contract or amount change. Δ still 20.
-- 2026-08-18 23:37 — fix 2, the final attempt on this root cause: P1-E closed at c316bbe,
-  deps [under26,student] -> [result]. Over-correction 19/19 on the built app. R4-F11 logged.
-- 2026-08-18 23:55 — check 3: P1-E CLOSED, all nine criteria PASS, delta 0 (41/41 visible, 5/5
-  held-out). New P1-F: spec §8 immediate announcement dropped for contract and copyright,
-  measured 579/581 ms against 79/85 ms. First cycle on a new root cause, so it is fixed.
-- 2026-08-19 00:02 — P1-F fix: 01389cd, the announce key names all four answers. Red test first,
-  latencies now 11-25 ms with typing still 503.7 ms. playwright 14 -> 16. Release check.
+- 2026-08-18 23:37 — fix 2, the final attempt on that root cause: P1-E closed at c316bbe.
+  Over-correction 19/19 on the built app. R4-F11 logged.
+- 2026-08-18 23:55 — check 3: P1-E CLOSED, nine criteria PASS, Δ 0 (41/41, 5/5). New P1-F:
+  §8's immediate announcement dropped for contract and copyright, 579/581 ms vs 79/85 ms.
+- 2026-08-19 00:02 — P1-F fix 01389cd, first cycle: the announce key names all four answers.
+  Latencies 11-25 ms, typing still 503.7 ms. playwright 14 -> 16. Release check.
