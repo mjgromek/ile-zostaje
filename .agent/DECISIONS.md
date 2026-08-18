@@ -148,3 +148,12 @@ Why: Criterion 4 fails any rule that lives in an `if`. One engine also makes sum
      grosz one property instead of three, and keeps etat on the arithmetic v0.1.0 shipped.
 Rules out: A second formula per contract, and a rule readable only by reading the engine.
 Level: 0 — slice 1's data-as-citation shape, widened from numbers to rules.
+
+## 2026-08-18 — A question appears where it can change the result; one exception, stated
+What: `Studiujesz?` renders on zlecenie and `Przenosisz prawa autorskie?` on dzieło.
+     `Masz mniej niż 26 lat?` renders on all three, and on dzieło it stays live while the
+     screen prints `subst.relief.dzielo` under the band.
+Why: DESIGN-SLICE-2 §6 names exactly one substitution instance and §10 gives exactly one
+     substitution string. A question with no possible effect and no sentence explaining
+     that would be the dead end §6 forbids, and inventing strings reopens a closed spec.
+Level: 0 — the spec settles it; recorded because the reading, not the rule, was the choice.

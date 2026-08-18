@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { LANGS, TABLES, t } from './strings';
+import { LANGS, TABLES, t, type Lang } from './strings';
 
 // Criterion 7: both languages are complete for every string. On screen a
 // missing key renders as ⟦key⟧, which the browser tests look for — but only on
@@ -7,7 +7,7 @@ import { LANGS, TABLES, t } from './strings';
 // string that only appears on the dzieło screen at 50% cannot hide.
 
 test('both language tables carry exactly the same keys, none of them empty', () => {
-  const [first, ...rest] = LANGS;
+  const [first, ...rest] = LANGS as [Lang, ...Lang[]];
   const reference = Object.keys(TABLES[first]).sort();
 
   for (const lang of rest) {

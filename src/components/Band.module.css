@@ -49,6 +49,11 @@
 .pit {
   background: var(--graphite);
 }
+/* The collapsed ZUS row is zero width by definition — it exists so the band and
+   the ladder tell the same story, not to be seen. */
+.zusOff {
+  background: var(--line);
+}
 
 .captions {
   display: flex;

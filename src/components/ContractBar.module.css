@@ -1,0 +1,49 @@
+/* DESIGN-SLICE-2 §1: the contract bar sits above everything, full width.
+   §8: segments are 52 px, the focus ring is never removed. */
+
+.wrap {
+  margin: 0 0 var(--s5);
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: var(--s2);
+}
+
+.bar {
+  display: flex;
+  gap: var(--s1);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-control);
+  padding: var(--s1);
+}
+
+.segment {
+  flex: 1 1 0;
+  min-height: 52px;
+  border: 0;
+  border-radius: var(--r-chip);
+  background: transparent;
+  font-family: var(--face-body);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  outline-offset: 2px;
+}
+
+.segment:hover {
+  background: var(--surface);
+}
+
+.active,
+.active:hover {
+  background: var(--surface);
+  box-shadow: var(--lift);
+}

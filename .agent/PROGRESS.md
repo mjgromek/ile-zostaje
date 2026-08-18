@@ -1,13 +1,13 @@
 SLICE 2 — Zlecenie and dzieło, student status, on layout B
-NOW: Engine is green; the screen is red — 9 of 11 browser specs fail on layout B locators   [22:36]
+NOW: Green: 26 vitest and 11 browser specs pass; committing layout B   [22:45]
 
 [x] Re-fetch and re-verify slice 1's eight cited sources
 [x] Cite zlecenie ZUS, student exemption, KUP 20/50, the 50% annual cap, the relief contract list
 [x] Capture the v0.1.0 umowa o pracę baseline from the tag
 [x] Red: engine, citation and rendering tests as test:
 [x] Green: per-contract costs in YearRates, zlecenie and dzieło engines as feat:
-[ ] Green: layout B, contract bar, Nie/Tak pills, notes, strings both languages as feat:
-[ ] Playwright: criteria 1, 2, 3, 4 in a real browser
+[x] Green: layout B, contract bar, Nie/Tak pills, notes, strings both languages as feat:
+[x] Playwright: criteria 1, 2, 3, 4 in a real browser
 [ ] npm test and npm run build green, builder hands over
 [ ] Checker: nine criteria in a real browser, v0.1.0 regression, held-out
 [ ] Fix cycles — two attempts per finding, then escalate that one

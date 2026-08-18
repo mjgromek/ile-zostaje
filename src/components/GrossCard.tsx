@@ -1,37 +1,50 @@
+import type { ContractKind } from '../engine/rates';
 import { t, type Lang } from '../i18n/strings';
 import type { GrossInput } from '../state/gross';
+import { Question } from './Question';
 import s from './GrossCard.module.css';
 
 type Props = {
   lang: Lang;
   year: number;
+  contract: ContractKind;
   grossText: string;
   parsed: GrossInput;
   under26: boolean;
+  student: boolean;
+  copyright: boolean;
   minimumWageGrosz: number;
+  /** What the current answers mean, already interpolated. May be empty. */
+  consequences: string[];
   onGrossText: (value: string) => void;
   onUnder26: (value: boolean) => void;
+  onStudent: (value: boolean) => void;
+  onCopyright: (value: boolean) => void;
 };
 
-const CONTRACTS = [
-  { key: 'contract.uop', enabled: true },
-  { key: 'contract.zlecenie', enabled: false },
-  { key: 'contract.dzielo', enabled: false },
-] as const;
-
 /**
- * The inputs. The contract control has all three slots from day one with two
- * disabled, so slice two removes two attributes and changes no layout.
+ * Variant B's one card: the amount and the Nie/Tak questions together, with the
+ * consequence of the current answers on its last line.
+ *
+ * A question appears where it can change the result. The one place that rule is
+ * suspended is under-26 on a dzieło: it stays, live, and the screen says the
+ * answer changes nothing — see the outlined note in App.
  */
 export function GrossCard({
   lang,
   year,
+  contract,
   grossText,
   parsed,
   under26,
+  student,
+  copyright,
   minimumWageGrosz,
+  consequences,
   onGrossText,
   onUnder26,
+  onStudent,
+  onCopyright,
 }: Props) {
   // The card carries no aria-label: one here would collide with the input's own
   // label and make "the gross field" ambiguous to a screen reader.
@@ -71,45 +84,28 @@ export function GrossCard({
         </div>
       </div>
 
-      <div>
-        <span className={s.label} id="contract-label">
-          {t(lang, 'field.contract.label')}
-        </span>
-        <div className={s.segmented} role="radiogroup" aria-labelledby="contract-label">
-          {CONTRACTS.map((contract) => (
-            <button
-              key={contract.key}
-              type="button"
-              role="radio"
-              aria-checked={contract.enabled}
-              disabled={!contract.enabled}
-              className={`${s.segment} ${contract.enabled ? s.segmentActive : ''}`}
-            >
-              {t(lang, contract.key)}
-            </button>
-          ))}
-        </div>
-        <p className={s.help}>{t(lang, 'contract.help')}</p>
+      <div className={s.questions}>
+        <Question lang={lang} questionKey="q.under26" value={under26} onChange={onUnder26} />
+        {contract === 'zlecenie' ? (
+          <Question lang={lang} questionKey="q.student" value={student} onChange={onStudent} />
+        ) : null}
+        {contract === 'dzielo' ? (
+          <Question
+            lang={lang}
+            questionKey="q.copyright"
+            value={copyright}
+            onChange={onCopyright}
+          />
+        ) : null}
       </div>
 
-      <div>
-        <label className={s.switchRow}>
-          <span className={s.switchControl}>
-            <input
-              className={s.checkbox}
-              type="checkbox"
-              role="switch"
-              checked={under26}
-              onChange={(event) => onUnder26(event.target.checked)}
-            />
-            <span className={s.track} aria-hidden="true">
-              <span className={s.thumb} />
-            </span>
-          </span>
-          <span className={s.switchLabel}>{t(lang, 'field.under26.label')}</span>
-        </label>
-        <p className={s.hint}>{t(lang, 'field.under26.hint')}</p>
-      </div>
+      {consequences.length > 0 ? (
+        <div className={s.consequence} data-testid="consequences">
+          {consequences.map((line) => (
+            <p key={line}>{line}</p>
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }

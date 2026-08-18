@@ -336,7 +336,13 @@ export function computeContract(
     ),
     zusExempt: result.zusExempt,
     studentWorthGrosz,
-    costsGrosz: result.pit.costsGrosz,
+    // The koszty that belong to the base the PIT row shows. Under the relief
+    // that row shows the base the relief REMOVED — what it is worth teaches
+    // more than a zero — so the koszty must come from the same computation, or
+    // the sentence names two numbers from two different subtractions.
+    costsGrosz: result.reliefApplies
+      ? result.pitWithoutRelief.costsGrosz
+      : result.pit.costsGrosz,
     costsPercent: result.costsPercent,
     costsCapped: result.pit.costsCapped,
   };

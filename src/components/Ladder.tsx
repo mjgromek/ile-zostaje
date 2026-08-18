@@ -15,6 +15,9 @@ const SWATCH: Record<Line['key'], string> = {
   rentowa: 'var(--plum-2)',
   chorobowa: 'var(--plum-3)',
   zdrowotna: 'var(--plum-4)',
+  // The collapsed row is not a składka, so it does not take a plum. It is a
+  // normal row in a normal table, not an ARIA trick.
+  zusOff: 'var(--line)',
   pit: 'var(--graphite)',
 };
 
@@ -37,12 +40,27 @@ export function Ladder({ lang, result, rates }: Props) {
         base: formatMoney(line.baseGrosz, lang),
       });
     }
+    if (line.key === 'zusOff') return t(lang, 'why.zusOff');
     if (line.key === 'pit') {
-      return t(lang, 'why.pit', {
+      const shared = {
         rate: formatRate(line.ratePercent, lang),
         base: formatMoney(line.baseGrosz, lang),
         kwota: formatMoney(rates.pit.taxReducingMonthlyGrosz.value, lang),
+      };
+      // The flat quota is a number the reader already saw; a percentage is a
+      // rule, so the row shows what it produced on this person's amount.
+      if (result.costsPercent === null) return t(lang, 'why.pit', shared);
+      const kup = t(lang, 'why.kup.inline', {
+        pct: formatRate(result.costsPercent, lang),
+        amount: formatMoney(result.costsGrosz, lang),
       });
+      const key =
+        result.contract === 'dzielo'
+          ? 'why.pit.dzielo'
+          : result.zusExempt
+            ? 'why.pit.zlecenie.nozus'
+            : 'why.pit.zlecenie';
+      return t(lang, key, { ...shared, kup });
     }
     return t(lang, 'why.simple', {
       rate: formatRate(line.ratePercent, lang),
@@ -50,7 +68,10 @@ export function Ladder({ lang, result, rates }: Props) {
     });
   };
 
-  const reliefOnPit = result.under26 && result.pitWithoutReliefGrosz > 0;
+  // Struck, not omitted: a line the relief zeroed FOR THIS PERSON keeps its
+  // original amount visible, because what the relief is worth teaches more
+  // than a zero. A line the contract does not have is absent instead.
+  const reliefOnPit = result.reliefApplies && result.pitWithoutReliefGrosz > 0;
 
   return (
     <table className={css.table} data-testid="ladder">
