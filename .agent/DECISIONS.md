@@ -226,3 +226,47 @@ Why: Slice 4's hour/week/month/year units multiply every one of these, and re-me
      them costs a run. Non-monotonicity, same instrument: net FALLS on 118 one-grosz steps
      over gross 5 000–5 300 on uop, 61 on zlecenie, 18 on dzieło+50%, 0 on student zlecenie.
 Rules out: Treating a threshold in a later slice as a fresh unknown, or as a round number.
+
+## 2026-08-19 — The answer speaks monthly in every unit; the unit ends at the field's edge
+What: STAKEHOLDER DECISION, option C of the designer's Level 2. The big numeral is always
+     the monthly figure; a 13 px echo under the from-line carries the user's own unit.
+Why: PROJECT.md line 8 fixes the objective at "what lands in their account each month" and
+     line 58 at "the real monthly net" — the period was settled in the brief, so this
+     slice discovers it rather than deciding it. Every engine threshold is monthly or
+     annual, and slice 5 subtracts a MONTHLY rent from this same figure.
+Rules out: A per-unit ladder, and any later slice quoting a per-hour net as the headline.
+Level: 2 — answered by the human, not by an agent.
+
+## 2026-08-19 — The unit is merged into the amount field, not given a row of its own
+What: A native `<select>` replaces the uneditable `zł / mies.` suffix inside the field. The
+     slice 3 direction row is untouched; neither control is nested or demoted.
+Why: The unit is one scalar's denominator, not a mode — the direction is the mode, and the
+     layout must not file them alike. MEASURED against the shipped stylesheet: a second
+     segmented row costs +54 px in EVERY state including month, and at 320 px overflows
+     horizontally by 48 px because `miesiąc` does not fit a 41 px segment. Merged, the
+     default state costs ZERO px against v0.3.0.
+Rules out: A four-slot segmented row, and a custom menu with its own focus and target rules.
+Level: 1 — an interface choice inside a settled card.
+
+## 2026-08-19 — The app asks how many hours a week; it never invents an hours-per-month
+What: The hour unit alone carries an editable hours/week field, default 40, persisted under
+     all four units. The conversion line prints the OPERATION (`40 × 52 ÷ 12`), not a
+     rounded intermediate. No hours-per-month constant exists in the source.
+Why: Kodeks pracy art. 130's nominal month runs ~152–184 h across 2026, so any fixed number
+     is invented; 173⅓ is derivable but wrong for this audience — a student on 20 h/week
+     told they earn 6 066 zł has been confidently misinformed about their own pay. And
+     printing `173,33` then computing 6 066,67 leaves a reader who multiplies 12 grosz
+     short: the rounded intermediate is the same invisible lie in a new coat.
+Rules out: A fixed hours-per-month constant, and printing any rounded intermediate.
+Level: 1 — one extra field in one of four unit states.
+
+## 2026-08-19 — The ryczałt deferral survives slice 4, and its stated condition was backwards
+What: The 12% ryczałt at ≤ 200 zł stays in BACKLOG. Its entry said hour and week units would
+     make small amounts routine; they do the opposite.
+Why: INFERRED from the conversion rules, not measured — hour and week MULTIPLY the typed
+     figure up into a month (20 zł/h at 5 h/week is still 433 zł/mies.), so reaching
+     200 zł/mies. through the hour unit needs about one hour a week. Only `year` divides
+     down, and 200 zł/mies. has been typeable in the monthly field since slice 1.
+Rules out: Promoting a backlog item because its entry names the slice, without re-checking
+     that the mechanism it names actually runs in the direction the entry assumed.
+Level: 0 — a deferral upheld, with the entry's reasoning corrected.
