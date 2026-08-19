@@ -1,10 +1,10 @@
 SLICE 3 — brutto/netto toggle: type what you want on hand, get the gross that produces it
-NOW: builder is implementing the solver, the direction row and the P2-G/P2-I ref reset   [15:20]
+NOW: builder is done: 33 Vitest and 23 Playwright green, handing to the checker   [15:30]
 
 [x] Slice 3 + acceptance criteria into STATE.md
 [x] Four slice-3 rulings into DECISIONS.md
 [x] builder: failing tests first (test:)
-[ ] builder: solver + direction control (feat:)
+[x] builder: solver + direction control (feat:)
 [ ] checker: real browser, both directions, all thresholds
 [ ] checker: regression against the v0.2.0 tag
 [ ] fix cycles, two attempts max per finding
