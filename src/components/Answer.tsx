@@ -30,7 +30,6 @@ export function Answer({ lang, result }: Props) {
   const reliefCovers = result?.reliefCovers ?? false;
   const reliefApplies = result?.reliefApplies ?? false;
   const reliefWorth = result?.reliefWorthGrosz ?? 0;
-  const pitWithoutRelief = result?.pitWithoutReliefGrosz ?? 0;
   const zusExempt = result?.zusExempt ?? false;
   const studentWorth = result?.studentWorthGrosz ?? 0;
 
@@ -92,11 +91,14 @@ export function Answer({ lang, result }: Props) {
       };
     } else if (previous.under26 !== under26 && reliefCovers) {
       // Only where the cited list covers this contract. Off the list the answer
-      // is worth nothing, and `pitWithoutReliefGrosz` is then the whole PIT
-      // advance — a chip built from it would price a relief that never applied.
-      const amountGrosz = under26 ? reliefWorth : pitWithoutRelief;
-      if (amountGrosz > 0) {
-        next = { key: under26 ? 'answer.delta.on' : 'answer.delta.off', amountGrosz };
+      // is worth nothing and `reliefWorthGrosz` is zero, so no chip appears. The
+      // engine gives the same figure on both sides of the flip; the whole PIT
+      // advance is not it, above the relief's monthly limit.
+      if (reliefWorth > 0) {
+        next = {
+          key: under26 ? 'answer.delta.on' : 'answer.delta.off',
+          amountGrosz: reliefWorth,
+        };
       }
     }
     // Anything else that moved the result — another contract, another amount —

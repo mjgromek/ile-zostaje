@@ -319,6 +319,22 @@ export function computeContract(
       )
     : 0;
 
+  // What the under-26 answer is worth this month, in either direction, by the
+  // same rule: the month in which the relief applies, computed once here. On the
+  // Nie side the whole PIT advance is not the answer — above the relief's
+  // monthly limit only part of the przychód is exempt, so the advance overstates
+  // what the relief would be worth, by 175 zł on uop at 12 000 and without bound
+  // above that.
+  const reliefRun = result.reliefApplies
+    ? result
+    : result.reliefCovers
+      ? core(grossGrosz, { ...answers, under26: true }, rates)
+      : null;
+  const reliefWorthGrosz =
+    reliefRun === null
+      ? 0
+      : Math.max(0, reliefRun.pitWithoutRelief.amountGrosz - reliefRun.pit.amountGrosz);
+
   return {
     grossGrosz: result.gross,
     contract: answers.contract,
@@ -330,10 +346,7 @@ export function computeContract(
     reliefCovers: result.reliefCovers,
     reliefApplies: result.reliefApplies,
     pitWithoutReliefGrosz: result.pitWithoutRelief.amountGrosz,
-    reliefWorthGrosz: Math.max(
-      0,
-      result.pitWithoutRelief.amountGrosz - result.pit.amountGrosz,
-    ),
+    reliefWorthGrosz,
     zusExempt: result.zusExempt,
     studentWorthGrosz,
     // The koszty that belong to the base the PIT row shows. Under the relief
