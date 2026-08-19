@@ -61,17 +61,17 @@ Checked in a real browser against the running app, not against the diff.
 
 ## In flight
 
-Two phase gates before the tag: the security review, and the delta-chip probe.
+Nothing. Slice 2 is done and tagged; slice 3 has not started.
 
 ## Blocked
 
-The tag, until both gates report. Nothing else.
+Nothing.
 
 ## Last verification result
 
-Measured 2026-08-19, slice 2 cycle 4, the release check — **PASS**, nine criteria, Δ = 0
-(visible 43/43, held-out 5/5), no open P0 or P1, two P2 in BACKLOG. Verbatim in
-`.agent/LAST_CHECK.md`.
+Measured 2026-08-19 14:54, slice 2, the P1-J re-check at cb189dc — **PASS**, nine criteria
+in the browser, Δ = 0 (visible 45/45, held-out 5/5), P1-J CLOSED, no open P0 or P1, four
+P2 in BACKLOG. Verbatim in `.agent/LAST_CHECK.md`.
 
 ## Next slices, in order
 
@@ -107,3 +107,6 @@ Measured 2026-08-19, slice 2 cycle 4, the release check — **PASS**, nine crite
 - 2026-08-19 00:26 — PROBE CONFIRMED, P1-J: the `Nie` delta chip prints the whole PIT advance as the
   relief worth, overstating it above ~10 319 zl/month — 37% at 20 000. Release BLOCKED,
   tag held. First cycle on this root cause.
+- 2026-08-19 14:39 — fix cycle 1 on P1-J: red test 9ae3b38, fix cb189dc. `reliefWorthGrosz`
+  is now the counterfactual `core(under26: true)` on both sides; `pitWithoutReliefGrosz`
+  untouched, so the ladder is unaffected. Builder's sweep: `under26: true` identical.

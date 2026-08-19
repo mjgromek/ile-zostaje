@@ -96,3 +96,10 @@ Format:
   artifact makes nine requests, all to its own origin — Urgent when: slice 6 puts this on a
   host, where it belongs as a `default-src 'self'` HEADER and not a meta tag, or the moment
   any third-party asset enters index.html.
+- P2-K: the delta chip's zero-guard is untested. MEASURED at slice 2's P1-J re-check: the
+  mutant `reliefWorth > 0` -> `>= 0` at `Answer.tsx:97` — the very line that fix rewrote —
+  survives the whole suite green, and it is behaviour-bearing: on the mutant build uop
+  3 000 zł prints `+0,00 zł z ulgą dla młodych` where HEAD correctly shows no chip —
+  Urgent when: the chip's amount derivation changes again, or the relief becomes worth zero
+  on a covered contract. With nothing pinning it, that regression lands silently, which is
+  exactly how P1-J survived four cycles. Raised by the checker at slice 2's P1-J re-check.

@@ -1,140 +1,95 @@
-<!-- Overwritten every phase. The checker cannot write; this is its report, preserved. -->
+<!-- Overwritten per phase. The checker cannot write; this is its report, verbatim in
+substance, written by the orchestrator on receipt, BEFORE anything else. -->
 
-# LAST CHECK — slice 2, cycle 4, the release check
+# LAST CHECK — slice 2, P1-J fix cycle 1, at cb189dc
 
-Measured 2026-08-19 against `3ac5c90`, phase-start `1bbffef`, production build on :5181,
-headless Chromium, PL and EN. STATE validated before use: every SHA it cites resolves
-(`1bbffef`, `d6b943c`, `01389cd`, `44afef5`, `3ac5c90`), `v0.1.0` -> `f8fdf09`, and the
-one-line change it claims is present at `src/components/Answer.tsx:47`.
-`git status --porcelain` empty at start and end.
+Measured 2026-08-19 14:54 by the checker in Chromium against the production build on
+:5181. The stakeholder's :5180 was never bound and never killed; verified still HTTP 200.
 
-## VERDICT: PASS. P1-F CLOSED. Δ = 0. No open P0 or P1. Two P2, both deferred.
+## VERDICT: PASS. P1-J CLOSED. Δ = 0. No open P0 or P1. One new P2.
 
-## P1-F — CLOSED, OBSERVED with the checker's own instrument
+Nine criteria hold in the browser. Visible 45/45, held-out 5/5, Δ = 0. The held-out five
+were written from STATE criteria 1, 2, 3, 4 and 6 in a `mktemp -d` outside the repo, run
+against the production build and discarded; proven able to fail — against mutant M3 they
+scored 4/5, H2 failing on the exact symptom.
 
-Instrument: an in-page capture-phase listener stamps `performance.now()`, a
-`MutationObserver` on the `role="status"` node stamps the announcement; no CDP in the
-interval. Second, independent instrument: Node-side 25 ms polling — the same method that
-read 579/581 ms at cycle 3.
+STATE validated before use: all 14 SHAs it cites resolve, `v0.1.0` -> `f8fdf09`, and the
+change it claims is present at `src/engine/contract.ts:322-336` and
+`src/components/Answer.tsx:94-101`.
 
-| control | in-page ms | 25 ms poll | utterances |
-| --- | --- | --- | --- |
-| contract -> Zlecenie / Dzieło / Etat | 14.3 / 14.9 / 13.3 | 58 / 57 / 57 | 1 each |
-| copyright -> Tak / Nie | 11.6 / 12.6 | 61 / 74 | 1 each |
-| under-26 -> Tak / Nie | 27.5 / 14.2 | 82 / 72 | 1 each |
-| student -> Tak | 13.5 | 59 | 1 |
-| EN: contract, under-26, copyright x2 | 13.0-15.2 | — | 1 each |
+## P1-J — CLOSED. The chip, measured with a 320 ms settle
 
-The same probe read 504.1 ms on the same page for typing, so it can produce a slow value;
-it did not.
+| lang / contract | 6 000 | 10 318 | 12 000 | 20 000 |
+| --- | --- | --- | --- | --- |
+| PL uop Tak / Nie | +291,00 / −291,00 | +738,00 / −738,00 | +759,00 / −759,00 | +1 968,00 / −1 968,00 |
+| PL zlecenie Tak / Nie | +211,00 / −211,00 | +579,00 / −579,00 | +607,00 / −607,00 | +1 446,00 / −1 446,00 |
+| EN uop Tak / Nie | +291.00 / −291.00 | +738.00 / −738.00 | +759.00 / −759.00 | +1,968.00 / −1,968.00 |
+| EN zlecenie Tak / Nie | +211.00 / −211.00 | +579.00 / −579.00 | +607.00 / −607.00 | +1,446.00 / −1,446.00 |
+| PL+EN dzieło, both sides | no chip | no chip | no chip | no chip |
 
-## The debounce and the utterance count
+**Instrument check.** The identical probe pointed at a `1fde72d` build read `−934,00`,
+`−3 143,00`, `−722,00`, `−2 243,00` in the same four cells: it CAN produce the failing
+value and did not against HEAD. Cross-check: the chip now equals the measured net
+difference to the grosz in all 16 cells — uop 12 000, 9 247,87 − 8 488,87 = 759,00,
+matching the hand arithmetic of the previous cycle.
 
-A 5-keystroke burst: **504.1 ms PL, 506.4 ms EN, one utterance each** — no keystroke is its
-own utterance. Re-clicking the same contract or answer: **0 utterances**. Two different
-answers 100 ms apart: 2 utterances, one per real change. Exactly one
-`role="status" aria-live="polite" aria-atomic="true"` node in the tree; the visible numeral
-is still `aria-hidden="true"`.
+## Nothing else moved — 24 states x 11 page fields, pre-fix build vs HEAD
 
-## Criteria re-verified in a real browser, and the chip
+`takChip`, `takNet`, `nieNet`, `takLive`, `nieLive`, `takTotal`, `nieTotal`, every ladder
+row and the cleared state after an amount change: all byte-identical. The ONLY delta is
+`nieChip`, at exactly the four amounts above the 7 127,33 zł monthly limit. The live region
+on the `Tak` side still reads 759,00 at uop 12 000. `Ladder.tsx`'s `pitWithoutReliefGrosz`
+still prints the struck 934,00 / 3 143,00 with under-26 on above the limit.
 
-1. PASS. Three slots, three distinct nets (4 420,43 / 4 634,20 / 5 724,00), **0 page loads**
-   across the clicks. Umowa o pracę compared against the v0.1.0 ARTIFACT built from the tag
-   and served on :5182 — 16 inputs (8 amounts x under-26 on/off), 0 mismatches.
-2. PASS. Student control on zlecenie only (1/0/0). Under 26 + student: 4 845,20 ->
-   6 000,00, no emerytalna/rentowa/chorobowa/zdrowotna row and no such band segment; the
-   `zusOff` row is the deliberate 0 zł explanatory row, not a charge; quote and link on page.
-3. PASS. No ZUS or health row on dzieło. Control reads `Przenosisz prawa autorskie?` with
-   no `50%` in the label; 20% -> 50% moves the net 5 724,00 -> 5 940,00; the cap prints
-   `50% liczy się do 120 000,00 zł kosztów rocznie.` from `copyrightCostsAnnualCapGrosz`
-   (12 000 000), consumed at `contract.ts:126`.
-4. PASS. Under-26 moves the net on etat and zlecenie and not on dzieło; both languages say
-   so on dzieło.
-6. PASS. 8 rendered ladders (3 contracts x relief/student/20%/50%), struck pre-relief
-   figures excluded: every one sums to exactly 6 000,00 zł.
-7 and 8 spot-checked: 0 `⟦key⟧` markers and 0 stray Polish in EN once the verbatim source
-quotes are excluded; bar 1088/1280 and 358/390 above the card, each contract's Nie/Tak
-groups inside the amount `<section>`.
+## The nine criteria — all hold
 
-**The chip, unchanged from cycle 3:** ±291,00 zł (etat), ±211,00 zł (zlecenie),
-±1 154,80 zł (student). Never on dzieło. Earned on etat then Dzieło clicked inside the dwell
--> none, re-read 900 ms later still none. Earned then amount changed to 20 000 -> none.
+1. PASS — three distinct nets (4 420,43 / 4 634,20 / 5 724,00), 0 page loads; uop compared
+   against the v0.1.0 artifact built from the tag on :5182, 16 states, 0 mismatches in net,
+   ladder total and every ladder line.
+2. PASS — student control on zlecenie only; under-26 + student 4 845,20 -> 6 000,00, three
+   ZUS rows -> none, source quoted on the page.
+3. PASS — dzieło has only a `pit` row, the control label carries no bare `%`, 20% -> 50%
+   moves 5 724,00 -> 5 940,00, the cap prints from the data file.
+4. PASS — the relief moves the net on uop (+291) and zlecenie (+1 365,80 with student on),
+   0 on dzieło, with the substitution note shown in PL and EN.
+5. PASS, carried — `rates-2026.ts` byte-identical to `3ac5c90` where the URLs were
+   re-fetched; 20 valued entries, 0 missing source, effective date or quote. **The official
+   URLs were NOT re-fetched this cycle**; nothing in the data file moved.
+6. PASS — ten ladders sum to exactly 6 000,00 zł.
+7. PASS — 0 `⟦key⟧` markers across three contracts x two languages.
+8. PASS — the bar at 104-166 above the card at 190 at both 1280x900 and 390x844, PL and EN;
+   the gross input and the under-26 radiogroup share one `<section>`; the answer follows in
+   DOM order, 442 under the card's 418 on a phone; the lede is absent in both languages.
+9. PASS — 17 Playwright tests drive a real browser for criteria 1, 2, 3 and 4.
 
-## Counts, Δ, mutation probe
+## Runners, read directly
 
-- `npm test` -> **27 passed / 27 collected, 3 files**. `npx playwright test` -> **16 passed
-  / 16 collected, chromium**. `npm run build` -> `tsc -b && vite build` clean, 53 modules,
-  231.61 kB. Counts read off the runners.
-- **Visible 43/43 = 100%. Held-out 5/5 = 100%. Δ = 0.** Held-out written from STATE's
-  criteria (1, 2, 3, 4, 6) in a temp dir, run against the production build, deleted. Proven
-  able to fail: against mutant M2 it scored 2/5, H2 failing on the exact symptom.
-- Mutation M1, this slice's fix line: `const state` reverted to `${under26}/${student}` on a
-  copy outside the repo -> the P1-F test FAILED at 514 ms against its 250 ms bound, and the
-  debounce test correctly stayed green. M2: `answers.student &&` dropped from `isZusExempt`
-  -> held-out H2 failed. Repo never mutated, porcelain empty, :5181/:5182/:5183 shut down,
-  **:5180 never bound or killed and still HTTP 200**.
+`npm test` 28 passed / 28 collected, 3 files. `npx playwright test` 17 passed / 17
+collected. `npm run build` clean, 53 modules, 231.63 kB. Matches the builder's claim.
 
-## P2 — deferred, nothing blocking
+**The new tests are genuinely red at `1fde72d`** — verified in a temp tree from `git
+archive 1fde72d` carrying only the two test files from `9ae3b38`. Vitest: `uop 6000,
+answered Nie: expected +0 to be 29100`. Playwright: `unexpected value "−934,00 zł bez ulgi
+dla młodych"`, the exact P1-J symptom. **M1**, the fix's own line — `under26: true` ->
+`false` on a copy outside the repo — failed BOTH new cases. The repo was never mutated.
 
-**P2-I, new.** Clear the amount, change an answer while the field is empty, then retype: the
-first keystroke announces immediately, then the rest debounce — 2 utterances for one entry.
-`announced.current` is not reset when the result goes null. Pre-existing for
-under-26/student; the P1-F fix widens it to contract and copyright. No false figure.
+## P2-K — NEW, deferred to BACKLOG. The chip's zero-guard is untested
 
-**P2-G, carried, still reproduces.** `6 000 -> empty -> 20 000` with under-26 on prints
-`+1 968,00 zł z ulgą dla młodych`, the relief's true worth at 20 000. Same root-cause family
-as P2-I — a ref surviving a null result — so one fix closes both.
+MEASURED, not inferred. M4 (`reliefWorth > 0` -> `>= 0` at `Answer.tsx:97`, the line this
+fix rewrote) survived the whole suite green and is behaviour-bearing: on the mutant build
+uop 3 000 zł prints `+0,00 zł z ulgą dla młodych`; HEAD correctly shows no chip.
 
-## Instruments discarded rather than reported — five would-be findings
+## Discarded rather than reported
 
-A second `MutationObserver` installed by the checker's own probe, doubling every EN record;
-reload arithmetic counting its own `goto` calls; a regex with an ASCII space where the page
-renders U+00A0, making the 120 000,00 zł cap look absent; an EN "stray Polish" hit that was
-the verbatim source quotes criterion 5 requires; an EN selector matching the Polish `Etat`.
-One real behaviour re-checked and cleared: an amount above 1 000 000 zł clears the live
-region, which is `parseGross`'s range-error path with its own on-screen message.
+**M2** (`: result.reliefCovers` -> `: true`) survived but is an EQUIVALENT mutant:
+`contract.ts:248` sets `pitWithoutRelief = pit` whenever the relief does not apply, so the
+off-list difference is 0 either way — redundant defence, not behaviour. A criterion-8 probe
+first reported `card: null`; that was the checker's own selector
+(`[data-testid="consequences"]` is absent with no consequence lines), re-measured against
+the section that owns the gross input.
 
-## PROBE after the release check — P1-J, CONFIRMED. The release is BLOCKED.
+## Carried, neither blocks the tag
 
-Raised by the orchestrator at the architecture gate as an INFERENCE FROM CODE, handed to a
-checker as a question, and measured 2026-08-19 in Chromium against the production build.
-The chip text is read from `[data-testid="delta-chip"]` after a 250 ms settle; the first
-probe without the wait read a stale chip, which is why the settle is in the measurement.
-
-**P1-J — the `Nie` delta chip prints the whole PIT advance as what the under-26 relief
-would be worth, so it OVERSTATES the relief above the relief's monthly limit.** OBSERVED:
-
-| gross, uop | `Tak` chip | `Nie` chip | overstatement |
-| --- | --- | --- | --- |
-| 6 000 | +291,00 | −291,00 | 0 |
-| 10 318 | +738,00 | −738,00 | 0 |
-| 10 320 | +738,00 | −739,00 | 1,00 |
-| 12 000 | +759,00 | −934,00 | 175,00 |
-| 20 000 | +1 968,00 | −3 143,00 | 1 175,00 |
-
-Zlecenie has the same shape: 12 000 -> +607,00 vs −722,00; 20 000 -> +1 446,00 vs
-−2 243,00. English identical: `−934.00 zł without the under-26 relief`, `−3,143.00 zł`.
-
-**Hand arithmetic, uop 12 000 zł, from `rates-2026.ts` only.** ZUS 9,76+1,5+2,45% =
-1 645,20. Monthly relief limit `divRoundHalfUp(8 552 800, 12)` = 712 733 gr = 7 127,33 zł.
-Without relief: base = round-to-zloty(12 000 − 1 645,20 − 250) = 10 105,00; 12% on 10 000
-plus 32% on 105 minus 300 = **934,00**. With relief: taxed 4 872,67, proportional ZUS
-668,04, base 3 955,00, 12% minus 300 = 175,00, so the relief is worth **759,00**. Every
-figure reproduces the screen exactly, so the `Tak` chip is the truth and the `Nie` chip
-prints the whole advance.
-
-**Cause, OBSERVED in source.** `src/engine/contract.ts:248` —
-`const pitWithoutRelief = reliefApplies ? pitAdvance(gross, zus, 0, costs, rates) : pit;`
-With `under26 = false`, `reliefApplies` is false, so `pitWithoutReliefGrosz` is the whole
-advance, and `src/components/Answer.tsx:97` prints it as the relief's worth. The comment at
-:94-96 anticipates exactly this for off-list contracts, but not for the annual-limit case.
-
-**Grade P1.** Divergence begins at about 10 319 zł/month on uop (10 318 identical, 10 320
-differs: above the 7 127,33 zł limit the exempt share still absorbs all tax until the
-residual base clears the kwota zmniejszająca), and it grows without bound — 37% at 20 000
-zł. Only the `Nie` chip is wrong: net figures, the `Tak` chip and the live region are
-correct. Bounded fix: the `Nie` branch needs the counterfactual, `core` run with
-`under26: true`, the way `studentWorthGrosz` is already computed at `contract.ts:314-320`.
-
-**Why four checker cycles missed it:** every observed figure was at 6 000 zł, below the
-relief's monthly limit, where the whole advance and the relief's worth coincide exactly.
+**P2-G** still reproduces; note the fix makes its figure the relief's TRUE worth at 20 000,
+so the stale chip is now stale-but-arithmetically-true — the defect is the ref surviving a
+null result, not the number. **P2-I**, same root-cause family, one fix closes both.
