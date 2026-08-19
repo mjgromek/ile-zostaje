@@ -56,6 +56,41 @@ test('no English string is its Polish original, outside a named allowlist', () =
   }
 });
 
+// Slice 3, criterion 7: the direction toggle's strings ship verbatim from
+// DESIGN-SLICE-2 §10, in both languages. Parity above proves both tables carry
+// the same keys; only the table itself proves they carry the agreed words, and
+// a paraphrase of a settled string is a reopened spec.
+test('the slice 3 direction strings are the ones §10 settled, in both languages', () => {
+  const settled: [key: string, pl: string, en: string][] = [
+    ['dir.label', 'Liczę', 'Calculating'],
+    ['dir.group', 'Kierunek przeliczenia', 'Direction of the calculation'],
+    ['dir.g2n', 'brutto → netto', 'gross → net'],
+    ['dir.n2g', 'netto → brutto', 'net → gross'],
+    ['field.amount.label.gross', 'Kwota brutto miesięcznie', 'Monthly gross amount'],
+    ['field.amount.label.net', 'Ile chcesz mieć na koncie', 'What you want in your account'],
+    ['answer.eyebrow.gross', 'Kwota na umowie', 'Amount on the contract'],
+    [
+      'answer.from.net',
+      'miesięcznie, żeby na konto trafiło {net} zł',
+      'per month, so that {net} zł lands in your account',
+    ],
+    [
+      'dir.ambiguous',
+      'Tę kwotę na koncie daje kilka kwot brutto — od {lo} zł do {hi} zł. Pokazujemy najniższą.',
+      'Several gross amounts produce this net — from {lo} zł to {hi} zł. We show the lowest.',
+    ],
+    [
+      'dir.unreachable',
+      'Żadna kwota brutto nie daje dokładnie tyle na konto. Najbliższa to {amount} zł.',
+      'No gross amount produces exactly this net. The closest is {amount} zł.',
+    ],
+  ];
+  for (const [key, plText, enText] of settled) {
+    expect(TABLES.pl[key], `pl: ${key}`).toBe(plText);
+    expect(TABLES.en[key], `en: ${key}`).toBe(enText);
+  }
+});
+
 // The lede is CUT, all three contracts, both languages, and nothing replaces
 // it. `contract.help` said "wkrótce", which is now false. The under-26 switch
 // became a question, so its label and hint went with it. A deleted key that

@@ -497,11 +497,14 @@ type ProbeWindow = { __t0: number; __live: { t: number; text: string }[] };
 /** Announced at once means well inside the 500 ms typing debounce. */
 const IMMEDIATE_MS = 250;
 
-async function installLiveProbe(page: Page) {
-  await page.evaluate(() => {
+// The selector is a parameter because slice 3 puts a second role="status" on
+// the page — the field's ambiguity slot — and it comes first in the DOM. The
+// default is what every slice 1 and 2 test already measured.
+async function installLiveProbe(page: Page, selector = '[role="status"]') {
+  await page.evaluate((where) => {
     const w = window as unknown as ProbeWindow;
-    const region = document.querySelector('[role="status"]');
-    if (region === null) throw new Error('no role="status" region on the page');
+    const region = document.querySelector(where);
+    if (region === null) throw new Error(`no live region matching ${where} on the page`);
     w.__t0 = performance.now();
     w.__live = [];
     let last = region.textContent ?? '';
@@ -517,7 +520,7 @@ async function installLiveProbe(page: Page) {
     };
     document.addEventListener('click', mark, true);
     document.addEventListener('input', mark, true);
-  });
+  }, selector);
 }
 
 /** Every non-empty text the live region held since the last click or keystroke. */
@@ -667,4 +670,204 @@ test('P1-J — the Nie chip prices the relief, not the whole PIT advance', async
   await expect(page.getByTestId('delta-chip')).toHaveCount(0);
   await answerEn(page, 'Are you under 26?', 'No').click();
   await expect(page.getByTestId('delta-chip')).toHaveCount(0);
+});
+
+// ── slice 3 — the brutto/netto direction toggle ───────────────────────────────
+//
+// Every figure below was measured with the SHIPPED engine before the slice was
+// written (scratchpad probe against `computeContract`, 15:00–15:20), so a test
+// that agrees with the screen and with the engine is not agreeing with itself:
+//   uop, net 4 600,00  <- gross 6 263,06 … 6 264,35, five values, lowest first
+//   uop, net 8 488,87  <- gross 11 998,73 (Nie) and 10 885,69 (Tak)
+//   uop, top reachable net 511 491,00 at the 1 000 000 zł input cap
+//   student under 26 on a zlecenie is exactly 1:1
+
+const NET_LABEL_PL = 'Ile chcesz mieć na koncie';
+const DIRECTION_PL = 'Kierunek przeliczenia';
+
+function direction(page: Page, which: 'g2n' | 'n2g') {
+  return page.getByRole('radiogroup', { name: DIRECTION_PL }).getByTestId(`dir-${which}`);
+}
+
+/** The amount field, whose label — and meaning — depend on the direction. */
+function amountField(page: Page) {
+  return page.locator('input#gross');
+}
+
+test('slice 3, criterion 1 — the direction row is above the amount label and is remembered', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  const group = page.getByRole('radiogroup', { name: DIRECTION_PL });
+  await expect(group).toBeVisible();
+  await expect(direction(page, 'g2n')).toHaveAttribute('aria-checked', 'true');
+  await expect(direction(page, 'n2g')).toHaveAttribute('aria-checked', 'false');
+
+  // Read before the field whose meaning it changes: above the label, and in the
+  // same card as the amount — not a page-level mode bar.
+  const label = page.getByText(GROSS_LABEL_PL, { exact: true });
+  const rowBox = (await group.boundingBox())!;
+  const labelBox = (await label.boundingBox())!;
+  expect(rowBox.y + rowBox.height, 'the direction row is not above the amount label').toBeLessThanOrEqual(
+    labelBox.y,
+  );
+  await expect(page.locator('section', { has: group }).locator('input#gross')).toHaveCount(1);
+
+  // §8's floor on the new row, and §3's arrow inside each segment.
+  for (const which of ['g2n', 'n2g'] as const) {
+    const box = (await direction(page, which).boundingBox())!;
+    expect(box.height, `${which} is ${box.height} px tall`).toBeGreaterThanOrEqual(44);
+    await expect(direction(page, which).locator('[aria-hidden="true"]')).toHaveText('→');
+  }
+
+  await direction(page, 'n2g').click();
+  await expect(page.getByText(NET_LABEL_PL, { exact: true })).toBeVisible();
+  await page.reload();
+  await expect(direction(page, 'n2g')).toHaveAttribute('aria-checked', 'true');
+  await expect(page.getByText(NET_LABEL_PL, { exact: true })).toBeVisible();
+
+  // An entry written before slice 3 knows nothing about a direction, and loads
+  // as brutto rather than as an error.
+  await page.evaluate(() => {
+    localStorage.setItem(
+      'ile-zostaje.v1',
+      JSON.stringify({ gross: '6000', contract: 'uop', under26: false, student: false, copyright: false, lang: 'pl' }),
+    );
+  });
+  await page.reload();
+  await expect(direction(page, 'g2n')).toHaveAttribute('aria-checked', 'true');
+  await expect(page.getByTestId('net-amount')).toHaveText(/4\D?420,43/);
+});
+
+test('slice 3, criterion 2 — netto mode changes the words, never the arithmetic', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await enterGross(page, '6263,06');
+  await expect(page.getByTestId('net-amount')).toHaveText(/4\D?600,00/);
+  const ladderInGross = await page.getByTestId('ladder').textContent();
+  const bandInGross = await page.getByTestId('band').textContent();
+
+  // The direction REINTERPRETS what was typed: it does not convert it and does
+  // not throw it away.
+  await direction(page, 'n2g').click();
+  await expect(amountField(page)).toHaveValue('6263,06');
+
+  await amountField(page).fill('4600');
+  await expect(page.getByTestId('net-amount')).toHaveText(/6\D?263,06/);
+  await expect(page.getByText('Kwota na umowie')).toBeVisible();
+  await expect(page.getByText(/miesięcznie, żeby na konto trafiło 4\D?600,00 zł/)).toBeVisible();
+
+  // Band, ladder and total row are the same screen the gross produced.
+  expect(await page.getByTestId('ladder').textContent()).toBe(ladderInGross);
+  expect(await page.getByTestId('band').textContent()).toBe(bandInGross);
+  await expect(page.getByText('To szacunek, nie porada podatkowa.')).toBeVisible();
+  await expect(
+    page.getByText('Twoje dane zostają w tej przeglądarce — nic nie wychodzi na serwer.'),
+  ).toBeVisible();
+});
+
+test('slice 3, criterion 5 — ambiguity and unreachability are stated, never as an error', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await direction(page, 'n2g').click();
+  await amountField(page).fill('4600');
+
+  // Five gross values give 4 600,00 zł on uop; the lowest is shown and the
+  // spread is named, in the field's status slot.
+  await expect(page.getByTestId('net-amount')).toHaveText(/6\D?263,06/);
+  const status = page.getByTestId('amount-status');
+  await expect(status).toHaveAttribute('role', 'status');
+  await expect(status).toHaveText(/od 6\D?263,06 zł do 6\D?264,35 zł/);
+  // Ambiguity is not an error: the field is never marked invalid for it.
+  await expect(amountField(page)).not.toHaveAttribute('aria-invalid', 'true');
+
+  // Above the top reachable net nothing is exact, and the closest gross is the
+  // cap the field itself allows.
+  await amountField(page).fill('600000');
+  await expect(status).toHaveText(/Najbliższa to 1\D?000\D?000,00 zł/);
+
+  // A student under 26 on a zlecenie is exactly 1:1, so neither message fires.
+  await contract(page, 'Zlecenie').click();
+  await answer(page, Q_UNDER26, 'Tak').click();
+  await answer(page, Q_STUDENT, 'Tak').click();
+  await amountField(page).fill('6000');
+  await expect(page.getByTestId('net-amount')).toHaveText(/6\D?000,00/);
+  await expect(status).toHaveCount(0);
+});
+
+// Criterion 6, the P1-J family in the new mode: at a net produced by a gross
+// above the relief's monthly limit, the chip must price the relief at the gross
+// now on screen — never the whole PIT advance, and never a figure from the
+// gross the other answer solved to.
+type NetCase = { contract: 'Etat' | 'Zlecenie'; net: string; gross: RegExp; worth: RegExp; advance: RegExp };
+
+const NETTO_CHIP_CASES: NetCase[] = [
+  { contract: 'Etat', net: '8488,87', gross: /10\D?885,69/, worth: /738,00/, advance: /797,00/ },
+  { contract: 'Etat', net: '12561,78', gross: /16\D?860,83/, worth: /1\D?598,00/, advance: /2\D?276,00/ },
+  { contract: 'Zlecenie', net: '8968,41', gross: /11\D?159,17/, worth: /608,00/, advance: /651,00/ },
+  { contract: 'Zlecenie', net: '13907,68', gross: /17\D?997,61/, worth: /1\D?163,00/, advance: /1\D?789,00/ },
+];
+
+test('slice 3, criterion 6 — in netto mode every figure is computed on the answer shown', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await direction(page, 'n2g').click();
+
+  for (const useCase of NETTO_CHIP_CASES) {
+    const where = `${useCase.contract} netto ${useCase.net}`;
+    await contract(page, useCase.contract).click();
+    await answer(page, Q_UNDER26, 'Nie').click();
+    await amountField(page).fill(useCase.net);
+
+    await answer(page, Q_UNDER26, 'Tak').click();
+    await expect(page.getByTestId('net-amount'), `${where}: solved gross`).toHaveText(useCase.gross);
+    const chip = page.getByTestId('delta-chip');
+    await expect(chip, `${where}: the chip`).toHaveText(useCase.worth);
+    await expect(chip, `${where}: the chip printed the whole PIT advance`).not.toHaveText(
+      useCase.advance,
+    );
+  }
+});
+
+test('slice 3, criterion 10 — a direction change announces at once, one utterance', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await enterGross(page, '6263,06');
+  await expect(page.getByTestId('live')).toHaveText(/4\D?600,00/);
+  await installLiveProbe(page, '[data-testid="live"]');
+
+  await direction(page, 'n2g').click();
+  announcedAtOnce(await utterances(page), 'a direction change');
+
+  await direction(page, 'g2n').click();
+  announcedAtOnce(await utterances(page), 'a direction change back');
+});
+
+test('slice 3, criterion 8 — clear, answer, retype: one utterance and no stale chip', async ({
+  page,
+}) => {
+  // P2-G and P2-I, one root cause: the announce ref and the delta ref survived
+  // the result going null. Clear-and-retype is the ordinary gesture now that
+  // the direction reinterprets the amount, so both close here.
+  await page.goto('/');
+  await enterGross(page, '6000');
+  await expect(page.getByTestId('live')).toHaveText(/4\D?420,43/);
+  await installLiveProbe(page, '[data-testid="live"]');
+
+  await amountField(page).fill('');
+  await answer(page, Q_UNDER26, 'Tak').click();
+  await amountField(page).pressSequentially('6000', { delay: 20 });
+
+  const said = await utterances(page);
+  expect(said, `retyping said ${said.length} things, not one — ${JSON.stringify(said)}`).toHaveLength(1);
+  expect(latency(said), `it announced after ${latency(said)} ms`).toBeGreaterThan(400);
+  await expect(
+    page.getByTestId('delta-chip'),
+    'a chip priced an answer flipped on an empty field',
+  ).toHaveCount(0);
 });
