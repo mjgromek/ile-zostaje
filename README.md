@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <img alt="Wersja" src="https://img.shields.io/badge/wersja-v0.4.0-e0a23c?style=flat-square" />
+  <img alt="Wersja" src="https://img.shields.io/badge/wersja-v0.5.0-e0a23c?style=flat-square" />
   <img alt="Rok podatkowy" src="https://img.shields.io/badge/dane-2026-e0a23c?style=flat-square" />
   <img alt="Języki" src="https://img.shields.io/badge/j%C4%99zyk-PL%20%2F%20EN-e0a23c?style=flat-square" />
   <img alt="Bez serwera" src="https://img.shields.io/badge/dane-tylko%20w%20przegl%C4%85darce-4a2f4a?style=flat-square" />
@@ -68,7 +68,8 @@ wieku po prostu nie wie.
 
 Rozmowa o pracę rzadko zaczyna się od brutto. Zaczyna się od „potrzebuję 5 000 zł na
 życie". Przełącznik **kierunku** nad polem odwraca pytanie: wpisujesz kwotę, która ma
-wpłynąć na konto, a aplikacja podaje brutto, które ją produkuje.
+wpłynąć na konto, a aplikacja podaje brutto, które ją produkuje. Od `v0.5.0` jest to jeden
+przycisk, który mówi, co liczysz **teraz** — klikasz i napis się odwraca.
 
 Nie jest to mnożnik ani drugi wzór. Odpowiedź jest **wyszukiwana przez ten sam silnik**,
 który liczy w drugą stronę — więc nie może się z nim rozjechać. Rozbicie, pasmo i drabina
@@ -151,6 +152,8 @@ nie złoży PIT-u i nie jest niczym, co urząd potraktuje jako wiążące.
 | **Uczciwość przy wielu odpowiedziach** — ekran mówi, że brutto jest więcej niż jedno | ✅ `v0.3.0` |
 | **Jednostki: godzina, tydzień, miesiąc, rok** — kwota z ogłoszenia, nie przeliczona | ✅ `v0.4.0` |
 | **Roczny limit 30-krotności ZUS** — powyżej 23 550 zł/mies. składki znikają | ✅ `v0.4.0` |
+| **Jeden przełącznik kierunku** — pokazuje, co liczysz teraz, klik odwraca | ✅ `v0.5.0` |
+| **Działa od pierwszej sekundy** — przykładowe 5000 zł, jeden klawisz i jest Twoje | ✅ `v0.5.0` |
 | **Ile zostaje po czynszu i jedzeniu** | 📋 zaplanowane |
 | Publiczny adres | 📋 zaplanowane |
 
@@ -268,7 +271,7 @@ official source with an effective date, and a rate that cannot be cited does not
 tax year is data, not code: a rule buried in an `if` branch is treated as a defect. The
 result is an estimate, not tax advice.
 
-**Today** (`v0.4.0`): all three contracts — employment (*umowa o pracę*), *umowa zlecenie*
+**Today** (`v0.5.0`): all three contracts — employment (*umowa o pracę*), *umowa zlecenie*
 with its own ZUS rules, and *umowa o dzieło* with no ZUS, no health contribution and
 deductible costs at 20% or 50% where copyright transfers, capped annually. A student under
 26 on a *zlecenie* pays no ZUS at all, and every contribution line disappears from the
