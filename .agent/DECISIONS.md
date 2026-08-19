@@ -362,3 +362,30 @@ Why: They are not the same act. An invented hours-per-month is a claim about the
      in front of them.
 Rules out: Extending "the app may prefill" to any value the user cannot see and overwrite.
 Level: 2 — answered by the human.
+
+## 2026-08-19 — "Cross-fade" is specced as fade-in on swap, and the departure is named
+What: The old answer is removed the instant the mode changes; the new one enters over
+     180 ms. The two figures are NEVER on screen together, which is not what "cross-fade"
+     literally means.
+Why: The stakeholder's own second clause decides it. A true overlapping cross-fade
+     superimposes two money figures at partial opacity for ~90 ms and renders an unreadable
+     numeral — the visual form of the thing "a money figure that is nobody's net must never
+     stand on screen" forbids. MEASURED: 40 ms illegible instead of 90 ms garbled.
+Rules out: `document.startViewTransition`, which gives exactly the overlapping snapshot.
+Level: 1 — the brief answers it, so the work is the deliverable and not a question. The
+     literal cross-fade was priced: a phase state machine in `Answer`, plus the previous
+     mode's figure on screen for 80 ms after the user changed modes.
+
+## 2026-08-19 — The live region announced the typed net under the other direction's eyebrow
+What: A P1-class defect PRE-EXISTING in the released `v0.4.0`, fixed inside slice 4b.
+     `netto` mode with `6000` typed announces `Na konto: 6 000,00 zł` while the screen reads
+     `Kwota na umowie 8 317,21 zł`. New key `answer.live.gross`, one ternary.
+Why: CONFIRMED by two independent instruments — the designer in a real browser at `v0.4.0`,
+     and the orchestrator by reading `Answer.tsx:85` (always `netGrosz`) against `:178`
+     (`direction === 'n2g' ? grossGrosz : netGrosz`) in the shipped source. It is the P1-J
+     family surviving in the one place a screen-reader user has no other channel, and 4b
+     makes it routine by putting the flip one tap away instead of two.
+Rules out: Grading it as a 4b regression, and any future assumption that a fix to the
+     visible surface reaches the audio one.
+Level: 1 — folded in on DESIGN-SLICE-4 §2's precedent, where rendering found the missing
+     `select` in the focus list and the one-word fix shipped with the slice that found it.
