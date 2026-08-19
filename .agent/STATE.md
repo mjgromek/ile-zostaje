@@ -75,12 +75,10 @@ Nothing. The Level 2 decision is answered.
 
 ## Last verification result
 
-Slice 3, measured 2026-08-19 15:50 at `d68b471` — **PASS**, Δ = 0 (visible 56/56, held-out
-5/5), 176 browser round trips with 0 failures, 72 screens compared against `v0.2.0` with 0
-differing. Security gate 16:21 at `b1ceca9` — **PASS**, no P0 and no P1, three P2. The
-human ran the built-in `/security-review` at 17:0x: **no findings**, scoped by the operator
-to `6b6787a..v0.3.0` because the command's own diff came back empty on a clean `main`.
-Verbatim in `.agent/LAST_CHECK.md`.
+Slice 3 at `d68b471` — **PASS**, Δ = 0, 176 browser round trips, 0 differing screens against
+`v0.2.0`. Security gate at `b1ceca9` — **PASS**, three P2. The human ran the built-in
+`/security-review`: **no findings**, on a scope the operator chose because the command's own
+diff came back empty on a clean `main`. Verbatim in `.agent/LAST_CHECK.md`.
 
 ## Next slices, in order
 
@@ -96,8 +94,6 @@ Verbatim in `.agent/LAST_CHECK.md`.
 
 - 2026-08-18 22:48 to 2026-08-19 16:24 — slices 2 and 3 built, checked and released at
   `v0.2.0` and `v0.3.0`; the detail is in `DECISIONS.md` and git history.
-- 2026-08-19 17:46 — designer returned DESIGN-SLICE-4 and stopped at its Level 2 question.
-  It found a real defect while rendering: `select` is absent from `base.css:23`'s focus
-  list, so the new control would ship the browser's blue ring.
-- 2026-08-19 — stakeholder answered: **option C, monthly dominant plus a per-unit echo.**
-  Slice 4 and its eleven criteria written. Phase-start `2732083`.
+- 2026-08-19 17:46 — designer returned DESIGN-SLICE-4, found a real defect while rendering
+  (`select` absent from `base.css:23`'s focus list), and stopped at its Level 2 question.
+  Stakeholder answered **option C**. Slice 4 and its eleven criteria written.
