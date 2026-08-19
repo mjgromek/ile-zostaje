@@ -8,6 +8,56 @@
   gap: var(--s5);
 }
 
+/* §3 and §9: d-dirRow / d-dir / d-dirSeg. Its own row above the amount label,
+   46 px on a phone, and it costs the card 58 px — measured when variant B was
+   picked, against the 90 px the cut lede refunded. */
+.dirRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2);
+  min-height: 46px;
+  margin-bottom: var(--s2);
+}
+
+/* The row label. Not a fourth surface: the only span the row's own element
+   holds, styled like every other eyebrow on the screen. */
+.dirRow > span {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.dir {
+  flex: 0 0 auto;
+  display: flex;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r-pill);
+  overflow: hidden;
+}
+
+.dirSeg {
+  min-height: 44px;
+  padding: 0 var(--s3);
+  border: 0;
+  background: var(--surface);
+  font-family: var(--face-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  outline-offset: 2px;
+  white-space: nowrap;
+  transition: background var(--dur-fast) var(--ease);
+}
+
+.active {
+  background: var(--ink);
+  color: var(--honey);
+}
+
 .label {
   display: block;
   font-size: 12px;
@@ -95,6 +145,15 @@
   margin: var(--s2) 0 0;
   font-size: 13px;
   color: var(--amber-ink);
+}
+
+/* The same slot, deliberately not the error's colour: the reverse solve saying
+   the answer is not unique is information about the answer, not a mistake. */
+.status {
+  margin: var(--s2) 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-muted);
 }
 
 .questions {

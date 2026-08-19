@@ -17,6 +17,18 @@ const pl: Table = {
   'lang.en': 'Angielski',
   'field.gross.label': 'Kwota brutto miesięcznie',
   'field.gross.unit': 'zł / mies.',
+  // Slice 3, DESIGN-SLICE-2 §10. The direction is read before the field whose
+  // meaning it changes, so its label is a verb: `Liczę: brutto → netto`.
+  'dir.label': 'Liczę',
+  'dir.group': 'Kierunek przeliczenia',
+  'dir.g2n': 'brutto → netto',
+  'dir.n2g': 'netto → brutto',
+  'field.amount.label.gross': 'Kwota brutto miesięcznie',
+  'field.amount.label.net': 'Ile chcesz mieć na koncie',
+  'dir.ambiguous':
+    'Tę kwotę na koncie daje kilka kwot brutto — od {lo} zł do {hi} zł. Pokazujemy najniższą.',
+  'dir.unreachable':
+    'Żadna kwota brutto nie daje dokładnie tyle na konto. Najbliższa to {amount} zł.',
   'field.gross.quickfill': 'Płaca minimalna {year}',
   'field.contract.label': 'Rodzaj umowy',
   'contract.uop': 'Etat',
@@ -36,7 +48,9 @@ const pl: Table = {
   'subst.relief.dzielo':
     'Ulga dla młodych nie obejmuje umowy o dzieło — tylko etat i zlecenie. Twój wiek nic tu nie zmienia.',
   'answer.eyebrow': 'Na konto',
+  'answer.eyebrow.gross': 'Kwota na umowie',
   'answer.from': 'miesięcznie, z {gross} zł brutto',
+  'answer.from.net': 'miesięcznie, żeby na konto trafiło {net} zł',
   'answer.delta.on': '+{amount} zł z ulgą dla młodych',
   'answer.delta.off': '−{amount} zł bez ulgi dla młodych',
   'answer.delta.student.on': '+{amount} zł, bo studiujesz',
@@ -111,6 +125,15 @@ const en: Table = {
   'lang.en': 'English',
   'field.gross.label': 'Monthly gross pay',
   'field.gross.unit': 'zł / month',
+  'dir.label': 'Calculating',
+  'dir.group': 'Direction of the calculation',
+  'dir.g2n': 'gross → net',
+  'dir.n2g': 'net → gross',
+  'field.amount.label.gross': 'Monthly gross amount',
+  'field.amount.label.net': 'What you want in your account',
+  'dir.ambiguous':
+    'Several gross amounts produce this net — from {lo} zł to {hi} zł. We show the lowest.',
+  'dir.unreachable': 'No gross amount produces exactly this net. The closest is {amount} zł.',
   'field.gross.quickfill': '{year} minimum wage',
   'field.contract.label': 'Contract type',
   'contract.uop': 'Employment',
@@ -131,7 +154,9 @@ const en: Table = {
   'subst.relief.dzielo':
     'The under-26 relief does not cover umowa o dzieło — only etat and zlecenie. Your age changes nothing here.',
   'answer.eyebrow': 'In your account',
+  'answer.eyebrow.gross': 'Amount on the contract',
   'answer.from': 'per month, from {gross} zł gross',
+  'answer.from.net': 'per month, so that {net} zł lands in your account',
   'answer.delta.on': '+{amount} zł with the under-26 relief',
   'answer.delta.off': '−{amount} zł without the under-26 relief',
   'answer.delta.student.on': '+{amount} zł because you are a student',

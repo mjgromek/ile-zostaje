@@ -202,3 +202,12 @@ Why: MEASURED with the shipped engine at 15:00 — the net FALLS on 118 of 30 00
      land in a hole. Plateaus reach 6 gross per net: "the lowest" is a choice, not a tie.
 Rules out: A closed-form inverse, a multiplier, and any solver not checked against a scan.
 Level: 1 — an internal interface added inside the engine's existing shape.
+
+## 2026-08-19 — The reverse solve is bisection to LOCATE, an exhaustive scan to DECIDE
+What: `solveGross` bisects `computeContract` for the crossing, then scans ±20 zł of gross
+     one grosz at a time and reports the lowest exact match, the bounds of the matching
+     set, or the closest gross when there is none. `WINDOW_GROSZ` is measured, not chosen.
+Why: Net is not monotone in gross, so bisection alone can land in a hole; and a matching
+     set spans up to 129 grosz WITH GAPS INSIDE IT, so its bounds cannot be walked
+     outwards from the first match either. The scan is what makes "lowest" and "from lo to
+     hi" true. 4 000 engine calls, ~7 ms — a keystroke's worth of work. Level 1.

@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ContractResult } from '../engine/contract';
 import { formatMoney, t, type Lang } from '../i18n/strings';
+import type { Direction } from '../state/storage';
 import s from './Answer.module.css';
 
 type Props = {
   lang: Lang;
   result: ContractResult | null;
+  /** Which figure this block is the answer to. §3's copy table, and nothing
+      else: the band, the ladder and the total row are direction-free. */
+  direction: Direction;
 };
 
 const DELTA_MS = 6_000;
@@ -18,7 +22,7 @@ const DELTA_MS_REDUCED = 10_000;
  */
 type Delta = { key: string; amountGrosz: number };
 
-export function Answer({ lang, result }: Props) {
+export function Answer({ lang, result, direction }: Props) {
   const [delta, setDelta] = useState<Delta | null>(null);
   const [live, setLive] = useState('');
   const announced = useRef<string | null>(null);
@@ -38,12 +42,17 @@ export function Answer({ lang, result }: Props) {
   useEffect(() => {
     if (netGrosz === null) {
       setLive('');
+      // P2-I: the last answered state must not outlive the result it described.
+      // Left standing, the first keystroke of the next entry differs from it,
+      // announces at once, and the rest debounce — one entry, two utterances.
+      announced.current = null;
       return;
     }
     // Every answer, not just two of them. Spec §8 binds contract, student and
     // copyright to an immediate utterance; a key that names only under-26 and
-    // student drops the other two into the typing debounce, silently.
-    const state = `${result?.contract}/${under26}/${student}/${result?.copyright}`;
+    // student drops the other two into the typing debounce, silently. The
+    // direction joins them: it is an answer, not a keystroke.
+    const state = `${result?.contract}/${under26}/${student}/${result?.copyright}/${direction}`;
     const answered = announced.current !== null && announced.current !== state;
     announced.current = state;
 
@@ -70,6 +79,7 @@ export function Answer({ lang, result }: Props) {
     reliefWorth,
     zusExempt,
     studentWorth,
+    direction,
     lang,
   ]);
 
@@ -78,10 +88,18 @@ export function Answer({ lang, result }: Props) {
   // now, one mechanism — the student answer is the bigger of the two numbers.
   useEffect(() => {
     const previous = previousAnswers.current;
+    if (netGrosz === null) {
+      // P2-G: there is no screen to price, so the chip goes and the memory of
+      // the last answers goes with it. Kept, they make the first result after
+      // a clear look like a flip the user never made on a figure they can see.
+      previousAnswers.current = null;
+      setDelta(null);
+      return;
+    }
     previousAnswers.current = { under26, student };
-    // Only a real change of an answer opens this moment. A first render, or a
-    // StrictMode second pass, must not fire it.
-    if (previous === null || netGrosz === null) return;
+    // Only a real change of an answer opens this moment. A first render, a
+    // StrictMode second pass, or the first entry after a clear must not fire it.
+    if (previous === null) return;
 
     let next: Delta | null = null;
     if (previous.student !== student && studentWorth > 0) {
@@ -122,17 +140,24 @@ export function Answer({ lang, result }: Props) {
 
   return (
     <section className={s.answer} data-testid="answer">
-      <p className={s.eyebrow}>{t(lang, 'answer.eyebrow')}</p>
+      <p className={s.eyebrow}>
+        {t(lang, direction === 'n2g' ? 'answer.eyebrow.gross' : 'answer.eyebrow')}
+      </p>
 
       {result === null ? (
         <p className={s.empty}>{t(lang, 'empty.answer')}</p>
       ) : (
         <>
+          {/* The figure is the answer to the question that was asked: what
+              lands in the account, or what has to be on the contract for it
+              to. Same computation, read from the other end. */}
           <p className={s.figure} aria-hidden="true" data-testid="net-amount">
-            {formatMoney(result.netGrosz, lang)} zł
+            {formatMoney(direction === 'n2g' ? result.grossGrosz : result.netGrosz, lang)} zł
           </p>
           <p className={s.from}>
-            {t(lang, 'answer.from', { gross: formatMoney(result.grossGrosz, lang) })}
+            {direction === 'n2g'
+              ? t(lang, 'answer.from.net', { net: formatMoney(result.netGrosz, lang) })
+              : t(lang, 'answer.from', { gross: formatMoney(result.grossGrosz, lang) })}
           </p>
           {delta ? (
             <p className={s.delta} data-testid="delta-chip">
@@ -153,7 +178,16 @@ export function Answer({ lang, result }: Props) {
         <p>{t(lang, 'furniture.storage')}</p>
       </div>
 
-      <p className="visually-hidden" role="status" aria-live="polite" aria-atomic="true">
+      {/* Named, because slice 3 puts a second role="status" on the page — the
+          field's ambiguity slot — and a probe that takes the first one would
+          silently measure the wrong region. */}
+      <p
+        className="visually-hidden"
+        data-testid="live"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         {live}
       </p>
     </section>

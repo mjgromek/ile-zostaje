@@ -9,6 +9,11 @@ const KEY = 'ile-zostaje.v1';
 
 const CONTRACTS: ContractKind[] = ['uop', 'zlecenie', 'dzielo'];
 
+/** Which way the amount is read: brutto → netto, or netto → brutto. */
+export type Direction = 'g2n' | 'n2g';
+
+const DIRECTIONS: Direction[] = ['g2n', 'n2g'];
+
 export type Entries = {
   gross: string;
   contract: ContractKind;
@@ -16,6 +21,7 @@ export type Entries = {
   student: boolean;
   copyright: boolean;
   lang: Lang;
+  direction: Direction;
 };
 
 export function loadEntries(): Entries {
@@ -26,6 +32,7 @@ export function loadEntries(): Entries {
     student: false,
     copyright: false,
     lang: detectLang(globalThis.navigator?.language),
+    direction: 'g2n',
   };
   try {
     const raw = globalThis.localStorage?.getItem(KEY);
@@ -43,6 +50,12 @@ export function loadEntries(): Entries {
       student: flag(parsed.student, fallback.student),
       copyright: flag(parsed.copyright, fallback.copyright),
       lang: parsed.lang === 'pl' || parsed.lang === 'en' ? parsed.lang : fallback.lang,
+      // An entry written before slice 3 has no direction, and one written by
+      // hand may have anything. Both are the same case: brutto → netto is what
+      // the app opens on, never an error and never a thrown-away entry.
+      direction: DIRECTIONS.includes(parsed.direction as Direction)
+        ? (parsed.direction as Direction)
+        : fallback.direction,
     };
   } catch {
     // A corrupted or unavailable store must not take the screen down with it.

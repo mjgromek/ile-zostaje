@@ -628,7 +628,7 @@ async function bothSidesOfTheFlip(
   const yes = lang === 'pl' ? 'Tak' : 'Yes';
   const no = lang === 'pl' ? 'Nie' : 'No';
   const question = lang === 'pl' ? Q_UNDER26 : 'Are you under 26?';
-  const grossLabel = lang === 'pl' ? GROSS_LABEL_PL : 'Monthly gross pay';
+  const grossLabel = lang === 'pl' ? GROSS_LABEL_PL : 'Monthly gross amount';
   const radio = (value: string) =>
     page.getByRole('radiogroup', { name: question }).getByRole('radio', { name: value });
 
@@ -665,7 +665,7 @@ test('P1-J — the Nie chip prices the relief, not the whole PIT advance', async
   // The off-list guard stays: dzieło is not on the cited list, so the answer is
   // worth nothing and no chip appears on either side of the flip.
   await contract(page, 'Dzieło').click();
-  await page.getByLabel('Monthly gross pay').fill('12000');
+  await page.getByLabel('Monthly gross amount').fill('12000');
   await answerEn(page, 'Are you under 26?', 'Yes').click();
   await expect(page.getByTestId('delta-chip')).toHaveCount(0);
   await answerEn(page, 'Are you under 26?', 'No').click();
@@ -861,13 +861,22 @@ test('slice 3, criterion 8 — clear, answer, retype: one utterance and no stale
 
   await amountField(page).fill('');
   await answer(page, Q_UNDER26, 'Tak').click();
-  await amountField(page).pressSequentially('6000', { delay: 20 });
+  // One input event, so the probe's window opens once: the entry either
+  // announces at once, which is the answered-a-question path firing on a
+  // keystroke, or it debounces, which is what typing is supposed to do.
+  await amountField(page).fill('6000');
 
+  // The chip is read first, and on a short leash. It stands for six seconds by
+  // design, so the default five-second retry would simply outlive it and pass
+  // on a chip that was there the whole time.
   const said = await utterances(page);
-  expect(said, `retyping said ${said.length} things, not one — ${JSON.stringify(said)}`).toHaveLength(1);
-  expect(latency(said), `it announced after ${latency(said)} ms`).toBeGreaterThan(400);
   await expect(
     page.getByTestId('delta-chip'),
-    'a chip priced an answer flipped on an empty field',
-  ).toHaveCount(0);
+    'a chip priced an answer flipped on a field with no result on screen',
+  ).toHaveCount(0, { timeout: 1_000 });
+  expect(said, `retyping said ${said.length} things, not one — ${JSON.stringify(said)}`).toHaveLength(1);
+  expect(
+    latency(said),
+    `retyping announced after ${latency(said)} ms — the stale announced state made a keystroke read as an answer`,
+  ).toBeGreaterThan(400);
 });

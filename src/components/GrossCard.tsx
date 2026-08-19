@@ -1,8 +1,11 @@
 import type { ContractKind } from '../engine/rates';
 import { t, type Lang } from '../i18n/strings';
 import type { GrossInput } from '../state/gross';
+import type { Direction } from '../state/storage';
 import { Question } from './Question';
 import s from './GrossCard.module.css';
+
+const DIRECTIONS: Direction[] = ['g2n', 'n2g'];
 
 type Props = {
   lang: Lang;
@@ -10,6 +13,9 @@ type Props = {
   contract: ContractKind;
   grossText: string;
   parsed: GrossInput;
+  direction: Direction;
+  /** Ambiguity or unreachability, already interpolated. Never an error. */
+  status: string | null;
   under26: boolean;
   student: boolean;
   copyright: boolean;
@@ -17,6 +23,7 @@ type Props = {
   /** What the current answers mean, already interpolated. May be empty. */
   consequences: string[];
   onGrossText: (value: string) => void;
+  onDirection: (value: Direction) => void;
   onUnder26: (value: boolean) => void;
   onStudent: (value: boolean) => void;
   onCopyright: (value: boolean) => void;
@@ -36,12 +43,15 @@ export function GrossCard({
   contract,
   grossText,
   parsed,
+  direction,
+  status,
   under26,
   student,
   copyright,
   minimumWageGrosz,
   consequences,
   onGrossText,
+  onDirection,
   onUnder26,
   onStudent,
   onCopyright,
@@ -51,8 +61,35 @@ export function GrossCard({
   return (
     <section className={s.card}>
       <div>
+        {/* §3: its own row, immediately above the label — a control is read
+            before the field whose meaning it changes. The arrow is decoration
+            for a screen reader; the group's own label carries the meaning. */}
+        <div className={s.dirRow}>
+          <span>{t(lang, 'dir.label')}</span>
+          <div className={s.dir} role="radiogroup" aria-label={t(lang, 'dir.group')}>
+            {DIRECTIONS.map((option) => {
+              const [before = '', after = ''] = t(lang, `dir.${option}`).split('→');
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  role="radio"
+                  data-testid={`dir-${option}`}
+                  aria-checked={direction === option}
+                  className={`${s.dirSeg} ${direction === option ? s.active : ''}`}
+                  onClick={() => onDirection(option)}
+                >
+                  {before}
+                  <span aria-hidden="true">→</span>
+                  {after}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <label className={s.label} htmlFor="gross">
-          {t(lang, 'field.gross.label')}
+          {t(lang, direction === 'n2g' ? 'field.amount.label.net' : 'field.amount.label.gross')}
         </label>
         <div className={s.inputRow}>
           <input
@@ -62,15 +99,28 @@ export function GrossCard({
             inputMode="decimal"
             autoComplete="off"
             value={grossText}
-            aria-describedby={parsed.kind === 'error' ? 'gross-error' : undefined}
+            aria-describedby={
+              parsed.kind === 'error'
+                ? 'gross-error'
+                : status !== null
+                  ? 'amount-status'
+                  : undefined
+            }
             aria-invalid={parsed.kind === 'error'}
             onChange={(event) => onGrossText(event.target.value)}
           />
           <span className={s.unit}>{t(lang, 'field.gross.unit')}</span>
         </div>
+        {/* One slot, two things that are not the same thing: an error, which
+            marks the field invalid, and the reverse solve's answer about its
+            own answer, which does not. Ambiguity is not a mistake. */}
         {parsed.kind === 'error' ? (
           <p className={s.error} id="gross-error">
             {t(lang, parsed.error === 'digits' ? 'error.digits' : 'error.range')}
+          </p>
+        ) : status !== null ? (
+          <p className={s.status} id="amount-status" role="status" data-testid="amount-status">
+            {status}
           </p>
         ) : null}
         <div className={s.quickWrap}>
