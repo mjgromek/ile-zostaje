@@ -215,3 +215,19 @@ Format:
 - `e2e/app.spec.ts` is 1 690 lines in one file and the slice 4b block is its fifth section
   — Urgent when: a slice needs to run one section in isolation, or a checker's fix cycle is
   slowed by re-running everything to exercise one area. Raised by the builder at slice 4b.
+- P2-A: the sibling-key fix has no test that NAMES it. MEASURED at slice 4b's check by
+  removing the `band-`/`ladder-` key prefixes in `src/App.tsx`: all eight slice-4b e2e tests
+  passed green, and the four tests that did fail (slice 2 criteria 2 and 3, slice 3
+  criterion 2, slice 4 criteria 5 and 11) failed on strict-mode violations mentioning
+  nothing about keys. The suite goes red, so this is diagnosability rather than absent
+  coverage — Urgent when: a third keyed sibling group is added, or any of those four older
+  assertions is rewritten or relaxed, at which point the fix becomes silently untested.
+  Raised by the checker at slice 4b.
+- P2-C: **the test that guards the product's headline privacy claim hardcodes
+  `http://localhost:5173`.** MEASURED at slice 4b's check — run the suite on any other port
+  and `criterion 7 — entries survive a reload and nothing leaves the device`
+  (`e2e/app.spec.ts:132`) fails with every same-origin asset listed as foreign. The
+  assertion is origin-LITERAL, not origin-relative. Byte-identical at `589ea02` and at
+  `v0.4.0`, so pre-existing — Urgent when: slice 6 points this suite at the LIVE URL. The
+  one test protecting "nothing leaves the device" will then fail for the wrong reason, or be
+  edited under deadline pressure. Raised by the checker at slice 4b.

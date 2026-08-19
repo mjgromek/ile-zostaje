@@ -65,7 +65,7 @@ Detail lives in `DESIGN-SLICE-4B.md`; § refs are to it. Twelve falsifiable clai
 
 ## In flight
 
-Builder, on slice 4b.
+Slice 4b checked PASS. Gates, then README and the v0.5.0 release.
 
 ## Blocked
 
