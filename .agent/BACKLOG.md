@@ -8,13 +8,13 @@ item, it is a wish — write the condition or drop it.
 Format:
 
 ```
-
 - <item> — Urgent when: <the observable condition that promotes it into a slice>
 ```
 
 ## Deferred
 
 <!-- - Pagination on the list endpoint — Urgent when: any account exceeds 500 rows. -->
+
 - B2B / działalność gospodarcza as a contract type — Urgent when: the stakeholder states a
   target user is invoicing rather than employed. Out of V0 by explicit constraint, and the
   most likely thing to be assumed in by mistake.
@@ -169,3 +169,15 @@ Format:
   shown — but the branch is held by a comment rather than an assertion — Urgent when: the
   hours validation changes, or a second field feeds the same cap. Raised by the checker at
   slice 4.
+- Ponytail says SIMPLIFY on the `export` keyword of `MAX_HOURS_PER_WEEK_TENTHS`
+  (`src/state/units.ts:38`) — MEASURED at slice 4's gate, referenced in 0 files outside its
+  own module. The constant stays; only the export is surplus. NOT applied: the tree sat at
+  a checked PASS and the tag asserts that SHA, the same call slice 3 made on a dead i18n
+  key — Urgent when: the next slice touches `units.ts` for any other reason, which makes
+  the deletion free. Raised by ponytail at slice 4.
+- `parseGross`'s bound is a DEFAULT PARAMETER — `parseGross(text, maxGrosz = MAX_GROSS_GROSZ)`
+  at `src/state/gross.ts:19`. A second caller that omits it silently gets the MONTHLY cap
+  whatever the unit, and the call site looks correct while doing it. One caller today, so
+  this is not a defect — it is the shape that lets one form. Merges with the untested
+  `maxGrosz` entry above — Urgent when: a second caller appears. Raised by the architecture
+  gate at slice 4.
