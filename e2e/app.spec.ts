@@ -1,10 +1,14 @@
 import { expect, test, type Page } from '@playwright/test';
+import { V030_SCREENS } from './v030-screens';
 
 // Slice 1's criteria 1, 3, 5, 6 and 7 and slice 2's criteria 1, 2, 3 and 4,
 // driven in a real browser against the running app. The checker drives the
 // artifact, not the diff.
 
-const GROSS_LABEL_PL = 'Kwota brutto miesięcznie';
+// Slice 4 §5 drops the period from both: the unit select now states it, one
+// screen inch to the right, and two places asserting it is how they drift apart.
+const GROSS_LABEL_PL = 'Kwota brutto';
+const GROSS_LABEL_EN = 'Gross amount';
 const Q_UNDER26 = 'Masz mniej niż 26 lat?';
 const Q_STUDENT = 'Studiujesz?';
 const Q_COPYRIGHT = 'Przenosisz prawa autorskie?';
@@ -400,10 +404,13 @@ test('P2-3 — every entry in the provenance list names what it actually is', as
   await page.getByTestId('sources').locator('summary').click();
 
   const pl = await provenance(page);
-  expect(pl).toHaveLength(20);
+  // 21 since slice 4: the annual ZUS ceiling is a cited rate, so it is in the
+  // data file and therefore in this list. A rate the app applies and does not
+  // show the source for is exactly what this list exists to make impossible.
+  expect(pl).toHaveLength(21);
   // Four different numbers under one label is the defect: a reader opening the
   // disclosure to find where 250 zł came from was told "Zaliczka na PIT".
-  expect(new Set(pl.map((entry) => entry.label)).size).toBe(20);
+  expect(new Set(pl.map((entry) => entry.label)).size).toBe(21);
   // pl-PL groups with a non-breaking space, so the value is matched on digits.
   const labelFor = (list: { value: string; label: string }[], amount: string) =>
     list.find((entry) => digits(entry.value) === amount)?.label;
@@ -414,7 +421,7 @@ test('P2-3 — every entry in the provenance list names what it actually is', as
   await page.getByRole('radio', { name: 'Angielski' }).click();
 
   const en = await provenance(page);
-  expect(new Set(en.map((entry) => entry.label)).size).toBe(20);
+  expect(new Set(en.map((entry) => entry.label)).size).toBe(21);
   expect(labelFor(en, '250.00')).toMatch(/Deductible costs/);
   // Criterion 5 holds for the keys this fix adds, in both tables.
   await expect(page.getByTestId('sources')).not.toContainText('⟦');
@@ -628,7 +635,7 @@ async function bothSidesOfTheFlip(
   const yes = lang === 'pl' ? 'Tak' : 'Yes';
   const no = lang === 'pl' ? 'Nie' : 'No';
   const question = lang === 'pl' ? Q_UNDER26 : 'Are you under 26?';
-  const grossLabel = lang === 'pl' ? GROSS_LABEL_PL : 'Monthly gross amount';
+  const grossLabel = lang === 'pl' ? GROSS_LABEL_PL : GROSS_LABEL_EN;
   const radio = (value: string) =>
     page.getByRole('radiogroup', { name: question }).getByRole('radio', { name: value });
 
@@ -665,7 +672,7 @@ test('P1-J — the Nie chip prices the relief, not the whole PIT advance', async
   // The off-list guard stays: dzieło is not on the cited list, so the answer is
   // worth nothing and no chip appears on either side of the flip.
   await contract(page, 'Dzieło').click();
-  await page.getByLabel('Monthly gross amount').fill('12000');
+  await page.getByLabel(GROSS_LABEL_EN).fill('12000');
   await answerEn(page, 'Are you under 26?', 'Yes').click();
   await expect(page.getByTestId('delta-chip')).toHaveCount(0);
   await answerEn(page, 'Are you under 26?', 'No').click();
@@ -878,5 +885,360 @@ test('slice 3, criterion 8 — clear, answer, retype: one utterance and no stale
   expect(
     latency(said),
     `retyping announced after ${latency(said)} ms — the stale announced state made a keystroke read as an answer`,
+  ).toBeGreaterThan(400);
+});
+
+// ── slice 4 — the amount's unit: hour, week, month, year ──────────────────────
+//
+// Every monthly figure below is a multiple of 5,20 zł, because that is the step
+// at which a month is exactly representable in all four units (week is ×52 ÷ 12,
+// hour at 40 h/week is ×3 ÷ 520). Round-looking amounts would compare screens
+// that are one or two grosz apart and call the difference a regression.
+//
+//   6 000,80 zł/mies. = 34,62 zł/godz. @ 40 h = 1 384,80 zł/tydz. = 72 009,60/rok
+//  12 001,60 zł/mies. = 69,24 zł/godz. @ 40 h = 2 769,60 zł/tydz. = 144 019,20/rok
+//  19 999,20 zł/mies. = 115,38 zł/godz. @ 40 h = 4 615,20 zł/tydz. = 239 990,40/rok
+
+type UnitCase = { unit: string; typed: string };
+
+const UNIT_CASES: Record<string, UnitCase[]> = {
+  '6000,80': [
+    { unit: 'hour', typed: '34,62' },
+    { unit: 'week', typed: '1384,80' },
+    { unit: 'month', typed: '6000,80' },
+    { unit: 'year', typed: '72009,60' },
+  ],
+  '12001,60': [
+    { unit: 'hour', typed: '69,24' },
+    { unit: 'week', typed: '2769,60' },
+    { unit: 'month', typed: '12001,60' },
+    { unit: 'year', typed: '144019,20' },
+  ],
+  '19999,20': [
+    { unit: 'hour', typed: '115,38' },
+    { unit: 'week', typed: '4615,20' },
+    { unit: 'month', typed: '19999,20' },
+    { unit: 'year', typed: '239990,40' },
+  ],
+};
+
+const unitSelect = (page: Page) => page.getByTestId('unit-select');
+const hoursField = (page: Page) => page.locator('input#hours');
+
+/** The whole answer/band/ladder surface, read as the browser renders it. */
+async function screen(page: Page) {
+  await page.evaluate(() => window.scrollTo(0, 100_000));
+  await page.waitForTimeout(400);
+  const bar = page.getByTestId('sticky-net');
+  const sticky = (await bar.count()) > 0 ? ((await bar.textContent()) ?? '') : '';
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(200);
+  return {
+    net: (await page.getByTestId('net-amount').textContent()) ?? '',
+    from: (await page.locator('[data-testid="answer"] p').nth(2).textContent()) ?? '',
+    band: (await page.getByTestId('band').locator('..').textContent()) ?? '',
+    ladder: (await page.getByTestId('ladder').textContent()) ?? '',
+    caption: (await page.locator('[data-testid="ladder"] caption').textContent()) ?? '',
+    total: (await page.getByTestId('ladder-total').textContent()) ?? '',
+    sticky,
+  };
+}
+
+test('slice 4, criterion 1 — the unit lives inside the field, and costs the default nothing', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+
+  // §2's shape: a native select, four options in order, month selected, named
+  // by a real <label for> rather than an aria-label.
+  const select = unitSelect(page);
+  await expect(select).toHaveAttribute('id', 'unit');
+  expect(await select.evaluate((el) => el.tagName)).toBe('SELECT');
+  expect(await select.locator('option').allTextContents()).toEqual([
+    'zł / godz.',
+    'zł / tydz.',
+    'zł / mies.',
+    'zł / rok',
+  ]);
+  expect(await select.locator('option').evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value))).toEqual(
+    ['hour', 'week', 'month', 'year'],
+  );
+  await expect(select).toHaveValue('month');
+  await expect(page.getByLabel('Jednostka kwoty')).toHaveAttribute('id', 'unit');
+  expect(
+    await page.locator('label[for="unit"]').evaluate((el) => el.className),
+    'the label must be visually hidden, not an aria-label',
+  ).toContain('visually-hidden');
+  // It replaces the uneditable suffix span, so it sits inside the input row.
+  expect(
+    await select.evaluate((el) => el.parentElement?.querySelector('input')?.id),
+    'the select is not inside the amount field',
+  ).toBe('gross');
+
+  // Zero cost in the default state: the card is the height v0.3.0 shipped.
+  const cardHeight = () => page.locator('section').filter({ has: page.locator('#gross') }).boundingBox();
+  expect(Math.round((await cardHeight())!.height), 'the month card grew').toBe(282);
+  for (const [unit, height] of [['week', 309], ['year', 309], ['hour', 361]] as const) {
+    await select.selectOption(unit);
+    await page.waitForTimeout(150);
+    expect(Math.round((await cardHeight())!.height), `the ${unit} card`).toBe(height);
+  }
+
+  // No horizontal overflow anywhere: three widths, four units, both languages.
+  for (const lang of ['Polski', 'Angielski'] as const) {
+    await page.getByRole('radio', { name: lang }).click();
+    for (const width of [320, 360, 390]) {
+      await page.setViewportSize({ width, height: 844 });
+      for (const unit of ['hour', 'week', 'month', 'year']) {
+        await select.selectOption(unit);
+        await page.waitForTimeout(120);
+        const measured = await page.evaluate(() => ({
+          scroll: document.documentElement.scrollWidth,
+          client: document.documentElement.clientWidth,
+        }));
+        expect(measured.scroll, `${lang} ${width} ${unit} overflows`).toBeLessThanOrEqual(
+          measured.client,
+        );
+      }
+    }
+  }
+});
+
+test('slice 4, criterion 3 — the conversion line prints the operation, never a rounded intermediate', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const select = unitSelect(page);
+  const conv = page.locator('#amount-conv');
+
+  // Absent at month: the answer already is the conversion.
+  await amountField(page).fill('6000');
+  await expect(conv).toHaveCount(0);
+  expect(await amountField(page).getAttribute('aria-describedby')).toBe(null);
+
+  await select.selectOption('hour');
+  await amountField(page).fill('35');
+  await expect(conv).toBeVisible();
+  await expect(conv).toHaveText('40 godz. tygodniowo × 52 tyg. ÷ 12 miesięcy.');
+  // The operation, not its result. 173,33 h a month then 6 066,67 zł leaves a
+  // reader who multiplies 12 grosz short — that is the defect, in one string.
+  await expect(conv).not.toContainText('173');
+  // And the figure the app actually computes from it, to the grosz.
+  await expect(page.getByText(/miesięcznie, z 6\D?066,67 zł brutto/)).toBeVisible();
+
+  for (const [unit, text] of [
+    ['week', 'Tydzień × 52 ÷ 12 miesięcy — ta sama kwota co tydzień.'],
+    ['year', 'Rok ÷ 12 miesięcy — ta sama kwota co miesiąc.'],
+  ] as const) {
+    await select.selectOption(unit);
+    await expect(conv).toHaveText(text);
+  }
+
+  // §2: aria-describedby is a space-separated list, the conversion FIRST — it
+  // is always true — then the error or the ambiguity note, still exclusive.
+  await select.selectOption('week');
+  await amountField(page).fill('1000');
+  expect(await amountField(page).getAttribute('aria-describedby')).toBe('amount-conv');
+
+  // §6: the range check moved onto the DERIVED monthly figure, and the message
+  // names the maximum recomputed into the active unit. 35 000 zł/godz. must
+  // never reach the engine as 60 666 667 zł/mies.
+  await select.selectOption('hour');
+  await amountField(page).fill('35000');
+  await expect(amountField(page)).toHaveAttribute('aria-invalid', 'true');
+  // pl-PL groups with a non-breaking space, and `unit.hour` ends in its own
+  // full stop, so the sentence really does end in two. Matched as the browser
+  // renders it rather than as it would be convenient to write.
+  await expect(page.locator('#gross-error')).toHaveText(/^Wpisz kwotę od 0 do 5\D?769,23 zł \/ godz\.\.$/);
+  expect(await amountField(page).getAttribute('aria-describedby')).toBe('amount-conv gross-error');
+  await expect(page.getByTestId('net-amount')).toHaveCount(0);
+
+  // The year unit accepts twelve times the monthly maximum, and one grosz more
+  // than that is the same refusal.
+  await select.selectOption('year');
+  await amountField(page).fill('12000000');
+  await expect(amountField(page)).not.toHaveAttribute('aria-invalid', 'true');
+  await amountField(page).fill('12000001');
+  await expect(page.locator('#gross-error')).toHaveText(
+    /^Wpisz kwotę od 0 do 12\D?000\D?000,00 zł \/ rok\.$/,
+  );
+});
+
+test('slice 4, criterion 4 — hours per week is asked, never invented', async ({ page }) => {
+  await page.goto('/');
+  const select = unitSelect(page);
+
+  // §5's omit case: for a monthly figure, hours are not a component of the
+  // value that exists — so the row is absent, not disabled and not struck out.
+  for (const unit of ['month', 'week', 'year'] as const) {
+    await select.selectOption(unit);
+    await expect(hoursField(page), `the hours row appeared under ${unit}`).toHaveCount(0);
+  }
+
+  await select.selectOption('hour');
+  await expect(page.getByText('Ile godzin tygodniowo?')).toBeVisible();
+  await expect(hoursField(page)).toHaveValue('40');
+  await expect(page.getByText('godz. / tydz.')).toBeVisible();
+
+  await amountField(page).fill('35');
+  await expect(page.getByText(/miesięcznie, z 6\D?066,67 zł brutto/)).toBeVisible();
+
+  // One decimal, comma or dot. 37,5 is an ordinary Polish contract.
+  // 35 × 37,5 × 52 ÷ 12 = 5 687,50 zł a month, exactly.
+  await hoursField(page).fill('37,5');
+  await expect(page.getByText(/miesięcznie, z 5\D?687,50 zł brutto/)).toBeVisible();
+  await hoursField(page).fill('37.5');
+  await expect(page.getByText(/miesięcznie, z 5\D?687,50 zł brutto/)).toBeVisible();
+
+  // Empty, zero, a word and more than a week's worth are one case: the field is
+  // invalid, the message is its own, and the result goes null rather than
+  // falling back to a number nobody entered.
+  for (const bad of ['', '0', 'abc', '169']) {
+    await hoursField(page).fill(bad);
+    await expect(hoursField(page), `"${bad}" was accepted`).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.locator('#hours-error')).toHaveText('Wpisz liczbę godzin od 1 do 168.');
+    expect(await hoursField(page).getAttribute('aria-describedby')).toBe('hours-error');
+    await expect(page.getByTestId('net-amount'), `"${bad}" still produced an answer`).toHaveCount(0);
+    // The amount itself is not the thing that is wrong, and is not marked so.
+    await expect(amountField(page)).not.toHaveAttribute('aria-invalid', 'true');
+  }
+
+  // Persisted under all four units and across a reload: it is the user's own
+  // fact about their life, and losing it on a unit switch is a loss nobody
+  // asked for. Round-tripped through the select rather than through storage.
+  await hoursField(page).fill('37,5');
+  await select.selectOption('year');
+  await select.selectOption('hour');
+  await expect(hoursField(page)).toHaveValue('37,5');
+  await page.reload();
+  await expect(hoursField(page)).toHaveValue('37,5');
+});
+
+test('slice 4, criteria 5 and 11 — the answer speaks monthly, byte-identical to v0.3.0', async ({
+  page,
+}) => {
+  // The unit ends at the field's edge. The band, the ladder, every why-line,
+  // the caption, the total row and the sticky mini-bar decompose a MONTHLY
+  // gross, which is what they have always decomposed — so for the same monthly
+  // gross they must be the strings the tagged release produced, in all four
+  // units. `V030_SCREENS` was read out of a browser driven against v0.3.0
+  // itself; comparing against this repository's own HEAD would prove nothing.
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto('/');
+  const select = unitSelect(page);
+
+  for (const contract of ['Etat', 'Zlecenie', 'Dzieło'] as const) {
+    await page.getByTestId('contract-bar').getByRole('radio', { name: contract }).click();
+
+    // Criterion 11: the default screen, in the default unit, unchanged.
+    for (const gross of ['6000', '12000', '20000']) {
+      await select.selectOption('month');
+      await amountField(page).fill(gross);
+      await page.waitForTimeout(150);
+      expect(await screen(page), `${contract}/${gross} against v0.3.0`).toEqual(
+        V030_SCREENS[`${contract}/${gross}`],
+      );
+    }
+
+    // Criterion 5: the same monthly gross reached through each of the four
+    // units renders the same screen — with the echo line as the one addition.
+    for (const [monthly, cases] of Object.entries(UNIT_CASES)) {
+      const reference = V030_SCREENS[`${contract}/${monthly}`];
+      for (const { unit, typed } of cases) {
+        await select.selectOption(unit);
+        await amountField(page).fill(typed);
+        await page.waitForTimeout(150);
+        expect(await screen(page), `${contract} ${monthly} via ${unit}`).toEqual(reference);
+      }
+
+      // The echo renders only when the unit is not a month, and it carries the
+      // user's own unit — 6 000,80 zł/mies. net, spoken per hour.
+      await select.selectOption('month');
+      await expect(page.getByTestId('answer-perunit')).toHaveCount(0);
+      await select.selectOption('hour');
+      await expect(page.getByTestId('answer-perunit')).toContainText('≈');
+      await expect(page.getByTestId('answer-perunit')).toContainText('za godzinę');
+    }
+  }
+});
+
+test('slice 4, criterion 8 — the quick-fill sets everything it asserts', async ({ page }) => {
+  // P2-L, driven by the gesture that produced it: a real click at 390, from
+  // netto mode and a unit that is not a month. The chip says "brutto", so it
+  // must leave a screen where brutto is what the field means.
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await direction(page, 'n2g').click();
+  await unitSelect(page).selectOption('year');
+  await amountField(page).fill('90000');
+
+  const quick = page.getByRole('button', { name: /Płaca minimalna/ });
+  await expect(quick).toHaveText(/^Płaca minimalna 2026 — 4\D?806 zł brutto$/);
+  const box = await target(quick);
+  expect(box.height, 'the chip is under the 44 px floor').toBeGreaterThanOrEqual(44);
+  await page.mouse.click(box.x + box.width / 2, box.y + 4);
+
+  await expect(amountField(page)).toHaveValue('4806');
+  await expect(unitSelect(page)).toHaveValue('month');
+  await expect(direction(page, 'g2n')).toHaveAttribute('aria-checked', 'true');
+  // Each of the three is something the cited figure genuinely asserts, so the
+  // screen after the click is the one the label describes.
+  await expect(page.getByTestId('net-amount')).toHaveText(/3\D?605,85/);
+  await expect(page.getByText(GROSS_LABEL_PL, { exact: true })).toBeVisible();
+});
+
+test('slice 4, criterion 10 — the accessibility floor holds on both new controls', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  const select = unitSelect(page);
+
+  // The defect the designer found by rendering: `select` is absent from
+  // base.css's :focus-visible list, so the control would ship the browser's
+  // blue ring. Measured in ink, not asserted from the stylesheet.
+  await select.focus();
+  const ring = await select.evaluate((el) => {
+    const style = getComputedStyle(el);
+    return { color: style.outlineColor, width: style.outlineWidth, style: style.outlineStyle };
+  });
+  expect(ring.width, 'the focus ring is not 3 px').toBe('3px');
+  expect(ring.color, 'the focus ring is not the ink colour').toBe('rgb(43, 33, 28)');
+  expect(ring.style).toBe('solid');
+
+  // 44 px targets on both new controls.
+  const selectBox = await target(select);
+  expect(selectBox.height, 'the select is under the 44 px floor').toBeGreaterThanOrEqual(44);
+  expect(selectBox.width).toBeGreaterThanOrEqual(44);
+  await select.selectOption('hour');
+  const hoursBox = await target(hoursField(page));
+  expect(hoursBox.height, 'the hours field is under the 44 px floor').toBeGreaterThanOrEqual(44);
+
+  // A unit change is an ANSWER: it announces at once, un-debounced, one
+  // utterance. Typed hours are a keystroke and debounce with the amount.
+  await select.selectOption('month');
+  await amountField(page).fill('6000');
+  await expect(page.getByTestId('live')).toHaveText(/4\D?420,43/);
+  await installLiveProbe(page, '[data-testid="live"]');
+
+  await select.selectOption('year');
+  announcedAtOnce(await utterances(page), 'a unit change');
+  await select.selectOption('hour');
+  announcedAtOnce(await utterances(page), 'a unit change onto hours');
+
+  // `Answer`'s announce key gains `unit` and must NOT gain `hoursPerWeek`: one
+  // is an answer, the other is a typed field, and a key that names both reads
+  // every keystroke of the hours aloud.
+  await amountField(page).fill('35');
+  await expect(page.getByTestId('live')).toHaveText(/6\D?066,67/);
+  await installLiveProbe(page, '[data-testid="live"]');
+  await hoursField(page).fill('');
+  await hoursField(page).pressSequentially('20', { delay: 20 });
+  const typed = await utterances(page);
+  expect(typed, `typing hours said ${typed.length} things, not one`).toHaveLength(1);
+  expect(
+    latency(typed),
+    `the hours field announced after ${latency(typed)} ms — a typed field must debounce`,
   ).toBeGreaterThan(400);
 });

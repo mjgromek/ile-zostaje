@@ -2,6 +2,7 @@ import { expect, test } from 'vitest';
 import { computeContract, type Answers } from './contract';
 import { RATES_2026 as rates } from './rates-2026';
 import { solveGross } from './solve';
+import { UNITS, fromMonthlyGrosz, toMonthlyGrosz } from '../state/units';
 
 // Slice 3, criteria 3, 4 and 5. The reverse calculation is obtained from the
 // SHIPPED engine and from nothing else, so the only honest check is the one
@@ -168,6 +169,52 @@ test('above the top reachable net there is no exact gross, and the closest is th
       expect(answer.kind, `${where}, target ${target}`).toBe('none');
       if (answer.kind !== 'none') continue;
       expect(answer.closestGrosz, `${where}: closest gross`).toBe(MAX_GROSZ);
+    }
+  }
+});
+
+// Slice 4, criterion 7. The reverse solve now runs on the DERIVED monthly
+// figure, so two things have to hold that did not have to hold before: the unit
+// conversion has to be a true round trip at the amounts the field can produce,
+// and the solver has to stay sound across the new ZUS ceiling, whose crossing
+// at 23 550,00 zł a month changes the net function's SLOPE inside the range the
+// year unit makes ordinary.
+//
+// The monthly amounts below are multiples of 5,20 zł. That is not decoration:
+// a month is exactly representable in all four units only when it is, because
+// the week conversion is ×52 ÷ 12 and the hour conversion at 40 h/week is
+// ×3 ÷ 520. Picking round-looking figures instead would test the rounding, not
+// the round trip, and would have hidden the solver behind it.
+const H40 = 400;
+const CEILING_MONTHLY = 2_355_000;
+
+test('the round trip closes to the grosz in every unit, on both sides of the ZUS ceiling', () => {
+  const monthlies = [
+    600_080, // 6 000,80 zł
+    2_000_440, // 20 004,40 zł
+    CEILING_MONTHLY - 520, // one step below the ceiling's crossing
+    CEILING_MONTHLY, // at it
+    CEILING_MONTHLY + 520, // and above it, where the slope changed
+  ];
+
+  for (const contract of ['uop', 'zlecenie', 'dzielo'] as const) {
+    for (const monthly of monthlies) {
+      for (const unit of UNITS) {
+        const typed = fromMonthlyGrosz(monthly, unit, H40);
+        const where = `${contract} ${monthly} as ${unit} (${typed})`;
+        // The unit is a lossless carrier at these amounts, so anything that
+        // fails below is the engine or the solver and never the conversion.
+        expect(toMonthlyGrosz(typed, unit, H40), `${where}: not a round trip`).toBe(monthly);
+
+        const a = answers(contract);
+        const net = netOf(monthly, a);
+        const answer = solve(net, a);
+        expect(answer.kind, where).toBe('exact');
+        if (answer.kind !== 'exact') continue;
+        // Exactly the net, not within a grosz of it — the criterion's own words.
+        expect(netOf(answer.grossGrosz, a), `${where}: compute(solve(net)) !== net`).toBe(net);
+        expect(answer.grossGrosz, `${where}: not the lowest`).toBeLessThanOrEqual(monthly);
+      }
     }
   }
 });

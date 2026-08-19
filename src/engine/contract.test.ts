@@ -238,6 +238,10 @@ describe('the monthly breakdown, 2026 rates', () => {
   // figure below was produced by running `git show v0.1.0:src/engine/uop.ts`
   // against `git show v0.1.0:src/engine/rates-2026.ts`, not by rereading this
   // repository — the tagged release is the baseline, not a memory of it.
+  //
+  // Slice 4 moves exactly one row of it, and says which and why in place: the
+  // annual ZUS ceiling is a real change to the engine above 23 550 zł a month,
+  // so a baseline that still passed there would be measuring nothing.
   it('umowa o pracę returns the figures tagged v0.1.0', () => {
     const baseline: Array<[number, boolean, Record<string, number>, number]> = [
       [480_600, false, { emerytalna: 46_907, rentowa: 7_209, chorobowa: 11_775, zdrowotna: 37_324, pit: 16_800 }, 360_585],
@@ -249,7 +253,21 @@ describe('the monthly breakdown, 2026 rates', () => {
       [333_333, false, { emerytalna: 32_533, rentowa: 5_000, chorobowa: 8_167, zdrowotna: 25_887, pit: 1_500 }, 260_246],
       [333_333, true, { emerytalna: 32_533, rentowa: 5_000, chorobowa: 8_167, zdrowotna: 25_887, pit: 0 }, 261_746],
       [100_000, false, { emerytalna: 9_760, rentowa: 1_500, chorobowa: 2_450, zdrowotna: 7_766, pit: 0 }, 78_524],
-      [9_999_999, true, { emerytalna: 976_000, rentowa: 150_000, chorobowa: 245_000, zdrowotna: 776_610, pit: 2_326_500 }, 5_525_889],
+      // The one row v0.1.0 no longer governs, and it is named rather than
+      // quietly re-frozen. 99 999,99 zł a month is far above the 23 550,00 zł
+      // monthly crossing of the annual ZUS ceiling this slice cites, so v0.1.0's
+      // figures here describe an engine that did not know about the limit
+      // 30-krotności. Derived by hand from the same rates plus the ceiling:
+      //   emerytalna 2355000 × 9,76%  = 229 848,00 → 229848  (base CAPPED)
+      //   rentowa    2355000 × 1,5%   =  35 325,00 →  35325  (base CAPPED)
+      //   chorobowa  9999999 × 2,45%  = 244 999,98 → 245000  (uncapped, and the
+      //                                 one line v0.1.0 still agrees with)
+      //   zdrowotna (9999999 − 510173) × 9% = 854 084,34 → 854084 — the base
+      //                                 RISES, because the ZUS above it stopped
+      //   PIT base   9287266 − 473811 − 25000 = 8788455 → 87 885 zł
+      //              1 000 000 × 12% + 7 788 500 × 32% − 300 zł → 2 582 300
+      //   net        9999999 − 510173 − 854084 − 2582300 = 6053442
+      [9_999_999, true, { emerytalna: 229_848, rentowa: 35_325, chorobowa: 245_000, zdrowotna: 854_084, pit: 2_582_300 }, 6_053_442],
     ];
 
     for (const [grossGrosz, under26, lines, netGrosz] of baseline) {
@@ -455,5 +473,74 @@ describe('the monthly breakdown, 2026 rates', () => {
     // Off the cited list the answer is worth nothing, in either direction.
     expect(worth('dzielo', 1_200_000, false)).toBe(0);
     expect(worth('dzielo', 1_200_000, true)).toBe(0);
+  });
+
+  // Slice 4, criterion 6. The annual ceiling on the emerytalna and rentowa base
+  // — the limit 30-krotności — read off zus.pl and cited in rates-2026.ts. It
+  // is contract-agnostic: it bites wherever those two lines exist, so on uop and
+  // zlecenie and never on dzieło, which has no ZUS at all.
+  //
+  // 282 600,00 zł a year is 23 550,00 zł a month, exactly. The test sits AT the
+  // crossing and one grosz either side of it, because the interesting property
+  // is not the value but the SLOPE: DESIGN-SLICE-4 §8 infers that the function
+  // stays continuous and monotone there and that `solveGross`'s bisection stays
+  // sound. An inference is not a measurement, so it is pinned here.
+  it('the annual ZUS ceiling caps the pension and disability base, and nothing else', () => {
+    const ceiling = RATES_2026.contributions.annualBaseCeilingGrosz;
+    expect(ceiling.value, 'the cited annual ceiling, in grosz').toBe(28_260_000);
+    expect(ceiling.quote, 'the quote must print the figure it carries').toContain('282 600,00 zł');
+
+    const CROSSING = 2_355_000; // 23 550,00 zł a month
+    const capped: ContractKind[] = ['uop', 'zlecenie'];
+
+    for (const contract of capped) {
+      const at = computeContract(CROSSING, answers(contract), RATES_2026);
+      const under = computeContract(CROSSING - 1, answers(contract), RATES_2026);
+      const over = computeContract(CROSSING + 1, answers(contract), RATES_2026);
+      const base = (r: typeof at, key: LineKey) =>
+        r.lines.find((line) => line.key === key)?.baseGrosz;
+
+      // At and below the crossing the base is the gross itself.
+      expect(base(under, 'emerytalna'), `${contract}: under the crossing`).toBe(CROSSING - 1);
+      expect(base(at, 'emerytalna'), `${contract}: at the crossing`).toBe(CROSSING);
+      // Above it the base stops moving. Both lines, and only those two: the
+      // ladder's why-line reads this figure, so it starts printing the ceiling
+      // by itself, with no new string.
+      expect(base(over, 'emerytalna'), `${contract}: over the crossing`).toBe(CROSSING);
+      expect(base(over, 'rentowa'), `${contract}: rentowa over the crossing`).toBe(CROSSING);
+      expect(at.zusCapped, `${contract}: not capped at the crossing`).toBe(false);
+      expect(over.zusCapped, `${contract}: capped one grosz above`).toBe(true);
+
+      // Chorobowa is uncapped where it exists, and zdrowotna's base RISES,
+      // because it is the gross less the ZUS that just stopped growing.
+      if (contract === 'uop') {
+        expect(base(over, 'chorobowa'), 'chorobowa is uncapped').toBe(CROSSING + 1);
+      }
+      expect(
+        (base(over, 'zdrowotna') ?? 0) - (base(at, 'zdrowotna') ?? 0),
+        `${contract}: the health base must rise by more than the gross did`,
+      ).toBeGreaterThan(1);
+
+      // Continuous: one grosz of gross moves the net by less than one złoty at
+      // the crossing, in both directions. A discontinuity here is what would
+      // put a hole under the solver's bisection.
+      expect(Math.abs(at.netGrosz - under.netGrosz), `${contract}: continuity below`).toBeLessThan(
+        100,
+      );
+      expect(Math.abs(over.netGrosz - at.netGrosz), `${contract}: continuity above`).toBeLessThan(
+        100,
+      );
+      // And the slope rises rather than falling: above the ceiling more of each
+      // extra złoty survives, which is the whole point of the cap.
+      const slopeBelow = at.netGrosz - computeContract(CROSSING - 10_000, answers(contract), RATES_2026).netGrosz;
+      const slopeAbove = computeContract(CROSSING + 10_000, answers(contract), RATES_2026).netGrosz - at.netGrosz;
+      expect(slopeAbove, `${contract}: the cap must not lower the slope`).toBeGreaterThan(slopeBelow);
+    }
+
+    // Dzieło is outside ZUS entirely, so the ceiling cannot reach it: the same
+    // gross either side of the crossing is untouched by this slice.
+    const dzielo = computeContract(CROSSING + 1, answers('dzielo'), RATES_2026);
+    expect(dzielo.zusCapped, 'dzieło has no capped contribution to cap').toBe(false);
+    expect(dzielo.lines.map((line) => line.key)).toEqual(['pit']);
   });
 });
