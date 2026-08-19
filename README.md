@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img alt="Wersja" src="https://img.shields.io/badge/wersja-v0.1.0-e0a23c?style=flat-square" />
+  <img alt="Wersja" src="https://img.shields.io/badge/wersja-v0.2.0-e0a23c?style=flat-square" />
   <img alt="Rok podatkowy" src="https://img.shields.io/badge/dane-2026-e0a23c?style=flat-square" />
   <img alt="Języki" src="https://img.shields.io/badge/j%C4%99zyk-PL%20%2F%20EN-e0a23c?style=flat-square" />
   <img alt="Bez serwera" src="https://img.shields.io/badge/dane-tylko%20w%20przegl%C4%85darce-4a2f4a?style=flat-square" />
@@ -91,7 +91,11 @@ nie złoży PIT-u i nie jest niczym, co urząd potraktuje jako wiążące.
 | **Polski i angielski**, cały interfejs | ✅ `v0.1.0` |
 | **Dane w localStorage**, przeżywają przeładowanie | ✅ `v0.1.0` |
 | **Źródła z datami wejścia w życie** | ✅ `v0.1.0` |
-| Umowa zlecenie i o dzieło, status studenta | 🔨 w budowie |
+| **Umowa zlecenie** — własne zasady ZUS, pełne rozbicie | ✅ `v0.2.0` |
+| **Student do 26 lat na zleceniu** — bez ZUS, wszystkie składki znikają | ✅ `v0.2.0` |
+| **Umowa o dzieło** — bez ZUS i bez zdrowotnej, koszty 20% albo 50% | ✅ `v0.2.0` |
+| **Ulga dla młodych tylko tam, gdzie sięga** — ekran mówi, gdzie nie sięga | ✅ `v0.2.0` |
+| Przeliczanie netto → brutto | 🔨 w budowie |
 | Jednostki: godzina, tydzień, miesiąc, rok | 📋 zaplanowane |
 | **Ile zostaje po czynszu i jedzeniu** | 📋 zaplanowane |
 | Publiczny adres | 📋 zaplanowane |
@@ -203,10 +207,16 @@ official source with an effective date, and a rate that cannot be cited does not
 tax year is data, not code: a rule buried in an `if` branch is treated as a defect. The
 result is an estimate, not tax advice.
 
-**Today** (`v0.1.0`): employment contract (*umowa o pracę*), the under-26 relief, full
-Polish and English interface, localStorage persistence, cited sources. **In progress:**
-*zlecenie* and *dzieło* with student status. **Planned:** hour/week/month/year input units,
-the rent-and-food leftover layer, and a public URL.
+**Today** (`v0.2.0`): all three contracts — employment (*umowa o pracę*), *umowa zlecenie*
+with its own ZUS rules, and *umowa o dzieło* with no ZUS, no health contribution and
+deductible costs at 20% or 50% where copyright transfers, capped annually. A student under
+26 on a *zlecenie* pays no ZUS at all, and every contribution line disappears from the
+screen. The under-26 income-tax relief applies only to the contracts the cited source
+lists, and where it does not reach, the interface says so instead of ignoring the control.
+Plus, from `v0.1.0`: the under-26 relief, a full Polish and English interface, localStorage
+persistence and cited sources with effective dates. **In progress:** a net→gross direction,
+so you can ask what gross pay leaves you 5 000 on hand. **Planned:** hour/week/month/year
+input units, the rent-and-food leftover layer, and a public URL.
 
 Run it with `npm install && npm run dev`. Tests: `npm test` for the engine,
 `npm run e2e` for a real browser.
