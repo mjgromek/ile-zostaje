@@ -1,5 +1,5 @@
 import type { Cited, ContractKind, YearRates } from '../engine/rates';
-import { formatMoney, formatRate, t, type Lang } from '../i18n/strings';
+import { formatMoney, formatRate, formatZloty, t, type Lang, type Params } from '../i18n/strings';
 import css from './Sources.module.css';
 
 type Props = {
@@ -7,7 +7,7 @@ type Props = {
   rates: YearRates;
 };
 
-type Entry = { labelKey: string; cited: Cited<unknown>; shown: string };
+type Entry = { labelKey: string; cited: Cited<unknown>; shown: string; params?: Params };
 
 /**
  * Where every number came from — and every RULE. Collapsed by default, because
@@ -30,6 +30,7 @@ export function Sources({ lang, rates }: Props) {
     { labelKey: 'line.rentowa', cited: rates.contributions.rentowa, shown: pct(rates.contributions.rentowa) },
     { labelKey: 'line.chorobowa', cited: rates.contributions.chorobowa, shown: pct(rates.contributions.chorobowa) },
     { labelKey: 'line.zdrowotna', cited: rates.contributions.zdrowotna, shown: pct(rates.contributions.zdrowotna) },
+    { labelKey: 'sources.zus.ceiling', cited: rates.contributions.annualBaseCeilingGrosz, shown: zl(rates.contributions.annualBaseCeilingGrosz) },
     { labelKey: 'sources.pit.rate1', cited: rates.pit.firstRatePercent, shown: pct(rates.pit.firstRatePercent) },
     { labelKey: 'sources.pit.rate2', cited: rates.pit.secondRatePercent, shown: pct(rates.pit.secondRatePercent) },
     { labelKey: 'sources.pit.threshold', cited: rates.pit.thresholdAnnualGrosz, shown: zl(rates.pit.thresholdAnnualGrosz) },
@@ -45,7 +46,15 @@ export function Sources({ lang, rates }: Props) {
     { labelKey: 'sources.dzielo.costs.cap', cited: dzielo.copyrightCostsAnnualCapGrosz, shown: zl(dzielo.copyrightCostsAnnualCapGrosz) },
     { labelKey: 'sources.relief.limit', cited: rates.youthRelief.annualLimitGrosz, shown: zl(rates.youthRelief.annualLimitGrosz) },
     { labelKey: 'sources.relief.contracts', cited: rates.youthRelief.contracts, shown: list(rates.youthRelief.contracts) },
-    { labelKey: 'field.gross.quickfill', cited: rates.minimumWageMonthlyGrosz, shown: zl(rates.minimumWageMonthlyGrosz) },
+    {
+      labelKey: 'field.gross.quickfill',
+      cited: rates.minimumWageMonthlyGrosz,
+      shown: zl(rates.minimumWageMonthlyGrosz),
+      // The quick-fill's label states the figure it sets, so this entry has to
+      // supply it too: a list item printing a literal `{amount}` would be the
+      // loudest possible way to say nobody read this screen.
+      params: { amount: formatZloty(rates.minimumWageMonthlyGrosz.value, lang) },
+    },
   ];
 
   return (
@@ -56,7 +65,7 @@ export function Sources({ lang, rates }: Props) {
         {entries.map((entry) => (
           <li className={css.item} key={entry.labelKey}>
             <span className={css.value}>{entry.shown}</span>{' '}
-            {t(lang, entry.labelKey, { year: rates.year })}
+            {t(lang, entry.labelKey, { year: rates.year, ...entry.params })}
             <span className={css.meta}>
               {/* Verbatim from a Polish official page, so it stays Polish and
                   says so, in both builds. A quote is evidence, not a label. */}

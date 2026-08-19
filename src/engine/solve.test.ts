@@ -186,15 +186,18 @@ test('above the top reachable net there is no exact gross, and the closest is th
 // ×3 ÷ 520. Picking round-looking figures instead would test the rounding, not
 // the round trip, and would have hidden the solver behind it.
 const H40 = 400;
-const CEILING_MONTHLY = 2_355_000;
 
 test('the round trip closes to the grosz in every unit, on both sides of the ZUS ceiling', () => {
+  // 23 550,00 zł — the crossing itself — is NOT a multiple of 5,20 zł, so it is
+  // not typeable in the hour or the week unit at all. That is a fact about the
+  // units and not a gap in the cover: the crossing itself is pinned to the
+  // grosz in contract.test.ts, and what belongs here is the solver on both
+  // sides of it, at amounts a person can actually enter.
   const monthlies = [
     600_080, // 6 000,80 zł
     2_000_440, // 20 004,40 zł
-    CEILING_MONTHLY - 520, // one step below the ceiling's crossing
-    CEILING_MONTHLY, // at it
-    CEILING_MONTHLY + 520, // and above it, where the slope changed
+    2_354_560, // 23 545,60 zł — the last step below the ceiling's crossing
+    2_355_080, // 23 550,80 zł — the first step above it, where the slope changed
   ];
 
   for (const contract of ['uop', 'zlecenie', 'dzielo'] as const) {

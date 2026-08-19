@@ -499,7 +499,11 @@ test('P1-E — a chip stops claiming a figure the entry has moved past', async (
 // would be counted as announcement delay.
 
 type Utterance = { dt: number; text: string };
-type ProbeWindow = { __t0: number; __live: { t: number; text: string }[] };
+type ProbeWindow = {
+  __t0: number;
+  __live: { t: number; text: string }[];
+  __probe?: MutationObserver;
+};
 
 /** Announced at once means well inside the 500 ms typing debounce. */
 const IMMEDIATE_MS = 250;
@@ -512,15 +516,21 @@ async function installLiveProbe(page: Page, selector = '[role="status"]') {
     const w = window as unknown as ProbeWindow;
     const region = document.querySelector(where);
     if (region === null) throw new Error(`no live region matching ${where} on the page`);
+    // A second install used to leave the first observer attached and still
+    // pushing into the shared buffer, so one utterance was recorded twice,
+    // 0,1 ms apart, and read as the app announcing twice. The instrument has to
+    // be replaced, not added to.
+    w.__probe?.disconnect();
     w.__t0 = performance.now();
     w.__live = [];
     let last = region.textContent ?? '';
-    new MutationObserver(() => {
+    w.__probe = new MutationObserver(() => {
       const text = region.textContent ?? '';
       if (text === last) return;
       last = text;
       w.__live.push({ t: performance.now(), text });
-    }).observe(region, { childList: true, characterData: true, subtree: true });
+    });
+    w.__probe.observe(region, { childList: true, characterData: true, subtree: true });
     const mark = () => {
       w.__t0 = performance.now();
       w.__live = [];
@@ -1124,6 +1134,11 @@ test('slice 4, criteria 5 and 11 — the answer speaks monthly, byte-identical t
   // gross they must be the strings the tagged release produced, in all four
   // units. `V030_SCREENS` was read out of a browser driven against v0.3.0
   // itself; comparing against this repository's own HEAD would prove nothing.
+  // 45 screens, each read after a scroll to the bottom and back so the sticky
+  // mini-bar is measured where it actually fires. That is a real browser doing
+  // real work, not a slow test: the default 30 s is simply the wrong budget for
+  // it, and raising it here is cheaper than reading fewer screens.
+  test.setTimeout(180_000);
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto('/');
   const select = unitSelect(page);
@@ -1150,15 +1165,21 @@ test('slice 4, criteria 5 and 11 — the answer speaks monthly, byte-identical t
         await amountField(page).fill(typed);
         await page.waitForTimeout(150);
         expect(await screen(page), `${contract} ${monthly} via ${unit}`).toEqual(reference);
-      }
 
-      // The echo renders only when the unit is not a month, and it carries the
-      // user's own unit — 6 000,80 zł/mies. net, spoken per hour.
-      await select.selectOption('month');
-      await expect(page.getByTestId('answer-perunit')).toHaveCount(0);
-      await select.selectOption('hour');
-      await expect(page.getByTestId('answer-perunit')).toContainText('≈');
-      await expect(page.getByTestId('answer-perunit')).toContainText('za godzinę');
+        // The echo is the ONE thing the unit adds to the answer, and it renders
+        // only when the unit is not a month — where the answer already is the
+        // echo. Read on the same screen that was just compared, so it cannot be
+        // read off an amount some other unit left behind.
+        const echo = page.getByTestId('answer-perunit');
+        if (unit === 'month') {
+          await expect(echo, 'a month echoed itself').toHaveCount(0);
+        } else {
+          await expect(echo, `${monthly} via ${unit}`).toContainText('≈');
+          await expect(echo).toContainText(
+            { hour: 'za godzinę', week: 'tygodniowo', year: 'rocznie' }[unit]!,
+          );
+        }
+      }
     }
   }
 });
@@ -1222,16 +1243,22 @@ test('slice 4, criterion 10 — the accessibility floor holds on both new contro
   await expect(page.getByTestId('live')).toHaveText(/4\D?420,43/);
   await installLiveProbe(page, '[data-testid="live"]');
 
+  // Both directions, and on amounts the new unit can actually carry: 6 000 zł
+  // a YEAR is 500 zł a month, and 6 000 zł an HOUR is not an amount at all, so
+  // switching onto the hour unit here would be measuring the range check.
   await select.selectOption('year');
   announcedAtOnce(await utterances(page), 'a unit change');
-  await select.selectOption('hour');
-  announcedAtOnce(await utterances(page), 'a unit change onto hours');
+  await select.selectOption('month');
+  announcedAtOnce(await utterances(page), 'a unit change back');
 
   // `Answer`'s announce key gains `unit` and must NOT gain `hoursPerWeek`: one
   // is an answer, the other is a typed field, and a key that names both reads
   // every keystroke of the hours aloud.
+  await select.selectOption('hour');
   await amountField(page).fill('35');
-  await expect(page.getByTestId('live')).toHaveText(/6\D?066,67/);
+  // The live region speaks the NET of the derived 6 066,67 zł gross, and then
+  // the echo — both figures the screen shows, in the order it shows them.
+  await expect(page.getByTestId('live')).toHaveText(/4\D?465,79.*25,76 zł za godzinę/);
   await installLiveProbe(page, '[data-testid="live"]');
   await hoursField(page).fill('');
   await hoursField(page).pressSequentially('20', { delay: 20 });

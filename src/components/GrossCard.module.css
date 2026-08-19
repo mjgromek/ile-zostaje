@@ -97,9 +97,97 @@
   color: var(--ink);
 }
 
-.unit {
+/* The unit is one scalar's denominator, not a mode of the app, so it sits
+   INSIDE the field at the exact pixel the uneditable `zł / mies.` span used to.
+   A 1 px hairline separates the two halves of one value; it is decoration and
+   is hidden from the accessibility tree. */
+.unitDivider {
   flex: 0 0 auto;
+  align-self: stretch;
+  width: 1px;
+  margin: 10px 0;
+  background: var(--line);
+}
+
+/* Hand-written rather than a component library's Select: that would arrive with
+   its own focus ring, its own target sizes and its own opinion about a suffix
+   inside a bordered row, all three of which are already settled here. The
+   chevron is an inline SVG in a data URI, so nothing is fetched at runtime. */
+.unitSelect {
+  flex: 0 0 auto;
+  align-self: stretch;
+  min-width: 96px;
+  border: 0;
+  background: transparent;
+  outline-offset: -3px;
+  padding: 0 24px 0 0;
+  font-family: var(--face-body);
   font-size: 13px;
+  /* 600, not 400: the span it replaces displayed a unit; this one is a control. */
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%232b211c' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+}
+
+/* The sentence that makes the conversion reproducible. It prints the OPERATION,
+   so a reader who multiplies gets the app's own figure and not one twelve grosz
+   away from it. Only rendered when the unit is not a month. */
+.conv {
+  margin: var(--s2) 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+
+/* The hour unit alone: how many hours a week, asked rather than invented. The
+   LIGHT border, deliberately — this qualifies the figure above it and must not
+   compete with it. */
+.hoursRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2);
+  min-height: 44px;
+  margin-top: var(--s2);
+}
+
+.hoursLabel {
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.hoursField {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+/* The border is on the INPUT and not on a wrapper around it. A wrapper measures
+   44 px while the control inside it takes a click across 41 — the exact failure
+   mode P1-1 exists to catch, and the one the quick-fill chip already taught
+   this project once. The suffix sits outside the box, as §1's sketch draws it. */
+.hoursInput {
+  width: 72px;
+  height: 44px;
+  padding: 0 var(--s2);
+  border: 1.5px solid var(--line);
+  border-radius: var(--r-control);
+  outline-offset: -3px;
+  background: var(--surface);
+  text-align: right;
+  font-family: var(--face-data);
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.hoursUnit {
+  font-size: 12px;
   color: var(--ink-muted);
   white-space: nowrap;
 }
@@ -135,6 +223,10 @@
   font-family: var(--face-body);
   font-size: 13px;
   color: var(--ink);
+  /* The chip states the figure it sets, so it is a sentence now. A longer
+     translation wraps instead of pushing the card past the viewport. */
+  white-space: normal;
+  text-align: left;
 }
 
 .quick:hover .quickChip {

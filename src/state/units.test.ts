@@ -1,6 +1,3 @@
-import { readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { expect, test } from 'vitest';
 import {
   DEFAULT_HOURS_PER_WEEK,
@@ -55,12 +52,20 @@ test('the conversion is one rounding at the engine boundary, to the grosz', () =
   expect(maxInUnitGrosz(MAX, 'month', H40)).toBe(100_000_000); //   1 000 000 zł
   expect(maxInUnitGrosz(MAX, 'week', H40)).toBe(23_076_923); //       230 769,23 zł
   expect(maxInUnitGrosz(MAX, 'hour', H40)).toBe(576_923); //            5 769,23 zł
-  // And it is a real bound: one grosz more than the stated maximum converts to
-  // more than a month may hold. `35 000 zł/godz.` never reaches the engine.
+  // And it is a real bound: the stated maximum converts inside the cap, and the
+  // next grosz is past it. Under `year` a typed grosz is worth one twelfth of a
+  // grosz a month — the only unit where a typed step is smaller than a grosz —
+  // so the ROUNDED monthly figure catches up five grosz later. The field gates
+  // on this floored maximum rather than on the rounded monthly for exactly that
+  // reason: a message that names 12 000 000 zł while 12 000 000,05 is accepted
+  // is a maximum that is not one.
   for (const unit of UNITS) {
     const max = maxInUnitGrosz(MAX, unit, H40);
+    const slack = unit === 'year' ? MONTHS_PER_YEAR / 2 : 1;
     expect(toMonthlyGrosz(max, unit, H40), `${unit}: the stated maximum`).toBeLessThanOrEqual(MAX);
-    expect(toMonthlyGrosz(max + 1, unit, H40), `${unit}: one grosz over`).toBeGreaterThan(MAX);
+    expect(toMonthlyGrosz(max + slack, unit, H40), `${unit}: past the maximum`).toBeGreaterThan(
+      MAX,
+    );
   }
   expect(toMonthlyGrosz(3_500_000, 'hour', H40), '35 000 zł/h').toBeGreaterThan(MAX);
 
@@ -82,19 +87,17 @@ test('the conversion is one rounding at the engine boundary, to the grosz', () =
 test('no hours-per-month constant exists anywhere in the source', () => {
   expect([WEEKS_PER_YEAR, MONTHS_PER_YEAR]).toEqual([52, 12]);
 
-  // Shipped source only. A test file is not the source, and this one has to be
-  // able to write `173,33` down in order to forbid it.
-  const root = fileURLToPath(new URL('..', import.meta.url));
-  const files: string[] = [];
-  const walk = (dir: string) => {
-    for (const entry of readdirSync(dir, { withFileTypes: true })) {
-      const path = join(dir, entry.name);
-      if (entry.isDirectory()) walk(path);
-      else if (/\.tsx?$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name)) files.push(path);
-    }
-  };
-  walk(root);
-  expect(files.length, 'the walk found no source at all').toBeGreaterThan(10);
+  // Every shipped module under src/, read through the bundler the app itself
+  // uses rather than through the filesystem: no new dependency, and the set of
+  // files is the set Vite would actually ship. Test files are excluded — this
+  // one has to be able to write the forbidden figure down in order to forbid it.
+  const modules = import.meta.glob('../**/*.{ts,tsx}', {
+    query: '?raw',
+    import: 'default',
+    eager: true,
+  }) as Record<string, string>;
+  const files = Object.keys(modules).filter((path) => !/\.test\.tsx?$/.test(path));
+  expect(files.length, 'the glob found no source at all').toBeGreaterThan(10);
 
   // 173,33 and 173⅓ in every spelling a builder might reach for, plus 168 and
   // 160 as monthly hours, plus the name itself. `168` is legal as the hours in
@@ -108,7 +111,7 @@ test('no hours-per-month constant exists anywhere in the source', () => {
     /\b(168|160|176|173)\b[^\n]{0,20}\bmonth/i,
   ];
   for (const path of files) {
-    const source = readFileSync(path, 'utf8');
+    const source = modules[path]!;
     for (const pattern of forbidden) {
       expect(pattern.test(source), `${path} carries an hours-per-month constant: ${pattern}`).toBe(
         false,

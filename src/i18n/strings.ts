@@ -15,21 +15,52 @@ const pl: Table = {
   'lang.legend': 'Język',
   'lang.pl': 'Polski',
   'lang.en': 'Angielski',
-  'field.gross.label': 'Kwota brutto miesięcznie',
-  'field.gross.unit': 'zł / mies.',
+  // Slice 4, DESIGN-SLICE-4 §5. The unit is one scalar's denominator, not a mode
+  // of the app, so its strings sit with the field's and not with the direction's.
+  'unit.group': 'Jednostka kwoty',
+  'unit.hour': 'zł / godz.',
+  'unit.week': 'zł / tydz.',
+  'unit.month': 'zł / mies.',
+  'unit.year': 'zł / rok',
+  'unit.per.hour': 'za godzinę',
+  'unit.per.week': 'tygodniowo',
+  'unit.per.month': 'miesięcznie',
+  'unit.per.year': 'rocznie',
+  // The OPERATION, never a rounded intermediate. Printing a rounded hours-per-
+  // month figure and then computing 6 066,67 zł from the unrounded one leaves a
+  // reader who multiplies twelve grosz short; printing the operation lets them
+  // reproduce the app's own figure exactly. Load-bearing prose, not style, and
+  // `units.test.ts` refuses the rounded figure anywhere in this source.
+  'conv.hour': '{hours} godz. tygodniowo × 52 tyg. ÷ 12 miesięcy.',
+  'conv.week': 'Tydzień × 52 ÷ 12 miesięcy — ta sama kwota co tydzień.',
+  'conv.year': 'Rok ÷ 12 miesięcy — ta sama kwota co miesiąc.',
+  'field.hours.label': 'Ile godzin tygodniowo?',
+  'field.hours.unit': 'godz. / tydz.',
+  'error.hours': 'Wpisz liczbę godzin od 1 do 168.',
+  // The echo. `≈` is doing real work: it says this division does not close
+  // exactly, and that the model assumes twelve identical months.
+  'answer.perunit': '≈ {amount} zł na konto {per}',
+  'answer.perunit.gross': '≈ {amount} zł na umowie {per}',
+  'answer.live.perunit': 'Około {amount} zł {per}.',
+  'note.zusCeiling':
+    'Powyżej {amount} zł miesięcznie nie płacisz już składki emerytalnej i rentowej — ' +
+    'roczny limit to {annual} zł. Liczymy tylko tę jedną umowę.',
+  'sources.zus.ceiling': 'Roczny limit podstawy składek emerytalnej i rentowej (30-krotność)',
   // Slice 3, DESIGN-SLICE-2 §10. The direction is read before the field whose
   // meaning it changes, so its label is a verb: `Liczę: brutto → netto`.
   'dir.label': 'Liczę',
   'dir.group': 'Kierunek przeliczenia',
   'dir.g2n': 'brutto → netto',
   'dir.n2g': 'netto → brutto',
-  'field.amount.label.gross': 'Kwota brutto miesięcznie',
+  // The period is dropped: the select states it one screen inch to the right,
+  // and two places asserting it is how they drift apart.
+  'field.amount.label.gross': 'Kwota brutto',
   'field.amount.label.net': 'Ile chcesz mieć na koncie',
   'dir.ambiguous':
     'Tę kwotę na koncie daje kilka kwot brutto — od {lo} zł do {hi} zł. Pokazujemy najniższą.',
   'dir.unreachable':
     'Żadna kwota brutto nie daje dokładnie tyle na konto. Najbliższa to {amount} zł.',
-  'field.gross.quickfill': 'Płaca minimalna {year}',
+  'field.gross.quickfill': 'Płaca minimalna {year} — {amount} zł brutto',
   'field.contract.label': 'Rodzaj umowy',
   'contract.uop': 'Etat',
   'contract.zlecenie': 'Zlecenie',
@@ -112,7 +143,7 @@ const pl: Table = {
   'sources.dzielo.costs.cap': 'Limit kosztów 50% (rocznie)',
   'empty.answer': 'Wpisz kwotę brutto, a pokażemy, ile zostaje.',
   'empty.band': 'Tu pojawi się podział twojej pensji.',
-  'error.range': 'Wpisz kwotę od 0 do 1 000 000 zł.',
+  'error.range': 'Wpisz kwotę od 0 do {max} {unit}.',
   'error.digits': 'Wpisz kwotę cyframi, na przykład 6000.',
 };
 
@@ -123,18 +154,38 @@ const en: Table = {
   'lang.legend': 'Language',
   'lang.pl': 'Polish',
   'lang.en': 'English',
-  'field.gross.label': 'Monthly gross pay',
-  'field.gross.unit': 'zł / month',
+  'unit.group': 'Amount unit',
+  'unit.hour': 'zł / hour',
+  'unit.week': 'zł / week',
+  'unit.month': 'zł / month',
+  'unit.year': 'zł / year',
+  'unit.per.hour': 'an hour',
+  'unit.per.week': 'a week',
+  'unit.per.month': 'a month',
+  'unit.per.year': 'a year',
+  'conv.hour': '{hours} h a week × 52 weeks ÷ 12 months.',
+  'conv.week': 'A week × 52 ÷ 12 months — the same amount every week.',
+  'conv.year': 'A year ÷ 12 months — the same amount every month.',
+  'field.hours.label': 'How many hours a week?',
+  'field.hours.unit': 'h / week',
+  'error.hours': 'Enter a number of hours from 1 to 168.',
+  'answer.perunit': '≈ {amount} zł in your account {per}',
+  'answer.perunit.gross': '≈ {amount} zł on the contract {per}',
+  'answer.live.perunit': 'About {amount} zł {per}.',
+  'note.zusCeiling':
+    'Above {amount} zł a month you stop paying the pension and disability contributions — ' +
+    'the annual ceiling is {annual} zł. We count this one contract only.',
+  'sources.zus.ceiling': 'Annual ceiling on the pension and disability contribution base (30×)',
   'dir.label': 'Calculating',
   'dir.group': 'Direction of the calculation',
   'dir.g2n': 'gross → net',
   'dir.n2g': 'net → gross',
-  'field.amount.label.gross': 'Monthly gross amount',
+  'field.amount.label.gross': 'Gross amount',
   'field.amount.label.net': 'What you want in your account',
   'dir.ambiguous':
     'Several gross amounts produce this net — from {lo} zł to {hi} zł. We show the lowest.',
   'dir.unreachable': 'No gross amount produces exactly this net. The closest is {amount} zł.',
-  'field.gross.quickfill': '{year} minimum wage',
+  'field.gross.quickfill': '{year} minimum wage — {amount} zł gross',
   'field.contract.label': 'Contract type',
   'contract.uop': 'Employment',
   'contract.zlecenie': 'Zlecenie',
@@ -214,7 +265,7 @@ const en: Table = {
   'sources.dzielo.costs.cap': 'Annual cap on 50% costs',
   'empty.answer': "Enter a gross amount and we'll show what's left.",
   'empty.band': 'Your pay breakdown will appear here.',
-  'error.range': 'Enter an amount between 0 and 1,000,000 zł.',
+  'error.range': 'Enter an amount between 0 and {max} {unit}.',
   'error.digits': 'Enter the amount in digits, for example 6000.',
 };
 
@@ -243,6 +294,19 @@ export function formatMoney(grosz: number, lang: Lang): string {
     // CLDR's pl locale suppresses grouping below five digits, which would print
     // `6000,00`. Polish typographic convention groups from four, and the design
     // spec fixes `6 000,00` with a non-breaking space, so grouping is forced.
+    useGrouping: 'always',
+  }).format(grosz / 100);
+}
+
+/**
+ * Whole złote, grouped, no grosz. The quick-fill chip says `4 806 zł brutto`:
+ * a statutory figure that IS a whole number of złote reads as a claim about
+ * money when it is printed with two zeroes after it, and the chip is measured
+ * at 248 px PL against a 264 px content box at 320 — the decimals do not fit.
+ */
+export function formatZloty(grosz: number, lang: Lang): string {
+  return new Intl.NumberFormat(LOCALES[lang], {
+    maximumFractionDigits: 0,
     useGrouping: 'always',
   }).format(grosz / 100);
 }

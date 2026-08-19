@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ContractResult } from '../engine/contract';
 import { formatMoney, t, type Lang } from '../i18n/strings';
 import type { Direction } from '../state/storage';
+import type { Unit } from '../state/units';
 import s from './Answer.module.css';
 
 type Props = {
@@ -10,6 +11,14 @@ type Props = {
   /** Which figure this block is the answer to. §3's copy table, and nothing
       else: the band, the ladder and the total row are direction-free. */
   direction: Direction;
+  /** The unit the amount was typed in. The ANSWER is monthly in all four. */
+  unit: Unit;
+  /**
+   * The same figure the numeral shows, expressed in the user's own unit, or
+   * null at the month unit — where the answer already is the echo. Computed by
+   * App from the monthly grosz, once, never chained through the typed amount.
+   */
+  perUnitGrosz: number | null;
 };
 
 const DELTA_MS = 6_000;
@@ -22,7 +31,7 @@ const DELTA_MS_REDUCED = 10_000;
  */
 type Delta = { key: string; amountGrosz: number };
 
-export function Answer({ lang, result, direction }: Props) {
+export function Answer({ lang, result, direction, unit, perUnitGrosz }: Props) {
   const [delta, setDelta] = useState<Delta | null>(null);
   const [live, setLive] = useState('');
   const announced = useRef<string | null>(null);
@@ -52,7 +61,9 @@ export function Answer({ lang, result, direction }: Props) {
     // copyright to an immediate utterance; a key that names only under-26 and
     // student drops the other two into the typing debounce, silently. The
     // direction joins them: it is an answer, not a keystroke.
-    const state = `${result?.contract}/${under26}/${student}/${result?.copyright}/${direction}`;
+    // The unit joins them: choosing one is an answer, not a keystroke. The
+    // hours are NOT here — that is a typed field and debounces with the amount.
+    const state = `${result?.contract}/${under26}/${student}/${result?.copyright}/${direction}/${unit}`;
     const answered = announced.current !== null && announced.current !== state;
     announced.current = state;
 
@@ -61,7 +72,17 @@ export function Answer({ lang, result, direction }: Props) {
       : reliefApplies && reliefWorth > 0
         ? ` ${t(lang, 'answer.live.delta', { amount: formatMoney(reliefWorth, lang) })}`
         : '';
-    const sentence = t(lang, 'answer.live', { net: formatMoney(netGrosz, lang) }) + extra;
+    // A screen-reader user hears both figures the screen shows, in the order
+    // the screen shows them: the monthly answer, then the echo in their unit.
+    const echo =
+      perUnitGrosz === null
+        ? ''
+        : ` ${t(lang, 'answer.live.perunit', {
+            amount: formatMoney(perUnitGrosz, lang),
+            per: t(lang, `unit.per.${unit}`),
+          })}`;
+    const sentence =
+      t(lang, 'answer.live', { net: formatMoney(netGrosz, lang) }) + extra + echo;
 
     if (answered) {
       setLive(sentence);
@@ -80,6 +101,8 @@ export function Answer({ lang, result, direction }: Props) {
     zusExempt,
     studentWorth,
     direction,
+    unit,
+    perUnitGrosz,
     lang,
   ]);
 
@@ -159,6 +182,17 @@ export function Answer({ lang, result, direction }: Props) {
               ? t(lang, 'answer.from.net', { net: formatMoney(result.netGrosz, lang) })
               : t(lang, 'answer.from', { gross: formatMoney(result.grossGrosz, lang) })}
           </p>
+          {/* The unit ends at the field's edge; this is the one place it
+              reaches the answer, and it is secondary to the monthly figure.
+              `≈` is doing real work — the division does not close exactly. */}
+          {perUnitGrosz !== null ? (
+            <p className={s.perUnit} data-testid="answer-perunit">
+              {t(lang, direction === 'n2g' ? 'answer.perunit.gross' : 'answer.perunit', {
+                amount: formatMoney(perUnitGrosz, lang),
+                per: t(lang, `unit.per.${unit}`),
+              })}
+            </p>
+          ) : null}
           {delta ? (
             <p className={s.delta} data-testid="delta-chip">
               {t(lang, delta.key, { amount: formatMoney(delta.amountGrosz, lang) })}

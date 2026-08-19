@@ -81,3 +81,13 @@
   font-size: 19px;
   color: var(--ink);
 }
+
+/* The echo: the answer in the user's own unit, secondary to the monthly figure
+   the whole screen is about. #5A3B00 on honey is 7.2:1 — the pair
+   DESIGN-SLICE-1 §6 already sanctions for the eyebrow and the from-line. */
+.perUnit {
+  margin: var(--s1) 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--on-honey-quiet);
+}

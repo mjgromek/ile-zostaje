@@ -1,5 +1,6 @@
 import type { ContractKind } from '../engine/rates';
 import { detectLang, type Lang } from '../i18n/strings';
+import { DEFAULT_HOURS_PER_WEEK, UNITS, type Unit } from './units';
 
 // The only place user data is ever written. It is this browser's localStorage
 // and nothing else: no server, no cookie, no analytics. The screen says so, in
@@ -22,6 +23,13 @@ export type Entries = {
   copyright: boolean;
   lang: Lang;
   direction: Direction;
+  unit: Unit;
+  /**
+   * The raw text, like `gross`. Persisted ALWAYS, including while the unit is
+   * not `hour`: it is the user's own fact about their life, and losing it on a
+   * unit switch is a loss they did not ask for.
+   */
+  hoursPerWeek: string;
 };
 
 export function loadEntries(): Entries {
@@ -33,6 +41,8 @@ export function loadEntries(): Entries {
     copyright: false,
     lang: detectLang(globalThis.navigator?.language),
     direction: 'g2n',
+    unit: 'month',
+    hoursPerWeek: DEFAULT_HOURS_PER_WEEK,
   };
   try {
     const raw = globalThis.localStorage?.getItem(KEY);
@@ -56,6 +66,14 @@ export function loadEntries(): Entries {
       direction: DIRECTIONS.includes(parsed.direction as Direction)
         ? (parsed.direction as Direction)
         : fallback.direction,
+      // An entry written before slice 4 has no unit and gets the unit it was
+      // written in — a month — which is why the key namespace does not move.
+      unit: UNITS.includes(parsed.unit as Unit) ? (parsed.unit as Unit) : fallback.unit,
+      // Validated on the way to the engine, not on the way out of storage: a
+      // bad value comes back as typed so the field can mark itself invalid and
+      // the person can see what they wrote. Only a non-string falls back.
+      hoursPerWeek:
+        typeof parsed.hoursPerWeek === 'string' ? parsed.hoursPerWeek : fallback.hoursPerWeek,
     };
   } catch {
     // A corrupted or unavailable store must not take the screen down with it.

@@ -295,3 +295,34 @@ Why: `role="switch"` is on/off and these are two named modes, not on and off. A 
      the designer's, not the builder's.
 Rules out: Shipping `aria-pressed` with a changing label because it looked like a toggle.
 Level: 2 — goes to the designer before any builder touches it.
+
+## 2026-08-19 — The 2026 ZUS annual base ceiling is READ off zus.pl, not carried forward
+What: 282 600,00 zł, cited at `contributions.annualBaseCeilingGrosz` with the page's own
+     sentence and MP 2025.1206. DESIGN-SLICE-4 §8 marked the figure INFERRED from a web
+     summary; it was fetched, de-tagged and read line by line before it shipped.
+Why: PROJECT.md's invariant is absolute, and an inferred figure that happens to be right
+     is still not a citation. The page lists every year since 1999, so the quote carries
+     the YEAR: a number without its year is a number that appears on a page.
+Rules out: Shipping a designer's INFERRED figure with a URL attached to it afterwards.
+Level: 0 — the brief named the action and the page answered it.
+
+## 2026-08-19 — The range check gates the TYPED amount against the unit's own maximum
+What: `parseGross` takes the cap as an argument; App passes `maxInUnitGrosz`, the monthly
+     cap recomputed into the active unit and FLOORED. §6 says the check moves to the
+     derived monthly figure; this is that check, expressed in the unit the person typed in.
+Why: The two differ by at most five grosz, and only under `year` — the one unit where a
+     typed grosz is worth less than a grosz a month. In that gap a screen saying "od 0 do
+     12 000 000 zł" would accept 12 000 000,05, and a stated maximum that is not enforced
+     is not a maximum.
+Rules out: A field whose refusal and whose explanation are computed from different bounds.
+Level: 1 — an implementation choice inside a settled spec.
+
+## 2026-08-19 — The hours field carries its own border; the 44 px control is the control
+What: `.hoursInput` is the bordered 44 px box and the `godz. / tydz.` suffix sits outside
+     it, rather than both living inside a 44 px wrapper.
+Why: MEASURED at 390 in Chromium — a 44 px wrapper with a stretched input gives a 42 px
+     control, because the border eats 3 px. That is P1-1's exact failure mode: the box
+     measures 44 and the thing you tap does not. §1's own sketch draws the suffix outside
+     the brackets, so this is the design's shape and not a deviation from it.
+Rules out: Measuring a container and calling it the target.
+Level: 0 — accessibility floor, never cut.

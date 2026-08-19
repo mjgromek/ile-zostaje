@@ -20,7 +20,7 @@ body {
 }
 
 /* Never removed, never replaced by a shadow — including inside the honey block. */
-:where(a, button, input, summary, [tabindex]):focus-visible {
+:where(a, button, input, select, summary, [tabindex]):focus-visible {
   outline: 3px solid var(--ink);
   outline-offset: 2px;
 }

@@ -64,6 +64,8 @@ test('the direction persists, and anything written before slice 3 loads as brutt
       copyright: false,
       lang: 'pl',
       direction: 'n2g',
+      unit: 'month',
+      hoursPerWeek: '40',
     });
     const loaded = loadEntries();
     expect(loaded.direction).toBe('n2g');

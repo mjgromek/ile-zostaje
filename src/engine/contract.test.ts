@@ -516,10 +516,24 @@ describe('the monthly breakdown, 2026 rates', () => {
       if (contract === 'uop') {
         expect(base(over, 'chorobowa'), 'chorobowa is uncapped').toBe(CROSSING + 1);
       }
-      expect(
-        (base(over, 'zdrowotna') ?? 0) - (base(at, 'zdrowotna') ?? 0),
-        `${contract}: the health base must rise by more than the gross did`,
-      ).toBeGreaterThan(1);
+      // The health base is the gross less the ZUS, so above the ceiling it rises
+      // one for one with the gross instead of losing 11,26% of every step to
+      // the two contributions that stopped growing. Measured over a 100 zł step,
+      // because a one-grosz step cannot show a slope at all.
+      const healthBase = (gross: number) =>
+        computeContract(gross, answers(contract), RATES_2026).lines.find(
+          (line) => line.key === 'zdrowotna',
+        )?.baseGrosz ?? 0;
+      const healthBelow = healthBase(CROSSING) - healthBase(CROSSING - 10_000);
+      const healthAbove = healthBase(CROSSING + 10_000) - healthBase(CROSSING);
+      expect(healthAbove, `${contract}: the health base must rise faster above`).toBeGreaterThan(
+        healthBelow,
+      );
+      // Below the ceiling a 100 zł step loses 11,26% of itself to emerytalna and
+      // rentowa before zdrowotna sees it; above it, only the contributions that
+      // are still uncapped do — chorobowa on uop, none at all on a zlecenie.
+      expect(healthBelow, `${contract}: the base below the ceiling`).toBeLessThan(8_900);
+      expect(healthAbove, `${contract}: the base above the ceiling`).toBeGreaterThan(9_700);
 
       // Continuous: one grosz of gross moves the net by less than one złoty at
       // the crossing, in both directions. A discontinuity here is what would

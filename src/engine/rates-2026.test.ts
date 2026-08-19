@@ -91,6 +91,16 @@ const PAGE_TEXT: Record<string, string[]> = {
       'czerwca 1999 r. o świadczeniach pieniężnych z ubezpieczenia społecznego w razie ' +
       'choroby i macierzyństwa.',
   ],
+  // Slice 4. The page is a list of every year since 1999, each figure followed
+  // by the obwieszczenie it comes from, so the 2025 row is kept beside the 2026
+  // one: it is what makes "the 2026 figure" a checkable claim rather than a
+  // number that appears somewhere on the page. The three U+200B are the page's
+  // own invisible markup and are recorded rather than tidied away.
+  'ZUS — Roczna podstawa wymiaru składek na ubezpieczenia emerytalne i rentowe od 1999 r.': [
+    '260 190,00 z\u0142 \u200b\u200b\u200b- kwota rocznego ograniczenia podstawy w 2025 r. ' +
+      '(MP 2024.1051) 282 600,00 z\u0142 \u200b\u200b\u200b- kwota rocznego ograniczenia ' +
+      'podstawy w 2026 r. (MP 2025.1206)',
+  ],
   'Ministerstwo Rodziny, Pracy i Polityki Społecznej — Minimalne wynagrodzenie za pracę': [
     'Od 1 stycznia 2026 r. minimalne wynagrodzenie za pracę wynosi 4806 zł.',
   ],
@@ -105,7 +115,16 @@ const PAGE_TEXT: Record<string, string[]> = {
  * voice. Whitespace is the markup's; punctuation is the page's.
  */
 function normalise(text: string): string {
-  return text.normalize('NFC').replace(/\s+/g, ' ').trim();
+  // Zero-width characters go with the whitespace and for the same reason: they
+  // are the markup's, not the page's. U+200B is invisible, carries no meaning
+  // and no punctuation, and zus.pl emits three of them mid-sentence — a quote
+  // that had to reproduce them would be unreadable in the source and would
+  // still not be the page's words in the page's voice.
+  return text
+    .normalize('NFC')
+    .replace(/[\u200b-\u200d\ufeff]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function citedValues(rates: YearRates): { path: string; cited: Cited<unknown> }[] {
@@ -135,7 +154,7 @@ function citedValues(rates: YearRates): { path: string; cited: Cited<unknown> }[
 
 test('every quote is verbatim from the page it cites', () => {
   const entries = citedValues(RATES_2026);
-  expect(entries.length).toBe(20);
+  expect(entries.length).toBe(21);
 
   for (const { path, cited } of entries) {
     const passages = PAGE_TEXT[cited.sourceTitle] ?? [];

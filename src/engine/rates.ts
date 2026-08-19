@@ -48,6 +48,15 @@ export type YearRates = {
     rentowa: PercentRate;
     chorobowa: PercentRate;
     zdrowotna: PercentRate;
+    /**
+     * The limit 30-krotności: the annual ceiling on the base for emerytalna and
+     * rentowa, and for those two only. Chorobowa is uncapped, and zdrowotna is
+     * uncapped and its base RISES once this bites, because the ZUS taken off
+     * ahead of it stopped growing. It is contract-agnostic — it applies
+     * wherever those two lines exist, which is uop and zlecenie and never
+     * dzieło, so the engine never looks at a contract name to use it.
+     */
+    annualBaseCeilingGrosz: GroszAmount;
   };
 
   pit: {

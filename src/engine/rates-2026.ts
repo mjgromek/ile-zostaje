@@ -16,6 +16,8 @@ const ZUS_FINANCING =
   'https://www.zus.pl/pracujacy/system-ubezpieczen-spolecznych-w-polsce/finansowanie-skladek-na-ubezpieczenia-spoleczne';
 const ZUS_HEALTH_RATE =
   'https://www.zus.pl/pracujacy/ubezpieczenie-zdrowotne-w-polsce/wyskosc-skladki-na-ubezpieczenie-zdrowotne';
+const ZUS_ANNUAL_BASE =
+  'https://www.zus.pl/baza-wiedzy/skladki-wskazniki-odsetki/wskazniki/roczna-podstawa-wymiaru-skladek-na-ubezpieczenia-emerytalne-i-rentowe-od-1999-r';
 const PIT_SCALE =
   'https://www.podatki.gov.pl/podatki-firmowe/pit/informacje-podstawowe/co-jest-opodatkowane/opodatkowanie-wedlug-skali-podatkowej';
 const PIT_WORK =
@@ -78,6 +80,22 @@ export const RATES_2026: YearRates = {
       sourceTitle: 'ZUS — Wysokość składki na ubezpieczenie zdrowotne',
       effective: '2026-01-01',
       verified: VERIFIED,
+    },
+    // The limit 30-krotności. DESIGN-SLICE-4 §8 carried 282 600 zł as INFERRED
+    // from a web-search summary; this was read off the ZUS page itself on the
+    // date below, which is the whole of what PROJECT.md's invariant asks for.
+    // The page is a list of every year since 1999 and names the obwieszczenie
+    // each figure comes from, so the quote carries the year and MP 2025 poz.
+    // 1206 with it — a figure without its year is not a citation, it is a
+    // number that happens to be on a page.
+    annualBaseCeilingGrosz: {
+      value: 28_260_000, // 282 600,00 zł a year — 23 550,00 zł a month, exactly
+      quote: '282 600,00 zł - kwota rocznego ograniczenia podstawy w 2026 r. (MP 2025.1206)',
+      source: ZUS_ANNUAL_BASE,
+      sourceTitle:
+        'ZUS — Roczna podstawa wymiaru składek na ubezpieczenia emerytalne i rentowe od 1999 r.',
+      effective: '2026-01-01',
+      verified: '2026-08-19',
     },
   },
 

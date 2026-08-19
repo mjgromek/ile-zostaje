@@ -3,9 +3,16 @@ import { computeContract } from './engine/contract';
 import { solveGross } from './engine/solve';
 import { RATES_2026 } from './engine/rates-2026';
 import type { ContractKind } from './engine/rates';
-import { formatMoney, formatRate, t, type Lang } from './i18n/strings';
+import { formatMoney, formatRate, formatZloty, t, type Lang } from './i18n/strings';
 import { MAX_GROSS_GROSZ, parseGross } from './state/gross';
 import { loadEntries, saveEntries, type Direction } from './state/storage';
+import {
+  fromMonthlyGrosz,
+  maxInUnitGrosz,
+  parseHours,
+  toMonthlyGrosz,
+  type Unit,
+} from './state/units';
 import { Header } from './components/Header';
 import { ContractBar } from './components/ContractBar';
 import { GrossCard } from './components/GrossCard';
@@ -26,6 +33,8 @@ export function App() {
   const [student, setStudent] = useState(initial.student);
   const [copyright, setCopyright] = useState(initial.copyright);
   const [direction, setDirection] = useState<Direction>(initial.direction);
+  const [unit, setUnit] = useState<Unit>(initial.unit);
+  const [hoursText, setHoursText] = useState(initial.hoursPerWeek);
   const [answerVisible, setAnswerVisible] = useState(true);
   const answerRef = useRef<HTMLDivElement>(null);
 
@@ -34,8 +43,19 @@ export function App() {
   }, [lang]);
 
   useEffect(() => {
-    saveEntries({ gross: grossText, contract, under26, student, copyright, lang, direction });
-  }, [grossText, contract, under26, student, copyright, lang, direction]);
+    saveEntries({
+      gross: grossText,
+      contract,
+      under26,
+      student,
+      copyright,
+      lang,
+      direction,
+      unit,
+      // Persisted under all four units, not only the one that reads it.
+      hoursPerWeek: hoursText,
+    });
+  }, [grossText, contract, under26, student, copyright, lang, direction, unit, hoursText]);
 
   // The sticky mini-bar guarantees the net at any scroll on any device height,
   // which fold placement alone cannot: at 320x568 the figure lands below it.
@@ -50,7 +70,34 @@ export function App() {
     return () => observer.disconnect();
   }, []);
 
-  const parsed = useMemo(() => parseGross(grossText), [grossText]);
+  // The hours are asked, never invented: without a valid answer there is no
+  // monthly figure to compute, so the result goes null and the screen says so.
+  // The amount itself is not what is wrong, and is not marked so.
+  const hours = useMemo(() => parseHours(hoursText), [hoursText]);
+  const hoursTenths = hours.kind === 'ok' ? hours.tenths : null;
+  const hoursError = unit === 'hour' && hours.kind === 'error';
+
+  // ONE rounding, at the boundary into the engine. The field's own maximum is
+  // the monthly cap recomputed into the active unit, floored — which is both
+  // the gate and the figure the message names, so a maximum the screen states
+  // is a maximum the field enforces. `35 000 zł/godz.` is refused here and
+  // never reaches the solver as 60 666 667 zł a month.
+  const maxTypedGrosz = useMemo(
+    () => maxInUnitGrosz(MAX_GROSS_GROSZ, unit, hoursTenths ?? 0),
+    [unit, hoursTenths],
+  );
+  // With no usable hours there is no monthly figure to bound, so there is
+  // nothing for a range check to be true about. The hours field says what is
+  // wrong; marking the amount invalid as well would blame the wrong entry.
+  const parsed = useMemo(
+    () => parseGross(grossText, hoursError ? Number.POSITIVE_INFINITY : maxTypedGrosz),
+    [grossText, hoursError, maxTypedGrosz],
+  );
+  const typedMonthlyGrosz =
+    parsed.kind === 'ok' && !hoursError
+      ? toMonthlyGrosz(parsed.grosz, unit, hoursTenths ?? 0)
+      : null;
+
   const answers = useMemo(
     () => ({ contract, under26, student, copyright }),
     [contract, under26, student, copyright],
@@ -59,19 +106,21 @@ export function App() {
   // so the gross is solved for it — by running the same engine, never by a
   // second formula. Flipping the direction reinterprets what was typed; it does
   // not convert it and does not throw it away.
+  // The solve runs on the DERIVED monthly figure, in every unit: the engine has
+  // one period and the unit ends at the field's edge.
   const solved = useMemo(
     () =>
-      parsed.kind === 'ok' && direction === 'n2g'
-        ? solveGross(parsed.grosz, answers, rates, MAX_GROSS_GROSZ)
+      typedMonthlyGrosz !== null && direction === 'n2g'
+        ? solveGross(typedMonthlyGrosz, answers, rates, MAX_GROSS_GROSZ)
         : null,
-    [parsed, answers, direction],
+    [typedMonthlyGrosz, answers, direction],
   );
 
   const grossGrosz =
-    parsed.kind !== 'ok'
+    typedMonthlyGrosz === null
       ? null
       : solved === null
-        ? parsed.grosz
+        ? typedMonthlyGrosz
         : solved.kind === 'exact'
           ? solved.grossGrosz
           : // No gross gives exactly this net, so the screen shows the closest
@@ -98,10 +147,40 @@ export function App() {
             })
           : null;
 
+  // The sentence that makes the conversion reproducible. It prints the
+  // operation, so the reader can arrive at the app's own figure; a rounded
+  // intermediate would leave them twelve grosz short and unable to tell why.
+  const conversion =
+    unit === 'month'
+      ? null
+      : t(lang, `conv.${unit}`, { hours: hoursText.trim() });
+
+  // The echo, applied ONCE to the monthly grosz the answer shows — never
+  // chained back through the amount that was typed, which would round twice.
+  const answerMonthlyGrosz =
+    result === null ? null : direction === 'n2g' ? result.grossGrosz : result.netGrosz;
+  const perUnitGrosz =
+    answerMonthlyGrosz === null || unit === 'month'
+      ? null
+      : fromMonthlyGrosz(answerMonthlyGrosz, unit, hoursTenths ?? 0);
+
   // What the current answers mean, on the card's last line. Each line is either
   // a rule of the contract or a number computed from this person's entry —
   // never a promise made before the fact.
   const consequences: string[] = [];
+  // The annual ZUS ceiling, once it actually bites this month. It is a fact
+  // about this entry, not a rule of the contract, so it belongs here and not in
+  // a permanent note — and it names both the monthly crossing the person just
+  // passed and the annual limit it comes from.
+  if (result?.zusCapped) {
+    const annual = rates.contributions.annualBaseCeilingGrosz.value;
+    consequences.push(
+      t(lang, 'note.zusCeiling', {
+        amount: formatMoney(Math.round(annual / 12), lang),
+        annual: formatMoney(annual, lang),
+      }),
+    );
+  }
   if (contract === 'zlecenie') {
     consequences.push(t(lang, 'note.zlecenie.chorobowa'));
     if (result?.zusExempt) consequences.push(t(lang, 'note.zlecenie.student'));
@@ -163,9 +242,24 @@ export function App() {
               student={student}
               copyright={copyright}
               consequences={consequences}
-              minimumWageGrosz={rates.minimumWageMonthlyGrosz.value}
+              unit={unit}
+              hoursText={hoursText}
+              hoursError={hoursError}
+              conversion={conversion}
+              minimumWageText={formatZloty(rates.minimumWageMonthlyGrosz.value, lang)}
+              maxAmountText={formatMoney(maxTypedGrosz, lang)}
               onGrossText={setGrossText}
               onDirection={setDirection}
+              onUnit={setUnit}
+              onHoursText={setHoursText}
+              onQuickFill={() => {
+                // All three, because all three are what the label asserts: the
+                // minimum wage is a monthly BRUTTO figure, and a chip that set
+                // only the amount left the screen contradicting its own words.
+                setGrossText(String(rates.minimumWageMonthlyGrosz.value / 100));
+                setUnit('month');
+                setDirection('g2n');
+              }}
               onUnder26={setUnder26}
               onStudent={setStudent}
               onCopyright={setCopyright}
@@ -174,7 +268,13 @@ export function App() {
 
           <div className={css.right}>
             <div ref={answerRef}>
-              <Answer lang={lang} result={result} direction={direction} />
+              <Answer
+                lang={lang}
+                result={result}
+                direction={direction}
+                unit={unit}
+                perUnitGrosz={perUnitGrosz}
+              />
             </div>
             <Band lang={lang} year={rates.year} result={result} />
             {substitution ? (

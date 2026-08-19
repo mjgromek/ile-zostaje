@@ -55,6 +55,8 @@ export type ContractResult = {
   costsPercent: number | null;
   /** True when the annual cap on 50% costs bit this month. */
   costsCapped: boolean;
+  /** True when the annual ZUS base ceiling bit this month — the card says so. */
+  zusCapped: boolean;
 };
 
 const MONTHS_PER_YEAR = 12;
@@ -179,6 +181,16 @@ function pitAdvance(
 type SocialKey = 'emerytalna' | 'rentowa' | 'chorobowa';
 
 /**
+ * The two contributions the annual base ceiling — the limit 30-krotności —
+ * applies to, as the cited page names them. Chorobowa is not on the list and is
+ * uncapped; zdrowotna is not a social contribution at all and is uncapped too,
+ * and its own base RISES when this bites, because the ZUS taken off ahead of it
+ * stopped growing. No contract name appears here: the cap bites wherever these
+ * two lines exist, which is what makes it contract-agnostic.
+ */
+const CEILING_APPLIES_TO: SocialKey[] = ['emerytalna', 'rentowa'];
+
+/**
  * Which contributions this contract carries, read off the cited rules. Three
  * absences, never mixed: a dzieło has no ZUS at all, a student under 26 on a
  * zlecenie has theirs removed, and chorobowa on a zlecenie is voluntary and
@@ -221,8 +233,20 @@ function core(grossGrosz: number, answers: Answers, rates: YearRates) {
     rentowa: contributions.rentowa.value,
     chorobowa: contributions.chorobowa.value,
   };
+  // The annual ceiling, shared out over the year the same way the PIT bracket
+  // and the relief limit are. It changes the SLOPE of the net above it, never
+  // its value at the crossing, so the function stays continuous and monotone
+  // and the reverse solver's bisection stays sound.
+  const ceilingMonthly = divRoundHalfUp(
+    contributions.annualBaseCeilingGrosz.value,
+    MONTHS_PER_YEAR,
+  );
+  const baseFor = (key: SocialKey) =>
+    CEILING_APPLIES_TO.includes(key) ? Math.min(gross, ceilingMonthly) : gross;
+  const zusCapped = social.some((key) => CEILING_APPLIES_TO.includes(key)) && gross > ceilingMonthly;
+
   const socialAmounts = social.map(
-    (key) => [key, applyRate(gross, percentOf[key])] as const,
+    (key) => [key, applyRate(baseFor(key), percentOf[key]), baseFor(key)] as const,
   );
   const zus = socialAmounts.reduce((total, [, amount]) => total + amount, 0);
 
@@ -248,8 +272,11 @@ function core(grossGrosz: number, answers: Answers, rates: YearRates) {
   const pitWithoutRelief = reliefApplies ? pitAdvance(gross, zus, 0, costs, rates) : pit;
 
   const amounts: Array<[LineKey, number, number, number]> = [
+    // The base carried here is the base the arithmetic used, which is why the
+    // ladder's why-line starts printing `9,76% od 23 550,00 zł` above the
+    // ceiling by itself, with no new string and no new branch on the screen.
     ...socialAmounts.map(
-      ([key, amount]) => [key, amount, gross, percentOf[key]] as [LineKey, number, number, number],
+      ([key, amount, base]) => [key, amount, base, percentOf[key]] as [LineKey, number, number, number],
     ),
     ...(healthApplies
       ? ([['zdrowotna', zdrowotna, healthBase, contributions.zdrowotna.value]] as Array<
@@ -285,6 +312,7 @@ function core(grossGrosz: number, answers: Answers, rates: YearRates) {
     reliefCovers,
     reliefApplies,
     zusExempt,
+    zusCapped,
     pit,
     pitWithoutRelief,
     costsPercent: costs.percent,
@@ -348,6 +376,7 @@ export function computeContract(
     pitWithoutReliefGrosz: result.pitWithoutRelief.amountGrosz,
     reliefWorthGrosz,
     zusExempt: result.zusExempt,
+    zusCapped: result.zusCapped,
     studentWorthGrosz,
     // The koszty that belong to the base the PIT row shows. Under the relief
     // that row shows the base the relief REMOVED — what it is worth teaches
