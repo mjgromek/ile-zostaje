@@ -199,3 +199,19 @@ Format:
   invalid-hours drives, so this is a latent coupling and NOT an observed defect — Urgent
   when: anyone adds `{max}` to `error.digits`, or renders `maxAmountText` outside the error
   branch. Two files, no test binds them. Raised by the checker at slice 4's security gate.
+- A first-time visitor now HEARS `5000`: the live region fills ~500 ms after load because
+  the first result goes through the typing debounce rather than being suppressed. The
+  mechanism is pre-existing `v0.4.0` behaviour; slice 4b changed WHO hears it, extending the
+  accepted "someone may read 5000 as their own figure" risk to the audio channel. NOT fixed
+  in 4b: suppressing the first-ever announcement needs a mount flag that React StrictMode's
+  double invocation eats in dev, so it would ship behaviour differing between `npm run dev`
+  and the built artifact — Urgent when: a screen-reader pass runs on the deployed build, or
+  anything else touches `Answer.tsx`'s announcement contract. Raised by the designer and
+  confirmed by the builder at slice 4b.
+- `rise` in `Answer.module.css` and `answerSwap` in `base.css` are the same eight-line
+  keyframe on two triggers — deliberate reuse of one gesture, not duplication to remove
+  today — Urgent when: a third consumer of that gesture appears, at which point one shared
+  keyframe stops being premature. Raised by the builder at slice 4b.
+- `e2e/app.spec.ts` is 1 690 lines in one file and the slice 4b block is its fifth section
+  — Urgent when: a slice needs to run one section in isolation, or a checker's fix cycle is
+  slowed by re-running everything to exercise one area. Raised by the builder at slice 4b.

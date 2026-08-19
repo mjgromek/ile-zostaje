@@ -1,13 +1,13 @@
 SLICE 4b — the card first impression: toggle, chip, prefill, animation
-NOW: designer: three of the four items have an open shape — ARIA, motion, reduced-motion   [19:35]
+NOW: checker: twelve criteria, the swap in a real browser, and reduced-motion   [20:43]
 
-[ ] designer: DESIGN-SLICE-4B — toggle ARIA, chip, prefill, motion spec
-[ ] any residual Level 2 to the human, and answered
-[ ] Slice 4b + acceptance criteria into STATE.md, phase-start SHA
-[ ] Rulings into DECISIONS.md
-[ ] builder: failing tests first (test:)
-[ ] builder: toggle, chip, prefill, animation (feat:)
-[ ] checker: real browser, the 20 rewritten e2e refs, reduced-motion, first run vs returning
+[x] designer: DESIGN-SLICE-4B — toggle ARIA, chip, prefill, motion spec
+[x] any residual Level 2 to the human — none; the designer escalated nothing
+[x] Slice 4b + twelve acceptance criteria into STATE.md, phase-start 589ea02
+[x] Rulings into DECISIONS.md
+[x] builder: failing tests first (test:) — 3f77ddc
+[x] builder: toggle, chip, prefill, animation (feat:) — 8cc7149
+[ ] checker: real browser, the migrated e2e refs, reduced-motion, first run vs returning
 [ ] checker: regression against the v0.4.0 tag
 [ ] fix cycles, two attempts max per finding
 [ ] ponytail + architecture + security gates

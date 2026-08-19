@@ -276,3 +276,27 @@ next instance should not shorten its delegations on that theory.
 **Who it hits:** this run only, as far as anything observed shows.
 **Proposed fix:** none — the trigger is not identified. What would confirm it: the harness's
 own stall log for the killed session, which the repository does not contain.
+
+## R4-F14 — the builder's contract and the orchestrator's brief disagree about who owns the board
+
+**Observed** at slice 4b, raised by the builder itself rather than discovered later: its
+`tools:`-level contract says keep `.agent/PROGRESS.md` current, while the orchestrator's
+brief for every slice so far has said "do not touch `.agent/PROGRESS.md` — the orchestrator
+owns it". The builder followed the brief, left the board alone, and **said so**, which is
+the only reason this is a finding and not a silent divergence.
+
+**Why it matters.** Two documents both claim an owner for one file. Whichever the agent
+obeys, it is violating the other, and an agent that resolves the conflict quietly leaves no
+trace — the next builder may resolve it the other way and the board will go stale mid-slice
+with nobody at fault. The board is the human's only view of how much is left.
+
+**The orchestrator's position, stated so it can be argued with:** the board is a PLAN
+written before the work starts and rewritten when a step completes; a builder ticking its
+own boxes mid-slice turns a plan into a log, which `.claude/policies/progress.md` refuses
+in its first refusal condition. So the brief is right and the builder's contract is what
+should change.
+
+**Fix:** remove the PROGRESS obligation from the builder's contract, or scope it to "report
+what the orchestrator should tick". Not fixed inside slice 4b — a harness-file edit during
+a slice is exactly the change this project keeps finding it cannot verify at the same time
+as product work.
