@@ -67,7 +67,8 @@ on 2026-08-19: option C, monthly dominant with a per-unit echo.** Do not reopen 
 
 ## In flight
 
-Nothing. The builder has not started.
+Slice 4 built at `bc0a757` and CHECKED PASS. Gates next, then README and the v0.4.0
+release. Then slice 4b, which needs the designer before any builder.
 
 ## Blocked
 

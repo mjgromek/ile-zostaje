@@ -8,13 +8,13 @@ item, it is a wish — write the condition or drop it.
 Format:
 
 ```
+
 - <item> — Urgent when: <the observable condition that promotes it into a slice>
 ```
 
 ## Deferred
 
 <!-- - Pagination on the list endpoint — Urgent when: any account exceeds 500 rows. -->
-
 - B2B / działalność gospodarcza as a contract type — Urgent when: the stakeholder states a
   target user is invoicing rather than employed. Out of V0 by explicit constraint, and the
   most likely thing to be assumed in by mistake.
@@ -48,25 +48,23 @@ Format:
   prints `podstawy wymiaru składek )` with a space before the bracket where
   `rates-2026.test.ts` records `składek).` — Urgent when: a quote check runs against live
   HTML instead of the frozen passages. Raised by the builder in slice 2's fix cycle.
-- P2-4: the gross field's focus ring is `outline-offset: -3px` where DESIGN-SLICE-1 §6 says
-  `2px`; the ring is present, 3 px and unclipped, so only its placement differs — Urgent
-  when: theme-factory revisits focus in slice 2, or a second inset ring makes the
-  inconsistency visible side by side.
+- P2-4: the focus ring on the gross field AND on the slice 4 unit select is
+  `outline-offset: -3px` where DESIGN-SLICE-1 §6 says `2px`; the ring is present, 3 px and
+  unclipped, so only its placement differs. **TWO elements now, not one** — MEASURED at
+  slice 4's check, `#gross` and `#unit` both compute `-3px`, the second joining the first
+  deliberately per DESIGN-SLICE-4 §2 rather than opening a new deviation — Urgent when:
+  theme-factory revisits focus, or a third inset ring makes the inconsistency a pattern.
 - Art. 83 reduction of składka zdrowotna to the tax advance is not modelled — Urgent when:
   a very low part-time gross reports a net that is too low. Raised by the builder in slice 1.
 - A real axe / screen-reader accessibility pass — Urgent when: any slice claims an
   accessibility standard, or a user reports one. Slice 1's criteria cover contrast, focus,
   targets and the live region, but no slice has yet run an audit tool end to end.
-- The annual ZUS contribution ceiling (limit 30-krotności) is not modelled — Urgent when:
-  any supported input can express an annual income above the ceiling, which slice 3's
-  year unit will allow. Until then it only misstates emerytalna and rentowa for high
-  earners late in the year, who are not this product's audience. Raised by the designer at
-  slice 1, recorded before it could become a defect discovered later.
-
 - The flat 12% ryczałt on a zlecenie or dzieło of 200 zł or less is not modelled, so the
   app over-reports the net below that amount — Urgent when: any supported input or unit
-  makes small amounts routine (slice 4's hour and week units do), or a user compares the
-  figure against a real rachunek. Raised by the builder in slice 2.
+  makes small amounts routine, or a user compares the figure against a real rachunek.
+  Raised by the builder in slice 2. **Its original condition named slice 4's hour and week
+  units and was backwards** — those units multiply the typed figure UP into a month; only
+  `year` divides down. Corrected at slice 4, reasoning in DECISIONS 2026-08-19.
 - The student ZUS exemption's own exception — a zlecenie signed with one's own employer —
   is not modelled — Urgent when: a user in that position reports a net that is too high.
   Raised by the builder in slice 2.
@@ -103,30 +101,16 @@ Format:
   Urgent when: the chip's amount derivation changes again, or the relief becomes worth zero
   on a covered contract. With nothing pinning it, that regression lands silently, which is
   exactly how P1-J survived four cycles. Raised by the checker at slice 2's P1-J re-check.
-- `field.gross.label` is now rendered nowhere — the direction row supplies both labels —
-  and was kept because DESIGN-SLICE-2 §10's deletion list does not name it — Urgent when:
-  anything renders it again, or the two EN gross labels drift apart, at which point one of
-  them is dead copy pretending to be live. Raised by the builder in slice 3.
 - `data-testid="net-amount"` carries the GROSS in netto mode, because the element is the
   answer figure and the answer figure changes meaning with the direction — Urgent when:
   any test or checker reads that id as proof that the figure is a net. Renaming it later
   costs one line; misreading it once costs a false PASS. Raised by the builder in slice 3.
-- P2-L: the quick-fill button offers a GROSS legal figure as a NET target in netto mode.
-  MEASURED at slice 3's check by a real click at 390: the field `Ile chcesz mieć na koncie`
-  took `4806` and the answer read `Kwota na umowie 6 566,15 zł`. Nothing false is printed,
-  which is why it is not P1 — Urgent when: slice 4 adds hour/week/month/year to the same
-  button, or the minimum wage appears anywhere with a `brutto` qualifier. Either makes the
-  shortcut assert something its source does not. Raised by the checker at slice 3's check.
 - The netto solve runs on every keystroke — about 4 000 engine calls, MEASURED at ~10 ms
   at full speed and ~157 ms per keystroke under 6x CPU throttling, against brutto's 92 ms
   — Urgent when: a second solved field shares the screen (slice 5's rent and food, or
   slice 4's units multiplying the entries), or measured keystroke latency passes 100 ms on
   a mid-range phone. The fix is a debounce or a memo on the answers, not a faster solver.
   Raised by the architecture gate at slice 3.
-- Ponytail says REMOVE on the i18n key `field.gross.label`, now rendered nowhere. It was
-  NOT removed at slice 3's gate: the tree sat at a checked PASS and the tag asserts that
-  SHA — Urgent when: the next slice touches `strings.ts` for any other reason, which makes
-  the deletion free. Merges with the builder's entry above. Raised by ponytail at slice 3.
 - P2-S1: the solver's negative-target clamp is untested. `src/engine/solve.ts:47`
   `Math.max(0, Math.round(targetNetGrosz))` — removing it leaves 33/33 Vitest green,
   MEASURED in a sandboxed copy at slice 3's security gate. No live exposure: the only
@@ -141,9 +125,10 @@ Format:
 - P2-S3: `gross` read from localStorage is validated for type but not for length.
   `src/state/storage.ts:44` accepts any `typeof === 'string'`; a 5 MB stored value MEASURED
   830 ms to first paint against a ~95 ms baseline. Same-origin write only, so self-
-  inflicted, and the `#gross` input likewise has no `maxLength` — Urgent when: any URL
-  param, share link or cross-origin path can write the entry. Raised by the checker at
-  slice 3's security gate.
+  inflicted. **The input half of this closed in slice 4** — MEASURED at its check,
+  `maxlength="12"` is in the DOM on `#gross` — so only the STORED value is still unbounded
+  — Urgent when: any URL param, share link or cross-origin path can write the entry.
+  Raised by the checker at slice 3's security gate.
 - At 320 px in ENGLISH the card's content box is 299 px against a 286 px client box — a
   13 px horizontal overflow, forced by the slice 3 direction row's `gross → net` /
   `net → gross` nowrap. MEASURED at slice 4's design pass, identical on the HEAD tree and
@@ -171,4 +156,16 @@ Format:
 - Criterion 5's screen-comparison test needs `test.setTimeout(180_000)`: 45 real screens
   with a scroll each. It is slow because it is thorough, not because it is broken — Urgent
   when: anyone trims the timeout, or the screen count grows again. Raised by the builder at
+  slice 4.
+- P2-B: the answer echo's contrast is **6.34:1, not the 7.2:1 DESIGN-SLICE-4 §4 asserts** —
+  MEASURED at slice 4's check from computed styles, `rgb(90,59,0)` on `rgb(255,194,74)` at
+  13 px, through the WCAG relative-luminance formula and hand-recomputed to rule the script
+  out. NOT slice 4's defect: the eyebrow and the from-line measure the identical 6.34:1 on
+  the `v0.3.0` server, so the echo joined an inherited pair exactly as the spec intended.
+  Clears AA (4.5:1), fails AAA (7:1) — Urgent when: a contrast figure is published
+  anywhere, or theme-factory re-runs. The spec's 7.2:1 is the number that is wrong.
+- The `hoursError → POSITIVE_INFINITY` cap path is covered by no test at all. MEASURED at
+  slice 4's check by driving it: no `∞` and no `NaN` reaches the screen, so nothing false is
+  shown — but the branch is held by a comment rather than an assertion — Urgent when: the
+  hours validation changes, or a second field feeds the same cap. Raised by the checker at
   slice 4.
