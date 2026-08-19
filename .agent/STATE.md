@@ -21,9 +21,8 @@ own row immediately above the amount field's label, defaulting to `brutto → ne
 `netto → brutto` the user types what they want to LAND ON and the app solves for the gross
 producing it, by inverting the shipped engine — not by a multiplier or a second formula.
 
-**Measured before the slice was written, with the shipped `computeContract` (orchestrator
-probe, 15:00, `scratchpad/probe-thresholds.mts` and `probe-gaps.mts`).** These are the
-numbers the criteria straddle, and the reason a bare bisection is unsound:
+**Measured 15:00 with the shipped `computeContract`, before the criteria were written.**
+These are the numbers the criteria straddle:
 
 | threshold | bites at gross | measured on |
 | --- | --- | --- |
@@ -31,12 +30,11 @@ numbers the criteria straddle, and the reason a bare bisection is unsound:
 | PIT 32% (base > 10 000 zł/mies.) | uop 11 880 · zlecenie 14 087 · dzieło 12 501 | all three |
 | 50% KUP annual cap (10 000 zł/mies. of costs) | 20 001 zł | dzieło + prawa autorskie |
 
-**Net is NOT monotone in gross.** Over gross 5 000–5 300 zł: uop 118 one-grosz steps where
-the net FALLS, worst 1,00 zł; zlecenie 61; dzieło+50% 18; student-on-zlecenie 0, exactly
-1:1. Plateaus run up to 6 gross values per net. **No unreachable net was found anywhere
-probed** — not at the relief limit, not at either 32% crossing, not at the KUP cap, not at
-gross 0–50. Above the top reachable net (uop 511 491,00 zł at the 1 000 000 zł input cap)
-every net is unreachable, and that is the one case `dir.unreachable` can be tested on.
+**Net is NOT monotone in gross.** Over gross 5 000–5 300 zł the net FALLS on 118 one-grosz
+steps on uop (worst 1,00 zł), 61 on zlecenie, 18 on dzieło+50%, 0 on student-zlecenie,
+which is exactly 1:1. Plateaus run to 6 gross per net. **No unreachable net was found
+below the input cap**, so `dir.unreachable` is testable only above the top reachable net
+(uop 511 491,00 zł at 1 000 000 zł of gross).
 
 ### Acceptance criteria
 
@@ -95,8 +93,10 @@ Nothing.
 
 ## Last verification result
 
-Measured 2026-08-19 14:54, slice 2 at `cb189dc` — PASS, Δ = 0, no open P0 or P1.
-Slice 3 has not been checked yet.
+Measured 2026-08-19 15:50, slice 3 at `d68b471` — **PASS**, Δ = 0 (visible 56/56, held-out
+5/5), 176 browser round trips with 0 failures, 72 screens compared against the `v0.2.0`
+worktree with 0 differing, two mutants caught. No open P0 or P1; one P2 (P2-L) in BACKLOG.
+Verbatim in `.agent/LAST_CHECK.md`.
 
 ## Next slices, in order
 
@@ -106,15 +106,14 @@ Slice 3 has not been checked yet.
 
 ## Checkpoints
 
-- 2026-08-18 22:48 to 2026-08-19 00:26 — slice 2 built and checked over five cycles; the
-  detail is in `.agent/LAST_CHECK.md`, `DECISIONS.md` and git history, compacted out here.
-- 2026-08-19 14:57 — slice 2 released: README at v0.2.0, `e6be6b6` and annotated `v0.2.0`
-  both on origin, verified with `git ls-remote`.
-- 2026-08-19 15:00 — slice 3 thresholds and non-monotonicity measured with the shipped
-  engine before any criterion was written. Table above.
+- 2026-08-18 22:48 to 2026-08-19 14:57 — slice 2 built, checked over five cycles and
+  released at `e6be6b6` / `v0.2.0`; the detail is in `DECISIONS.md` and git history.
+- 2026-08-19 15:00 — slice 3 thresholds and non-monotonicity measured. Table above.
 - 2026-08-19 15:04 — slice 3 and its ten criteria written. Phase-start `6b6787a`.
 - 2026-08-19 15:30 — builder handed over: `3676565` test: (5 Vitest, 6 Playwright red),
   `8531b01` feat:, `f8ff553` docs. 33 Vitest and 23 Playwright green, 11 tests added.
 - 2026-08-19 15:31 — criterion 5's example corrected on the builder's measurement; two
   deferrals to BACKLOG. The DECISIONS per-entry cap caught one of my own entries at 9
   lines and it was trimmed — R4-F8's known workaround, not a new finding.
+- 2026-08-19 15:50 — checker: PASS on all ten criteria, Δ 0, zero fix cycles needed. P2-L
+  to BACKLOG. Gates next, then README and the v0.3.0 release.

@@ -1,13 +1,13 @@
 SLICE 3 — brutto/netto toggle: type what you want on hand, get the gross that produces it
-NOW: builder is done: 33 Vitest and 23 Playwright green, handing to the checker   [15:30]
+NOW: running the three phase gates: ponytail, architecture, security   [15:51]
 
 [x] Slice 3 + acceptance criteria into STATE.md
 [x] Four slice-3 rulings into DECISIONS.md
 [x] builder: failing tests first (test:)
 [x] builder: solver + direction control (feat:)
-[ ] checker: real browser, both directions, all thresholds
-[ ] checker: regression against the v0.2.0 tag
-[ ] fix cycles, two attempts max per finding
+[x] checker: real browser, both directions, all thresholds
+[x] checker: regression against the v0.2.0 tag
+[x] fix cycles, two attempts max per finding — none needed, PASS first time
 [ ] ponytail + architecture gate
 [ ] security-gate
 [ ] README to v0.3.0

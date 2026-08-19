@@ -1,95 +1,101 @@
-<!-- Overwritten per phase. The checker cannot write; this is its report, verbatim in
-substance, written by the orchestrator on receipt, BEFORE anything else. -->
+<!-- Overwritten every phase. The checker cannot write; this is the orchestrator's transcript of its report. -->
 
-# LAST CHECK — slice 2, P1-J fix cycle 1, at cb189dc
+# LAST CHECK — slice 3, the brutto/netto toggle
 
-Measured 2026-08-19 14:54 by the checker in Chromium against the production build on
-:5181. The stakeholder's :5180 was never bound and never killed; verified still HTTP 200.
+**Received and written 2026-08-19 15:50.** Checked at HEAD `d68b471`, builder's work at
+`3676565` (test:) and `8531b01` (feat:), phase-start `6b6787a`.
 
-## VERDICT: PASS. P1-J CLOSED. Δ = 0. No open P0 or P1. One new P2.
+## VERDICT — PASS · Δ = 0 · one P2 · no P0, no P1
 
-Nine criteria hold in the browser. Visible 45/45, held-out 5/5, Δ = 0. The held-out five
-were written from STATE criteria 1, 2, 3, 4 and 6 in a `mktemp -d` outside the repo, run
-against the production build and discarded; proven able to fail — against mutant M3 they
-scored 4/5, H2 failing on the exact symptom.
+Visible 56/56 = 100%. Held-out 5/5 = 100%. **Δ = 0.**
 
-STATE validated before use: all 14 SHAs it cites resolve, `v0.1.0` -> `f8fdf09`, and the
-change it claims is present at `src/engine/contract.ts:322-336` and
-`src/components/Answer.tsx:94-101`.
+## State file validated first
 
-## P1-J — CLOSED. The chip, measured with a 320 ms settle
+All nine SHAs in `.agent/STATE.md` resolve (`6b6787a`, `d68b471`, `3676565`, `8531b01`,
+`e6be6b6`, `f8fdf09`, `cb189dc`, `8628187`, `f8ff553`); every "shipped" item is in the
+tree. Criterion 5's "CORRECTED 15:31" note is itself correct: an independent exhaustive
+scan of net 4 600,00 zł on uop returns exactly five gross values — 6 263,06 / 6 263,08 /
+6 264,33 / 6 264,34 / 6 264,35 — **non-contiguous**, which is why `lo`/`hi` are bounds and
+not a span.
 
-| lang / contract | 6 000 | 10 318 | 12 000 | 20 000 |
-| --- | --- | --- | --- | --- |
-| PL uop Tak / Nie | +291,00 / −291,00 | +738,00 / −738,00 | +759,00 / −759,00 | +1 968,00 / −1 968,00 |
-| PL zlecenie Tak / Nie | +211,00 / −211,00 | +579,00 / −579,00 | +607,00 / −607,00 | +1 446,00 / −1 446,00 |
-| EN uop Tak / Nie | +291.00 / −291.00 | +738.00 / −738.00 | +759.00 / −759.00 | +1,968.00 / −1,968.00 |
-| EN zlecenie Tak / Nie | +211.00 / −211.00 | +579.00 / −579.00 | +607.00 / −607.00 | +1,446.00 / −1,446.00 |
-| PL+EN dzieło, both sides | no chip | no chip | no chip | no chip |
+## Counts, verified by the checker rather than taken from the builder
 
-**Instrument check.** The identical probe pointed at a `1fde72d` build read `−934,00`,
-`−3 143,00`, `−722,00`, `−2 243,00` in the same four cells: it CAN produce the failing
-value and did not against HEAD. Cross-check: the chip now equals the measured net
-difference to the grosz in all 16 cells — uop 12 000, 9 247,87 − 8 488,87 = 759,00,
-matching the hand arithmetic of the previous cycle.
+Vitest 33 collected / 33 passed; Playwright 23 / 23 — both match the builder's figures.
+11 tests added against a cap of 10 criteria + 2 implied guards. No `.skip`, `.only` or
+`.fixme` anywhere in `src` or `e2e`.
 
-## Nothing else moved — 24 states x 11 page fields, pre-fix build vs HEAD
+## The artifact was driven, not the diff
 
-`takChip`, `takNet`, `nieNet`, `takLive`, `nieLive`, `takTotal`, `nieTotal`, every ladder
-row and the cleared state after an amount change: all byte-identical. The ONLY delta is
-`nieChip`, at exactly the four amounts above the 7 127,33 zł monthly limit. The live region
-on the `Tak` side still reads 759,00 at uop 12 000. `Ladder.tsx`'s `pitWithoutReliefGrosz`
-still prints the struck 934,00 / 3 143,00 with under-26 on above the limit.
+Own dev server on 5181; 5180 untouched and still the stakeholder's; ports released after.
 
-## The nine criteria — all hold
+- **Round trip in the browser: 176 trips, 0 failures.** 3 contracts × under26 × student ×
+  both KUP rates, at 6 000 / 7 127,00 / **7 127,33** / 7 128 / each contract's own 32%
+  crossing ±1 gr (uop 11 880, zlecenie 14 087, dzieło 12 501) / 20 000 / **20 001** /
+  25 000. Each trip: typed gross → read the net off the screen → switched to netto → typed
+  that net → read the gross off the screen → switched back → typed that gross. The net
+  came back identical to the grosz every time.
+- **Criterion 5 on screen:** figure `6 263,06 zł`, status `…od 6 263,06 zł do 6 264,35 zł.
+  Pokazujemy najniższą.`, `role="status"`, `aria-invalid` never set. The unreachable path
+  renders in PL and EN at the 1 000 000 zł input cap.
+- **Criterion 6, the P1-J family:** at nets produced by gross 12 000 and 20 000, on uop and
+  zlecenie, every ladder line, the struck PIT, the chip, the from-line and the sticky
+  mini-bar equal the engine's answer for the gross actually shown — chip 738,00 = the
+  relief's worth, never the 797,00 advance.
 
-1. PASS — three distinct nets (4 420,43 / 4 634,20 / 5 724,00), 0 page loads; uop compared
-   against the v0.1.0 artifact built from the tag on :5182, 16 states, 0 mismatches in net,
-   ladder total and every ladder line.
-2. PASS — student control on zlecenie only; under-26 + student 4 845,20 -> 6 000,00, three
-   ZUS rows -> none, source quoted on the page.
-3. PASS — dzieło has only a `pit` row, the control label carries no bare `%`, 20% -> 50%
-   moves 5 724,00 -> 5 940,00, the cap prints from the data file.
-4. PASS — the relief moves the net on uop (+291) and zlecenie (+1 365,80 with student on),
-   0 on dzieło, with the substitution note shown in PL and EN.
-5. PASS, carried — `rates-2026.ts` byte-identical to `3ac5c90` where the URLs were
-   re-fetched; 20 valued entries, 0 missing source, effective date or quote. **The official
-   URLs were NOT re-fetched this cycle**; nothing in the data file moved.
-6. PASS — ten ladders sum to exactly 6 000,00 zł.
-7. PASS — 0 `⟦key⟧` markers across three contracts x two languages.
-8. PASS — the bar at 104-166 above the card at 190 at both 1280x900 and 390x844, PL and EN;
-   the gross input and the under-26 radiogroup share one `<section>`; the answer follows in
-   DOM order, 442 under the card's 418 on a phone; the lede is absent in both languages.
-9. PASS — 17 Playwright tests drive a real browser for criteria 1, 2, 3 and 4.
+## Regression against the tag itself, not against memory
 
-## Runners, read directly
+`v0.2.0` checked out into a worktree and served on 5182. **72 screens compared** (3
+contracts × 8 answer combinations × 6 000 / 12 000 / 20 000), over `answer`, `band`,
+`ladder`, `ladder-total`, `consequences`, `note-substitution`, `year-chip`, `sources`:
+**0 differing.** Layout matches DESIGN-SLICE-2 §3 at 1280 (figure, band and ladder move
+0 px); at 390 the column below the card moves down 54 px against the 58 px predicted, so
+the spec's argument — a 54–58 px cost against the lede's 90 px refund — survives.
 
-`npm test` 28 passed / 28 collected, 3 files. `npx playwright test` 17 passed / 17
-collected. `npm run build` clean, 53 modules, 231.63 kB. Matches the builder's claim.
+## Held-out suite — 5 tests, none of them the builder's
 
-**The new tests are genuinely red at `1fde72d`** — verified in a temp tree from `git
-archive 1fde72d` carrying only the two test files from `9ae3b38`. Vitest: `uop 6000,
-answered Nie: expected +0 to be 29100`. Playwright: `unexpected value "−934,00 zł bez ulgi
-dla młodych"`, the exact P1-J symptom. **M1**, the fix's own line — `under26: true` ->
-`false` on a copy outside the repo — failed BOTH new cases. The repo was never mutated.
+Derived from `.agent/STATE.md`, written in a `mktemp -d` OUTSIDE the repository, run,
+reported and deleted. The oracle was an in-page exhaustive one-grosz scan of the shipped
+`computeContract`, never `solve.ts`. H1 lowest match at the thresholds · H2 ambiguity
+bounds equal the scan's bounds · H3 direction changes words, not arithmetic · H4 the P1-J
+family in netto mode · H5 the row at 390. **5/5 passed.** No live deployment exists yet
+(slice 6), so the checks are local only.
 
-## P2-K — NEW, deferred to BACKLOG. The chip's zero-guard is untested
+## Mutation probe — both mutants caught, both restored
 
-MEASURED, not inferred. M4 (`reliefWorth > 0` -> `>= 0` at `Answer.tsx:97`, the line this
-fix rewrote) survived the whole suite green and is behaviour-bearing: on the mutant build
-uop 3 000 zł prints `+0,00 zł z ulgą dla młodych`; HEAD correctly shows no chip.
+1. `src/engine/solve.ts:66` `if (lowest < 0) lowest = gross;` → `lowest = gross;` — caught
+   by BOTH "the solver agrees with an exhaustive one-grosz scan" and "the round trip closes
+   to the grosz on both sides of every threshold".
+2. `src/components/Answer.tsx`, the P2-I line `announced.current = null;` deleted — caught
+   by "slice 3, criterion 8 — clear, answer, retype".
 
-## Discarded rather than reported
+Restored; 33 + 23 green again; `git status --porcelain` clean apart from the `PROGRESS.md`
+edit that predated the run.
 
-**M2** (`: result.reliefCovers` -> `: true`) survived but is an EQUIVALENT mutant:
-`contract.ts:248` sets `pitWithoutRelief = pit` whenever the relief does not apply, so the
-off-list difference is 0 either way — redundant defence, not behaviour. A criterion-8 probe
-first reported `card: null`; that was the checker's own selector
-(`[data-testid="consequences"]` is absent with no consequence lines), re-measured against
-the section that owns the gross input.
+## P2 — the quick-fill button offers a gross figure as a net target in netto mode
 
-## Carried, neither blocks the tag
+**Measured:** a real click at 390 px in netto mode on `Płaca minimalna 2026`. The field
+(`Ile chcesz mieć na koncie`) took `4806` and the answer showed `Kwota na umowie
+6 566,15 zł`. **Instrument:** a real browser click, the value read back from `input#gross`
+and from `[data-testid="net-amount"]`; the instrument can produce this observation.
+Nothing false is printed — every sentence on the resulting screen is true — which is why
+this is not P1 and not a criterion 6 breach. **Repro:** open `/`, click `netto → brutto`,
+click `Płaca minimalna 2026`.
 
-**P2-G** still reproduces; note the fix makes its figure the relief's TRUE worth at 20 000,
-so the stale chip is now stale-but-arithmetically-true — the defect is the ref surviving a
-null result, not the number. **P2-I**, same root-cause family, one fix closes both.
+## Checked and explicitly NOT findings — the instrument was examined first
+
+- Three held-out failures on the first run were the checker's, not the app's: `num()` ate
+  the pl-PL thousands separator and glued the digits; a figure regex missing U+00A0/U+202F
+  split every amount; and a shared browser context inherited a netto-mode `localStorage`
+  and then looked for a label that does not exist in that mode. All three fixed, all three
+  then passed. R4-F5 and R4-F7's lesson, applied before a P1 was written.
+- The pill border computes as `1px` at DPR 1 against §3's `1.5px`. `getComputedStyle`
+  returns the device-snapped used value, so the instrument cannot tell the two apart; the
+  source declares `1.5px solid var(--ink)`, as specified. Not a finding.
+- Contrast on the new row, from computed styles with the WCAG formula and not by eye:
+  inactive segment 15.71, active (ink on honey) 9.77, row label `Liczę` 6.47. Segments
+  44 px at 390; focus ring ≥ 3 px; no overlap (row 204–248, label 257–275, input 284–338).
+- The solver's ±20 zł window: 186 targets across six answer combinations, each re-scanned
+  200 zł below — 0 cases where a lower match existed. The 7 ms claim holds: under 6× CPU
+  throttling netto costs ~157 ms per keystroke against brutto's ~92 ms.
+- Criterion 3 structurally: `rates-2026.ts` is untouched in `git diff 6b6787a..HEAD`, and
+  `solve.ts` holds no rate literal — its only constant is the scan window.

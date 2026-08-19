@@ -111,3 +111,9 @@ Format:
   answer figure and the answer figure changes meaning with the direction — Urgent when:
   any test or checker reads that id as proof that the figure is a net. Renaming it later
   costs one line; misreading it once costs a false PASS. Raised by the builder in slice 3.
+- P2-L: the quick-fill button offers a GROSS legal figure as a NET target in netto mode.
+  MEASURED at slice 3's check by a real click at 390: the field `Ile chcesz mieć na koncie`
+  took `4806` and the answer read `Kwota na umowie 6 566,15 zł`. Nothing false is printed,
+  which is why it is not P1 — Urgent when: slice 4 adds hour/week/month/year to the same
+  button, or the minimum wage appears anywhere with a `brutto` qualifier. Either makes the
+  shortcut assert something its source does not. Raised by the checker at slice 3's check.
