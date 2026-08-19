@@ -15,16 +15,28 @@ and npm 11.12.1 are there and are NOT on the agent's default Bash PATH; without 
 **Port 5180 is the stakeholder's dev server and 5184 is their LIVE PREVIEW.** Neither is
 ever bound or killed by an agent; every agent uses 5181–5183 and releases them.
 
-## Current slice
+## Current slice — 4b, the card's first impression: four stakeholder decisions
 
-None. **Slice 4b is next and is NOT started.** It needs the designer before any builder:
-the stakeholder settled the toggle's MEANING (the label shows the current direction) but
-its ARIA shape is an open Level 2 — `aria-pressed` on a button whose label changes asserts
-the mode twice and can be read out in conflict. See DECISIONS 2026-08-19, both entries.
+All four taken on the live preview, all Level 2, all answered. Rulings in DECISIONS
+2026-08-19. **The designer runs first** — three of the four have an open shape.
+
+1. **One toggling button** replaces the direction radiogroup; its label IS the active
+   direction. OPEN: the ARIA shape. `aria-pressed` on a button whose label changes asserts
+   the mode twice and can be read out in conflict; `role="switch"` is on/off and these are
+   two named modes. The designer settles it.
+2. **The quick-fill chip reads `Płaca minimalna {year}` alone** — no dash, no amount. The
+   click must STILL set amount, unit AND direction; that is what keeps P2-L closed, and
+   the label under-describing it is a graded, accepted cost, not a regression to fix.
+3. **A first-time visitor gets `5000` as a real value** and the screen computes on load. A
+   returning visitor's stored entry is NEVER overwritten — that is the load-bearing half.
+4. **The figure animates** on a change of contract or direction: cross-fade and slide,
+   ~180 ms, band and ladder moving with it. **No counter through intermediate values** —
+   a money figure that is nobody's net must never stand on screen. OPEN: whether the
+   ladder rows stagger, and `prefers-reduced-motion` is not optional.
 
 ## In flight
 
-Nothing.
+Designer, on all four items of slice 4b.
 
 ## Blocked
 
@@ -52,9 +64,6 @@ gate, so no gate may treat it as sufficient. The README now says so out loud.
 
 ## Next slices, in order
 
-4b. **The direction becomes one toggling button** — see Current slice above. It REPLACES
-    slice 3's criterion 1 (`role="radiogroup"`, two `role="radio"`), and MEASURED 20
-    references in `e2e/app.spec.ts` must be rewritten with it.
 5. The leftover layer — rent and food subtracted from the net. Survives every scope cut.
    **This is the one that turns a net calculator into this product**; it is also the only
    remaining Definition-of-Done clause with real weight.

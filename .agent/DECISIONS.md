@@ -326,3 +326,39 @@ Why: MEASURED at 390 in Chromium — a 44 px wrapper with a stretched input give
      the brackets, so this is the design's shape and not a deviation from it.
 Rules out: Measuring a container and calling it the target.
 Level: 0 — accessibility floor, never cut.
+
+## 2026-08-19 — Four stakeholder decisions taken on the live preview, slice 4b
+What: (1) The direction collapses to ONE button showing the current state — recorded above.
+     (2) The quick-fill chip reads `Płaca minimalna {year}` ALONE: no dash, no amount.
+     (3) A first-time visitor gets `5000` as a REAL value, computing on load; a returning
+     visitor's stored entry is never overwritten. (4) The figure animates on a change of
+     contract or direction — cross-fade and slide, never a counter through intermediates.
+Why: Taken by the stakeholder watching the app, which is the only place three of these four
+     could have been noticed at all. Each was put to them with its cost named.
+Rules out: A counter/odometer on any money figure, and a pre-fill that overwrites a
+     returning user's own entry.
+Level: 2 — all four answered by the human.
+
+## 2026-08-19 — The chip's label will under-describe what its click does, and that is graded
+What: With the amount and `brutto` gone from the label, the chip still sets three things —
+     amount, unit AND direction. The label names one.
+Why: This is NOT a return of P2-L, and the distinction matters. P2-L was that the chip
+     offered a gross figure as a NET target; the click setting `direction = 'g2n'` is what
+     fixed it, and that behaviour survives, so nothing false is presented. What returns is
+     milder: a control whose label is narrower than its effect. Recorded rather than argued
+     because the stakeholder chose the shorter label with this cost in front of them.
+Rules out: Reading slice 4b as reopening P2-L, and any later fix that drops the direction
+     reset "since the label does not mention it anyway".
+Level: 1 — a consequence of a Level 2 decision, recorded so it is not rediscovered.
+
+## 2026-08-19 — A pre-filled amount is the one figure the app may show without being asked
+What: `5000` on first run is a real value and the screen computes from it. The hours ruling
+     forbade inventing an hours-per-month constant; this is deliberately the exception.
+Why: They are not the same act. An invented hours-per-month is a claim about the USER —
+     "you work this much" — silently folded into their own pay. A pre-filled amount is a
+     worked example the user replaces with one keystroke, and it is visible, editable and
+     obviously round. The risk that someone reads 5000 as their own figure is real and the
+     stakeholder accepted it with the alternatives — placeholder, and an "Przykład" label —
+     in front of them.
+Rules out: Extending "the app may prefill" to any value the user cannot see and overwrite.
+Level: 2 — answered by the human.
