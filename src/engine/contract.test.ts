@@ -416,4 +416,44 @@ describe('the monthly breakdown, 2026 rates', () => {
     expect(computeContract(400_000, answers('dzielo'), RATES_2026).studentWorthGrosz).toBe(0);
     expect(computeContract(400_000, answers('uop'), RATES_2026).studentWorthGrosz).toBe(0);
   });
+
+  // P1-J. The same rule as the student answer, for the under-26 one: what the
+  // answer is worth is the same month computed with the other answer, in EITHER
+  // direction. Below the relief's monthly limit — 85 528 / 12 = 7 127,33 zł —
+  // the relief cancels the whole advance and the two numbers coincide, which is
+  // why the whole advance passed for the relief's worth for four cycles. Above
+  // it only part of the przychód is exempt and they diverge: on uop at 12 000 zł
+  // the advance is 934,00 and the relief is worth 759,00.
+  it('says what the under-26 answer is worth, in either direction', () => {
+    const worth = (contract: ContractKind, grossGrosz: number, under26: boolean) =>
+      computeContract(grossGrosz, answers(contract, { under26 }), RATES_2026).reliefWorthGrosz;
+
+    const cases: Array<[ContractKind, number, number]> = [
+      // below the monthly limit: the relief is worth the whole advance
+      ['uop', 600_000, 29_100],
+      ['uop', 1_031_800, 73_800],
+      ['zlecenie', 600_000, 21_100],
+      ['zlecenie', 1_031_800, 57_900],
+      // above it: the advance is bigger than the relief is worth
+      ['uop', 1_200_000, 75_900],
+      ['uop', 2_000_000, 196_800],
+      ['zlecenie', 1_200_000, 60_700],
+      ['zlecenie', 2_000_000, 144_600],
+    ];
+
+    for (const [contract, grossGrosz, expected] of cases) {
+      const where = `${contract} ${grossGrosz / 100}`;
+      expect(worth(contract, grossGrosz, true), `${where}, answered Tak`).toBe(expected);
+      expect(worth(contract, grossGrosz, false), `${where}, answered Nie`).toBe(expected);
+    }
+
+    // Above the limit the whole advance is NOT what the relief is worth, and
+    // the Nie side used to print it: 934,00 against 759,00 on uop at 12 000.
+    const nie = computeContract(1_200_000, answers('uop'), RATES_2026);
+    expect(nie.pitWithoutReliefGrosz).toBe(93_400);
+
+    // Off the cited list the answer is worth nothing, in either direction.
+    expect(worth('dzielo', 1_200_000, false)).toBe(0);
+    expect(worth('dzielo', 1_200_000, true)).toBe(0);
+  });
 });

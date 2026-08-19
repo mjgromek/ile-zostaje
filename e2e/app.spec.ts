@@ -590,3 +590,81 @@ test('P1-F — typing is still debounced, so no keystroke is its own utterance',
   expect(latency(said), `typing announced after ${latency(said)} ms`).toBeGreaterThan(400);
   expect(latency(said), `typing announced after ${latency(said)} ms`).toBeLessThan(900);
 });
+
+// P1-J. The chip is read off the screen on both sides of the flip, because an
+// engine number that is right proves nothing about what the chip prints — that
+// gap is exactly how four cycles read this as correct. Every figure below is the
+// relief's worth, hand-derived in .agent/LAST_CHECK.md from rates-2026.ts.
+type ChipCase = { gross: string; pl: RegExp; en: RegExp };
+
+// 7 127,33 zł/month is the relief's limit. Below it the relief cancels the whole
+// advance, so the two coincide; above it the advance is the larger number and
+// the chip must still print the relief's worth.
+const CHIP_CASES: ChipCase[] = [
+  { gross: '6000', pl: /291,00/, en: /291\.00/ },
+  { gross: '10318', pl: /738,00/, en: /738\.00/ },
+  { gross: '12000', pl: /759,00/, en: /759\.00/ },
+  { gross: '20000', pl: /1\D?968,00/, en: /1,968\.00/ },
+];
+
+const CHIP_CASES_ZLECENIE: ChipCase[] = [
+  { gross: '6000', pl: /211,00/, en: /211\.00/ },
+  { gross: '10318', pl: /579,00/, en: /579\.00/ },
+  { gross: '12000', pl: /607,00/, en: /607\.00/ },
+  { gross: '20000', pl: /1\D?446,00/, en: /1,446\.00/ },
+];
+
+/** Tak then Nie, reading the chip after each. Same number, opposite sign. */
+async function bothSidesOfTheFlip(
+  page: Page,
+  cases: ChipCase[],
+  lang: 'pl' | 'en',
+  where: string,
+) {
+  const chip = page.getByTestId('delta-chip');
+  const yes = lang === 'pl' ? 'Tak' : 'Yes';
+  const no = lang === 'pl' ? 'Nie' : 'No';
+  const question = lang === 'pl' ? Q_UNDER26 : 'Are you under 26?';
+  const grossLabel = lang === 'pl' ? GROSS_LABEL_PL : 'Monthly gross pay';
+  const radio = (value: string) =>
+    page.getByRole('radiogroup', { name: question }).getByRole('radio', { name: value });
+
+  for (const useCase of cases) {
+    const amount = lang === 'pl' ? useCase.pl : useCase.en;
+    await page.getByLabel(grossLabel).fill(useCase.gross);
+    // A new amount clears the standing chip, so each case starts from nothing.
+    await expect(chip).toHaveCount(0);
+
+    await radio(yes).click();
+    await expect(chip, `${where} ${useCase.gross}, Tak`).toHaveText(
+      new RegExp(`^\\+${amount.source}`),
+    );
+
+    await radio(no).click();
+    await expect(chip, `${where} ${useCase.gross}, Nie`).toHaveText(
+      new RegExp(`^−${amount.source}`),
+    );
+  }
+}
+
+test('P1-J — the Nie chip prices the relief, not the whole PIT advance', async ({ page }) => {
+  await page.goto('/');
+
+  await bothSidesOfTheFlip(page, CHIP_CASES, 'pl', 'uop pl');
+  await contract(page, 'Zlecenie').click();
+  await bothSidesOfTheFlip(page, CHIP_CASES_ZLECENIE, 'pl', 'zlecenie pl');
+
+  await page.getByRole('radio', { name: 'Angielski' }).click();
+  await bothSidesOfTheFlip(page, CHIP_CASES_ZLECENIE, 'en', 'zlecenie en');
+  await page.getByTestId('contract-bar').getByRole('radio', { name: 'Employment' }).click();
+  await bothSidesOfTheFlip(page, CHIP_CASES, 'en', 'uop en');
+
+  // The off-list guard stays: dzieło is not on the cited list, so the answer is
+  // worth nothing and no chip appears on either side of the flip.
+  await contract(page, 'Dzieło').click();
+  await page.getByLabel('Monthly gross pay').fill('12000');
+  await answerEn(page, 'Are you under 26?', 'Yes').click();
+  await expect(page.getByTestId('delta-chip')).toHaveCount(0);
+  await answerEn(page, 'Are you under 26?', 'No').click();
+  await expect(page.getByTestId('delta-chip')).toHaveCount(0);
+});
