@@ -1,1 +1,15 @@
-No slice in progress.
+SLICE 3 — brutto/netto toggle: type what you want on hand, get the gross that produces it
+NOW: writing slice 3 and its threshold-straddling criteria into STATE.md   [15:04]
+
+[ ] Slice 3 + acceptance criteria into STATE.md
+[ ] Four slice-3 rulings into DECISIONS.md
+[ ] builder: failing tests first (test:)
+[ ] builder: solver + direction control (feat:)
+[ ] checker: real browser, both directions, all thresholds
+[ ] checker: regression against the v0.2.0 tag
+[ ] fix cycles, two attempts max per finding
+[ ] ponytail + architecture gate
+[ ] security-gate
+[ ] README to v0.3.0
+[ ] commit and push main
+[ ] annotated tag v0.3.0, pushed, both verified with git ls-remote

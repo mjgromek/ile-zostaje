@@ -166,3 +166,39 @@ Why: The `Nie` chip read `pitWithoutReliefGrosz`, which with `under26: false` is
      20 000 zł (P1-J). Four checker cycles missed it because every figure was at 6 000 zł.
 Rules out: Pricing any answer from a field computed under the other answer's branch, and
      any chip figure not obtained by running the engine with the answer flipped. Level 1.
+
+## 2026-08-19 — The designer is not re-run for slice 3; DESIGN-SLICE-2 §3 settled it
+What: §3 fixes the toggle's own row above the amount label, its two arrowed segments, its
+     treatment, its copy per mode and its nine strings, measured at 390 and 1280.
+Why: The standing rule is that a slice RESHAPING the screen shows rendered variants. This
+     one does not reshape: §3 measured the drop-in when variant B was picked, and
+     re-running the designer would reopen a decision the stakeholder has already made.
+Rules out: A second placement round, and any deviation from §3's copy table.
+Level: 0 — executing a settled spec.
+
+## 2026-08-19 — Flipping the direction REINTERPRETS the amount, never converts or clears it
+What: The number in the field stays; the control above it changes what that number means.
+     6 000 brutto becomes 6 000 wanted on hand, and the answer changes accordingly.
+Why: The control sits above the field precisely to be read before it (§3). Converting
+     would silently rewrite what the person typed; clearing would throw it away. Both
+     invent behaviour the spec does not contain, and neither can be read off the screen.
+Rules out: Auto-filling the field with the net just computed.
+Level: 1 — a small user-visible choice inside a settled form. Named in the summary.
+
+## 2026-08-19 — P2-G and P2-I are promoted into slice 3 by their own urgency condition
+What: The announce and delta refs reset when the result goes null, so clear-and-retype
+     gives one utterance and no chip pricing a screen that is gone. One fix, both items.
+Why: P2-I's condition is literally "slice 3's toggle makes clear-and-retype a normal entry
+     mode" — flipping direction and retyping is now the ordinary gesture. The backlog
+     pre-authorised this; carrying it further would make the entry a wish.
+Rules out: Deferring the pair into slice 4, where a third trigger would widen it again.
+Level: 0 — the backlog states the condition and the condition is met.
+
+## 2026-08-19 — The reverse solve searches the shipped engine; bisection alone is unsound
+What: `solveGross` calls `computeContract` and scans; it is verified against an exhaustive
+     one-grosz scan per contract, and reports the LOWEST gross plus the run's bounds.
+Why: MEASURED with the shipped engine at 15:00 — the net FALLS on 118 of 30 000 one-grosz
+     gross steps on uop, worst 1,00 zł, so net is not monotone and a bare bisection can
+     land in a hole. Plateaus reach 6 gross per net: "the lowest" is a choice, not a tie.
+Rules out: A closed-form inverse, a multiplier, and any solver not checked against a scan.
+Level: 1 — an internal interface added inside the engine's existing shape.
