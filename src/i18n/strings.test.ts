@@ -165,10 +165,22 @@ test('the slice 4 unit strings are the ones §5 settled, in both languages', () 
     // the period one screen inch to the right, and two places asserting it is
     // how they drift apart.
     ['field.amount.label.gross', 'Kwota brutto', 'Gross amount'],
+    // RE-settled by slice 4b §7: the dash and the amount go, and the `{amount}`
+    // slot dies with them. A stakeholder decision taken on the live preview.
+    ['field.gross.quickfill', 'Płaca minimalna {year}', '{year} minimum wage'],
+    // NEW in slice 4b §7. `empty.answer.net` exists because the shipped
+    // `empty.answer` tells a netto user to type a gross over a field labelled
+    // `Ile chcesz mieć na koncie`; `answer.live.gross` because the live region
+    // announced the typed net under the other direction's eyebrow.
     [
-      'field.gross.quickfill',
-      'Płaca minimalna {year} — {amount} zł brutto',
-      '{year} minimum wage — {amount} zł gross',
+      'empty.answer.net',
+      'Wpisz kwotę, jaką chcesz mieć na koncie, a policzymy brutto.',
+      "Enter what you want in your account and we'll work out the gross.",
+    ],
+    [
+      'answer.live.gross',
+      'Kwota na umowie: {gross} zł miesięcznie.',
+      'On the contract: {gross} zł per month.',
     ],
     ['error.range', 'Wpisz kwotę od 0 do {max} {unit}.', 'Enter an amount between 0 and {max} {unit}.'],
   ];

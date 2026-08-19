@@ -702,8 +702,22 @@ test('P1-J — the Nie chip prices the relief, not the whole PIT advance', async
 const NET_LABEL_PL = 'Ile chcesz mieć na koncie';
 const DIRECTION_PL = 'Kierunek przeliczenia';
 
-function direction(page: Page, which: 'g2n' | 'n2g') {
-  return page.getByRole('radiogroup', { name: DIRECTION_PL }).getByTestId(`dir-${which}`);
+/**
+ * Slice 4b §8. The two segments became ONE button, and a toggle is not
+ * idempotent: `direction(page, 'n2g').click()` was safe to call twice and one
+ * button is not. Every call site goes through a state-aware setter that reads
+ * `data-direction` and clicks only if it must, then asserts it arrived — which
+ * is also why `data-direction` exists rather than a test reading the label's
+ * own text, since that cannot tell a label change from a state change.
+ */
+function dirToggle(page: Page) {
+  return page.getByTestId('dir-toggle');
+}
+
+async function setDirection(page: Page, which: 'g2n' | 'n2g') {
+  const toggle = dirToggle(page);
+  if ((await toggle.getAttribute('data-direction')) !== which) await toggle.click();
+  await expect(toggle).toHaveAttribute('data-direction', which);
 }
 
 /** The amount field, whose label — and meaning — depend on the direction. */
@@ -716,32 +730,32 @@ test('slice 3, criterion 1 — the direction row is above the amount label and i
 }) => {
   await page.goto('/');
 
-  const group = page.getByRole('radiogroup', { name: DIRECTION_PL });
-  await expect(group).toBeVisible();
-  await expect(direction(page, 'g2n')).toHaveAttribute('aria-checked', 'true');
-  await expect(direction(page, 'n2g')).toHaveAttribute('aria-checked', 'false');
+  const toggle = dirToggle(page);
+  await expect(toggle).toBeVisible();
+  await expect(toggle).toHaveAttribute('data-direction', 'g2n');
 
   // Read before the field whose meaning it changes: above the label, and in the
   // same card as the amount — not a page-level mode bar.
   const label = page.getByText(GROSS_LABEL_PL, { exact: true });
-  const rowBox = (await group.boundingBox())!;
+  const rowBox = (await toggle.boundingBox())!;
   const labelBox = (await label.boundingBox())!;
   expect(rowBox.y + rowBox.height, 'the direction row is not above the amount label').toBeLessThanOrEqual(
     labelBox.y,
   );
-  await expect(page.locator('section', { has: group }).locator('input#gross')).toHaveCount(1);
+  await expect(page.locator('section', { has: toggle }).locator('input#gross')).toHaveCount(1);
 
-  // §8's floor on the new row, and §3's arrow inside each segment.
-  for (const which of ['g2n', 'n2g'] as const) {
-    const box = (await direction(page, which).boundingBox())!;
-    expect(box.height, `${which} is ${box.height} px tall`).toBeGreaterThanOrEqual(44);
-    await expect(direction(page, which).locator('[aria-hidden="true"]')).toHaveText('→');
-  }
+  // §8's floor on the control, and §3's arrow inside it. The old
+  // `[aria-hidden="true"]` locator matched one element per segment; the button
+  // now holds TWO hidden children — the arrow and the swap glyph — so a locator
+  // that took either would be reading whichever came first.
+  const box = (await toggle.boundingBox())!;
+  expect(box.height, `the toggle is ${box.height} px tall`).toBeGreaterThanOrEqual(44);
+  await expect(toggle).toContainText('→');
 
-  await direction(page, 'n2g').click();
+  await setDirection(page, 'n2g');
   await expect(page.getByText(NET_LABEL_PL, { exact: true })).toBeVisible();
   await page.reload();
-  await expect(direction(page, 'n2g')).toHaveAttribute('aria-checked', 'true');
+  await expect(toggle).toHaveAttribute('data-direction', 'n2g');
   await expect(page.getByText(NET_LABEL_PL, { exact: true })).toBeVisible();
 
   // An entry written before slice 3 knows nothing about a direction, and loads
@@ -753,7 +767,7 @@ test('slice 3, criterion 1 — the direction row is above the amount label and i
     );
   });
   await page.reload();
-  await expect(direction(page, 'g2n')).toHaveAttribute('aria-checked', 'true');
+  await expect(dirToggle(page)).toHaveAttribute('data-direction', 'g2n');
   await expect(page.getByTestId('net-amount')).toHaveText(/4\D?420,43/);
 });
 
@@ -768,7 +782,7 @@ test('slice 3, criterion 2 — netto mode changes the words, never the arithmeti
 
   // The direction REINTERPRETS what was typed: it does not convert it and does
   // not throw it away.
-  await direction(page, 'n2g').click();
+  await setDirection(page, 'n2g');
   await expect(amountField(page)).toHaveValue('6263,06');
 
   await amountField(page).fill('4600');
@@ -789,7 +803,7 @@ test('slice 3, criterion 5 — ambiguity and unreachability are stated, never as
   page,
 }) => {
   await page.goto('/');
-  await direction(page, 'n2g').click();
+  await setDirection(page, 'n2g');
   await amountField(page).fill('4600');
 
   // Five gross values give 4 600,00 zł on uop; the lowest is shown and the
@@ -832,7 +846,7 @@ test('slice 3, criterion 6 — in netto mode every figure is computed on the ans
   page,
 }) => {
   await page.goto('/');
-  await direction(page, 'n2g').click();
+  await setDirection(page, 'n2g');
 
   for (const useCase of NETTO_CHIP_CASES) {
     const where = `${useCase.contract} netto ${useCase.net}`;
@@ -858,10 +872,12 @@ test('slice 3, criterion 10 — a direction change announces at once, one uttera
   await expect(page.getByTestId('live')).toHaveText(/4\D?600,00/);
   await installLiveProbe(page, '[data-testid="live"]');
 
-  await direction(page, 'n2g').click();
+  // Two calls, two DIFFERENT states, on one button: the second is the flip
+  // back, and with a toggle it is the same element as the first.
+  await setDirection(page, 'n2g');
   announcedAtOnce(await utterances(page), 'a direction change');
 
-  await direction(page, 'g2n').click();
+  await setDirection(page, 'g2n');
   announcedAtOnce(await utterances(page), 'a direction change back');
 });
 
@@ -1190,19 +1206,30 @@ test('slice 4, criterion 8 — the quick-fill sets everything it asserts', async
   // must leave a screen where brutto is what the field means.
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  await direction(page, 'n2g').click();
+  await setDirection(page, 'n2g');
   await unitSelect(page).selectOption('year');
   await amountField(page).fill('90000');
 
   const quick = page.getByRole('button', { name: /Płaca minimalna/ });
-  await expect(quick).toHaveText(/^Płaca minimalna 2026 — 4\D?806 zł brutto$/);
+  // Slice 4b item 2: the dash and the amount are gone. The click is NOT — it
+  // still sets all three, which is what keeps P2-L closed.
+  await expect(quick).toHaveText(/^Płaca minimalna 2026$/);
+  // §3: with the amount gone the chip is 97 px shorter and a 1 px --line box at
+  // that width is the header's year chip, not a control. It takes the toggle's
+  // ink outline, measured in ink rather than asserted from the stylesheet.
+  const chipInk = await quick.locator('span').first().evaluate((el) => {
+    const style = getComputedStyle(el);
+    return { width: style.borderTopWidth, color: style.borderTopColor };
+  });
+  expect(chipInk.width, 'the chip does not carry the 1.5 px ink outline').toBe('1.5px');
+  expect(chipInk.color, 'the chip outline is not the ink colour').toBe('rgb(43, 33, 28)');
   const box = await target(quick);
   expect(box.height, 'the chip is under the 44 px floor').toBeGreaterThanOrEqual(44);
   await page.mouse.click(box.x + box.width / 2, box.y + 4);
 
   await expect(amountField(page)).toHaveValue('4806');
   await expect(unitSelect(page)).toHaveValue('month');
-  await expect(direction(page, 'g2n')).toHaveAttribute('aria-checked', 'true');
+  await expect(dirToggle(page)).toHaveAttribute('data-direction', 'g2n');
   // Each of the three is something the cited figure genuinely asserts, so the
   // screen after the click is the one the label describes.
   await expect(page.getByTestId('net-amount')).toHaveText(/3\D?605,85/);
@@ -1268,4 +1295,362 @@ test('slice 4, criterion 10 — the accessibility floor holds on both new contro
     latency(typed),
     `the hours field announced after ${latency(typed)} ms — a typed field must debounce`,
   ).toBeGreaterThan(400);
+});
+
+// ── slice 4b — the card's first impression ────────────────────────────────────
+//
+// Twelve criteria, of which criteria 2, 3, 11 and 12 are migrations of the tests
+// above rather than new ones: a toggle is not idempotent, so every direction
+// call site already goes through `setDirection`, and the byte-identical screen
+// comparison against v0.3.0 is what criterion 12 is measured with.
+
+const STORE_KEY = 'ile-zostaje.v1';
+
+// §2.2, MEASURED by the designer against Chromium's own AX engine and
+// cross-checked with Playwright's independent accname implementation. The arrow
+// is decoration and is excluded from all four.
+const DIR_NAME = {
+  pl: { g2n: 'Kierunek przeliczenia: brutto netto', n2g: 'Kierunek przeliczenia: netto brutto' },
+  en: {
+    g2n: 'Direction of the calculation: gross net',
+    n2g: 'Direction of the calculation: net gross',
+  },
+};
+
+const EMPTY_ANSWER_PL = 'Wpisz kwotę brutto, a pokażemy, ile zostaje.';
+const EMPTY_ANSWER_NET_PL = 'Wpisz kwotę, jaką chcesz mieć na koncie, a policzymy brutto.';
+const EMPTY_ANSWER_NET_EN = "Enter what you want in your account and we'll work out the gross.";
+const EMPTY_BAND_PL = 'Tu pojawi się podział twojej pensji.';
+
+/**
+ * The language pill. Its two radios are labelled IN THE ACTIVE LANGUAGE —
+ * `Polski` / `Angielski` in PL and `Polish` / `English` in EN — so a test that
+ * switches both ways cannot select them by a name that moves under it.
+ */
+function langButton(page: Page, code: 'pl' | 'en') {
+  return page.getByTestId('lang-switch').getByRole('radio').nth(code === 'pl' ? 0 : 1);
+}
+
+/** Write a record and reload, which is the only way a returning visitor exists. */
+async function returnWith(page: Page, raw: string) {
+  await page.evaluate(
+    (entry) => localStorage.setItem(entry.key, entry.raw),
+    { key: STORE_KEY, raw },
+  );
+  await page.reload();
+}
+
+/**
+ * §5.1's trigger set, in one place because two criteria read it: criterion 7
+ * asserts the first two fire and the last four do not, and criteria 8 and 9
+ * drive all six. The language switch is last because it renames the controls
+ * every earlier entry selects by name.
+ */
+const SIX_TRIGGERS: [name: string, run: (page: Page) => Promise<void>][] = [
+  ['a direction change', async (page) => dirToggle(page).click()],
+  ['a contract change', async (page) => contract(page, 'Zlecenie').click()],
+  [
+    'a typed digit',
+    async (page) => {
+      await amountField(page).press('End');
+      await amountField(page).press('0');
+    },
+  ],
+  [
+    'a unit change',
+    async (page) => {
+      await unitSelect(page).selectOption('year');
+    },
+  ],
+  ['an under-26 flip', async (page) => answer(page, Q_UNDER26, 'Tak').click()],
+  ['a language switch', async (page) => langButton(page, 'en').click()],
+];
+
+/**
+ * The play state of the swap animation on each of §5.2's three groups. Filtered
+ * by animation NAME: the band's segments carry width transitions and the delta
+ * chip its own keyframes, and `getAnimations()` returns those too.
+ */
+async function swapAnimations(page: Page): Promise<Record<string, string[]>> {
+  return page.evaluate(() => {
+    const nodes: [string, Element | null | undefined][] = [
+      ['answer', document.querySelector('[data-testid="answer-swap"]')],
+      ['band', document.querySelector('[data-testid="band"]')?.parentElement],
+      ['ladder', document.querySelector('[data-testid="ladder"]')],
+    ];
+    const out: Record<string, string[]> = {};
+    for (const [name, node] of nodes) {
+      out[name] = node
+        ? node
+            .getAnimations()
+            .filter((a) => (a as CSSAnimation).animationName === 'answerSwap')
+            .map((a) => a.playState)
+        : ['NO ELEMENT'];
+    }
+    return out;
+  });
+}
+
+test('slice 4b, criterion 1 — one button, named for the mode it is in, and no second state channel', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const toggle = dirToggle(page);
+
+  // The radiogroup and both segments are DELETED, not hidden.
+  await expect(page.getByRole('radiogroup', { name: DIRECTION_PL })).toHaveCount(0);
+  await expect(page.getByTestId('dir-g2n')).toHaveCount(0);
+  await expect(page.getByTestId('dir-n2g')).toHaveCount(0);
+
+  // §2.2: the name carries purpose AND current value; the AX tree carries no
+  // state property at all. `aria-pressed` on a name that already states the mode
+  // asserts it twice and can be read out in conflict — the name says the app is
+  // in brutto → netto and the state says "not pressed".
+  await expect(toggle).toHaveAccessibleName(DIR_NAME.pl.g2n);
+  for (const attribute of ['aria-pressed', 'role', 'aria-checked']) {
+    expect(await toggle.getAttribute(attribute), `the toggle carries ${attribute}`).toBeNull();
+  }
+  // MEASURED: this matches nothing in any of the four states, because the arrow
+  // is not in the accessible name. Pinned so it is not written again.
+  await expect(page.getByRole('button', { name: /brutto → netto/ })).toHaveCount(0);
+
+  // A native button, so both keys activate and no key handler is needed.
+  await toggle.focus();
+  await page.keyboard.press('Space');
+  await expect(toggle).toHaveAttribute('data-direction', 'n2g');
+  await expect(toggle).toHaveAccessibleName(DIR_NAME.pl.n2g);
+  await expect(page.getByText(NET_LABEL_PL, { exact: true })).toBeVisible();
+  await page.keyboard.press('Enter');
+  await expect(toggle).toHaveAttribute('data-direction', 'g2n');
+  await expect(toggle).toHaveAccessibleName(DIR_NAME.pl.g2n);
+
+  // The other language, both states.
+  await langButton(page, 'en').click();
+  await expect(toggle).toHaveAccessibleName(DIR_NAME.en.g2n);
+  await toggle.click();
+  await expect(toggle).toHaveAccessibleName(DIR_NAME.en.n2g);
+});
+
+test('slice 4b, criterion 4 — the EN card stops overflowing at 320', async ({ page }) => {
+  // The overflow DESIGN-SLICE-4 §1 measured and sent to BACKLOG: 299 over 286 at
+  // 320 EN. The card is measured, not the document — the entry names the card.
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.goto('/');
+  const card = page.locator('section', { has: page.locator('input#gross') });
+
+  for (const lang of ['pl', 'en'] as const) {
+    await langButton(page, lang).click();
+    await page.waitForTimeout(120);
+    const measured = await card.evaluate((el) => ({
+      scroll: el.scrollWidth,
+      client: el.clientWidth,
+    }));
+    expect(
+      measured.scroll,
+      `${lang} at 320: the card is ${measured.scroll} wide inside ${measured.client}`,
+    ).toBeLessThanOrEqual(measured.client);
+  }
+});
+
+test('slice 4b, criterion 5 — the first run is told from a cleared field, on the raw string', async ({
+  page,
+}) => {
+  // 1. No record at all: a real value, computed through the shipped engine.
+  await page.goto('/');
+  await expect(amountField(page)).toHaveValue('5000');
+  await expect(page.getByTestId('net-amount')).toHaveText(/3\D?738,19/);
+  // The write-on-mount effect turns the first paint into a record, which is what
+  // makes the prefill happen once ever rather than on every visit.
+  const written = await page.evaluate(
+    (key) => JSON.parse(localStorage.getItem(key) ?? '{}').gross,
+    STORE_KEY,
+  );
+  expect(written, 'the first paint did not become a record').toBe('5000');
+
+  // 5 and 5b. They clear it. The empty states return, and a reload does not hand
+  // the example back.
+  await amountField(page).fill('');
+  await expect(page.getByText(EMPTY_ANSWER_PL)).toBeVisible();
+  await page.reload();
+  await expect(amountField(page), 'the prefill came back on a second load').toHaveValue('');
+  await expect(page.getByText(EMPTY_ANSWER_PL)).toBeVisible();
+
+  // 2. A record with an amount is untouched.
+  await returnWith(page, JSON.stringify({ gross: '6000' }));
+  await expect(amountField(page)).toHaveValue('6000');
+  await expect(page.getByTestId('net-amount')).toHaveText(/4\D?420,43/);
+
+  // 3. THE load-bearing half. A record whose amount is empty is not a first run:
+  // the parsed field cannot tell it from no record, and the raw string can.
+  await returnWith(page, JSON.stringify({ gross: '' }));
+  await expect(amountField(page), 'a cleared field was handed the example back').toHaveValue('');
+  await expect(page.getByText(EMPTY_ANSWER_PL)).toBeVisible();
+  await expect(page.getByText(EMPTY_BAND_PL)).toBeVisible();
+
+  // 4. An unreadable record is somebody's entry and is never written over.
+  await returnWith(page, '{"gross": "6000"');
+  await expect(amountField(page), 'an unreadable record was overwritten').toHaveValue('');
+});
+
+test('slice 4b, criterion 6 — the empty state asks for the amount the field is labelled for', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await setDirection(page, 'n2g');
+  await amountField(page).fill('');
+
+  // The defect this closes: `Wpisz kwotę brutto` over a field whose own label
+  // is `Ile chcesz mieć na koncie`. Item 3 makes it a RETURN state.
+  await expect(page.getByText(NET_LABEL_PL, { exact: true })).toBeVisible();
+  await expect(page.getByText(EMPTY_ANSWER_NET_PL)).toBeVisible();
+  await expect(page.getByText(EMPTY_ANSWER_PL)).toHaveCount(0);
+
+  await langButton(page, 'en').click();
+  await expect(page.getByText(EMPTY_ANSWER_NET_EN)).toBeVisible();
+
+  // The gross direction keeps the greeting it always had.
+  await setDirection(page, 'g2n');
+  await expect(page.getByText("Enter a gross amount and we'll show what's left.")).toBeVisible();
+});
+
+test('slice 4b, criterion 7 — the swap fires on a contract or a direction change, and on nothing else', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await amountField(page).fill('6000');
+  await expect(page.getByTestId('net-amount')).toHaveText(/4\D?420,43/);
+
+  for (const [name, run] of SIX_TRIGGERS) {
+    // Long enough for the previous 180 ms gesture to be over, so a `running`
+    // reading below is this trigger's and not the last one's.
+    await page.waitForTimeout(300);
+    await run(page);
+    await page.waitForTimeout(20);
+    const fires = name === 'a direction change' || name === 'a contract change';
+    for (const [group, states] of Object.entries(await swapAnimations(page))) {
+      expect(
+        states.includes('running'),
+        `${group} on ${name}: ${JSON.stringify(states)}`,
+      ).toBe(fires);
+    }
+    if (name === 'a direction change') {
+      // §5.4: a fade-in on swap. The old answer is gone the instant the mode
+      // changes, so two money figures are never on screen together.
+      await expect(page.getByTestId('net-amount')).toHaveCount(1);
+      const timing = await page.getByTestId('answer-swap').evaluate((el) => {
+        const style = getComputedStyle(el);
+        return {
+          duration: style.animationDuration,
+          easing: style.animationTimingFunction,
+          fill: style.animationFillMode,
+        };
+      });
+      expect(timing).toEqual({
+        duration: '0.18s',
+        easing: 'cubic-bezier(0.2, 0, 0, 1)',
+        fill: 'both',
+      });
+    }
+  }
+});
+
+test('slice 4b, criterion 8 — reduced motion degrades to instant and announces the same thing', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await amountField(page).fill('6000');
+  await expect(page.getByTestId('net-amount')).toHaveText(/4\D?420,43/);
+  await installLiveProbe(page, '[data-testid="live"]');
+
+  await dirToggle(page).click();
+  const style = await page.getByTestId('answer-swap').evaluate((el) => {
+    const computed = getComputedStyle(el);
+    return {
+      name: computed.animationName,
+      duration: computed.animationDuration,
+      opacity: computed.opacity,
+      transform: computed.transform,
+    };
+  });
+  expect(style).toEqual({ name: 'none', duration: '0s', opacity: '1', transform: 'none' });
+  // The announcement was never coupled to the transition, in either direction.
+  announcedAtOnce(await utterances(page), 'a direction change under reduced motion');
+
+  for (const [name, run] of SIX_TRIGGERS) {
+    await run(page);
+    await page.waitForTimeout(20);
+    for (const [group, states] of Object.entries(await swapAnimations(page))) {
+      expect(states, `${group} animated on ${name} under prefers-reduced-motion`).toEqual([]);
+    }
+  }
+});
+
+test('slice 4b, criterion 9 — the live region survives every swap', async ({ page }) => {
+  await page.goto('/');
+  await amountField(page).fill('6000');
+  await expect(page.getByTestId('live')).toHaveText(/4\D?420,43/);
+
+  // A property on the DOM object itself. It cannot survive the node being
+  // destroyed and recreated — which is exactly what a changing React key does,
+  // and the failure is silent, because the recreated region looks right and
+  // simply stops announcing.
+  await page.evaluate(() => {
+    (document.querySelector('[data-testid="live"]') as unknown as { __kept?: boolean }).__kept =
+      true;
+  });
+
+  for (const [name, run] of SIX_TRIGGERS) {
+    await run(page);
+    await page.waitForTimeout(250);
+    const survived = await page.evaluate(
+      () =>
+        (document.querySelector('[data-testid="live"]') as unknown as { __kept?: boolean } | null)
+          ?.__kept === true,
+    );
+    expect(survived, `the live region was destroyed and recreated by ${name}`).toBe(true);
+  }
+
+  // Still a live region, and still saying the answer after all six.
+  const live = page.getByTestId('live');
+  await expect(live).toHaveAttribute('role', 'status');
+  await expect(live).toHaveAttribute('aria-live', 'polite');
+  await expect(live).not.toHaveText('');
+
+  // §5.6: a transform creates a containing block and silently kills sticky
+  // positioning in a descendant. The desktop layout's left column is sticky.
+  const stickyInside = await page.evaluate(
+    () =>
+      Array.from(document.querySelectorAll('*')).filter(
+        (el) => getComputedStyle(el).position === 'sticky' && el.closest('.swap') !== null,
+      ).length,
+  );
+  expect(stickyInside, 'a position: sticky element sits inside the animated group').toBe(0);
+});
+
+test('slice 4b, criterion 10 — the live region announces the figure the screen shows', async ({
+  page,
+}) => {
+  // PRE-EXISTING at v0.4.0 and at 589ea02, MEASURED twice: netto with 6000 typed
+  // announced `Na konto: 6 000,00 zł` while the screen read `Kwota na umowie
+  // 8 317,21 zł`. It is FIXED here, not caused here.
+  await page.goto('/');
+  await amountField(page).fill('6000');
+  await setDirection(page, 'n2g');
+
+  const figure = page.getByTestId('net-amount');
+  const live = page.getByTestId('live');
+  await expect(figure).toHaveText(/8\D?317,21/);
+  await expect(live).toHaveText(/^Kwota na umowie: 8\D?317,21 zł miesięcznie\.$/);
+  // And against the screen rather than only against a literal: whatever the
+  // figure says, the region says that number and not the one that was typed.
+  expect(digits(await live.textContent())).toContain(digits(await figure.textContent()));
+  expect(
+    digits(await live.textContent()),
+    'the region announced the typed net under the other eyebrow',
+  ).not.toContain('6000,00');
+
+  // The gross direction is unchanged: it always said the net, and still does.
+  await setDirection(page, 'g2n');
+  await expect(live).toHaveText(/^Na konto: 4\D?420,43 zł miesięcznie\.$/);
 });
