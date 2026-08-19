@@ -270,3 +270,28 @@ Why: INFERRED from the conversion rules, not measured — hour and week MULTIPLY
 Rules out: Promoting a backlog item because its entry names the slice, without re-checking
      that the mechanism it names actually runs in the direction the entry assumed.
 Level: 0 — a deferral upheld, with the entry's reasoning corrected.
+
+## 2026-08-19 — The direction becomes ONE toggling button showing the CURRENT state
+What: STAKEHOLDER DECISION, taken while watching the live preview. The slice 3
+     `role="radiogroup"` with two `role="radio"` segments collapses to a single button whose
+     label IS the active direction — `brutto → netto`, clicked, becomes `netto → brutto`.
+Why: The direction is a MODE, not a question about the user. DESIGN-SLICE-4 §0 already
+     argued exactly this to justify merging the unit into the field; the same reasoning
+     applied to the direction row says a two-segment pill — the shape the card uses for
+     "masz mniej niż 26 lat?" — files a mode as if it were a question.
+Rules out: A second visible segment, and any label naming what a click will DO rather than
+     what the app is doing now.
+Level: 2 — answered by the human. The label convention was put to them with the ambiguity
+     named, and they chose current-state over action-label.
+
+## 2026-08-19 — OPEN, for the designer: the toggle's ARIA shape is NOT settled by the above
+What: The decision above fixes the label's MEANING. It does not fix the markup, and the
+     obvious markup is a known trap: `aria-pressed` on a button whose label changes is
+     contradictory — the pressed state and the changing name assert the mode twice, and can
+     be read out in conflict.
+Why: `role="switch"` is on/off and these are two named modes, not on and off. A plain
+     button needs its accessible name to carry both the purpose and the current value
+     without becoming a sentence. This is a real choice with a11y consequences and it is
+     the designer's, not the builder's.
+Rules out: Shipping `aria-pressed` with a changing label because it looked like a toggle.
+Level: 2 — goes to the designer before any builder touches it.

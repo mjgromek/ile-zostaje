@@ -84,6 +84,11 @@ Verbatim in `.agent/LAST_CHECK.md`.
 
 ## Next slices, in order
 
+4b. **The direction becomes one toggling button.** STAKEHOLDER DECISION on the live
+    preview — see DECISIONS 2026-08-19. It REPLACES slice 3's criterion 1, which asserted a
+    `role="radiogroup"` with two `role="radio"` segments, and MEASURED 20 references in
+    `e2e/app.spec.ts` must be rewritten with it. Runs AFTER slice 4 lands, never folded into
+    it. The designer settles the ARIA shape first — the second DECISIONS entry says why.
 5. The leftover layer — rent and food subtracted from the net. Survives every scope cut.
 6. Deploy to a public URL, verified with `hooks/verify-deploy.sh`.
 
