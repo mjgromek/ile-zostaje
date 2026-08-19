@@ -60,7 +60,10 @@ const pl: Table = {
     'Tę kwotę na koncie daje kilka kwot brutto — od {lo} zł do {hi} zł. Pokazujemy najniższą.',
   'dir.unreachable':
     'Żadna kwota brutto nie daje dokładnie tyle na konto. Najbliższa to {amount} zł.',
-  'field.gross.quickfill': 'Płaca minimalna {year} — {amount} zł brutto',
+  // Slice 4b item 2: the label states what it is, and the click still sets the
+  // amount, the unit AND the direction. The label is narrower than its effect;
+  // that is recorded in DECISIONS and paid for by the chip's ink outline.
+  'field.gross.quickfill': 'Płaca minimalna {year}',
   'field.contract.label': 'Rodzaj umowy',
   'contract.uop': 'Etat',
   'contract.zlecenie': 'Zlecenie',
@@ -89,6 +92,9 @@ const pl: Table = {
   'answer.relief.persistent': 'Z ulgą dla młodych (PIT 0 zł).',
   'answer.student.persistent': 'Bez składek ZUS — student do 26 lat.',
   'answer.live': 'Na konto: {net} zł miesięcznie.',
+  // The live region says the figure the SCREEN says. Announcing the typed net
+  // under the other direction's eyebrow was the P1-class defect 4b fixes.
+  'answer.live.gross': 'Kwota na umowie: {gross} zł miesięcznie.',
   'answer.live.delta': 'To o {amount} zł więcej dzięki uldze dla młodych.',
   'answer.live.delta.student': 'To o {amount} zł więcej, bo nie ma składek ZUS.',
   'furniture.estimate': 'To szacunek, nie porada podatkowa.',
@@ -142,6 +148,11 @@ const pl: Table = {
   'sources.dzielo.costs.copyright': 'Koszty 50% przy przeniesieniu praw autorskich',
   'sources.dzielo.costs.cap': 'Limit kosztów 50% (rocznie)',
   'empty.answer': 'Wpisz kwotę brutto, a pokażemy, ile zostaje.',
+  // Direction-aware, because item 3 makes the empty state a RETURN state: a
+  // netto user must not be told to type a gross over a field labelled
+  // `Ile chcesz mieć na koncie`. `empty.band` needs no pair — the band
+  // decomposes a gross either way.
+  'empty.answer.net': 'Wpisz kwotę, jaką chcesz mieć na koncie, a policzymy brutto.',
   'empty.band': 'Tu pojawi się podział twojej pensji.',
   'error.range': 'Wpisz kwotę od 0 do {max} {unit}.',
   'error.digits': 'Wpisz kwotę cyframi, na przykład 6000.',
@@ -185,7 +196,7 @@ const en: Table = {
   'dir.ambiguous':
     'Several gross amounts produce this net — from {lo} zł to {hi} zł. We show the lowest.',
   'dir.unreachable': 'No gross amount produces exactly this net. The closest is {amount} zł.',
-  'field.gross.quickfill': '{year} minimum wage — {amount} zł gross',
+  'field.gross.quickfill': '{year} minimum wage',
   'field.contract.label': 'Contract type',
   'contract.uop': 'Employment',
   'contract.zlecenie': 'Zlecenie',
@@ -215,6 +226,7 @@ const en: Table = {
   'answer.relief.persistent': 'With the under-26 relief (income tax 0 zł).',
   'answer.student.persistent': 'No ZUS — student under 26.',
   'answer.live': 'In your account: {net} zł per month.',
+  'answer.live.gross': 'On the contract: {gross} zł per month.',
   'answer.live.delta': "That's {amount} zł more thanks to the under-26 relief.",
   'answer.live.delta.student': 'That is {amount} zł more, because there is no ZUS.',
   'furniture.estimate': 'An estimate, not tax advice.',
@@ -264,6 +276,7 @@ const en: Table = {
   'sources.dzielo.costs.copyright': 'The 50% rate for transferred copyright',
   'sources.dzielo.costs.cap': 'Annual cap on 50% costs',
   'empty.answer': "Enter a gross amount and we'll show what's left.",
+  'empty.answer.net': "Enter what you want in your account and we'll work out the gross.",
   'empty.band': 'Your pay breakdown will appear here.',
   'error.range': 'Enter an amount between 0 and {max} {unit}.',
   'error.digits': 'Enter the amount in digits, for example 6000.',

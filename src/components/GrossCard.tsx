@@ -6,8 +6,6 @@ import { UNITS, type Unit } from '../state/units';
 import { Question } from './Question';
 import s from './GrossCard.module.css';
 
-const DIRECTIONS: Direction[] = ['g2n', 'n2g'];
-
 type Props = {
   lang: Lang;
   year: number;
@@ -27,8 +25,6 @@ type Props = {
   under26: boolean;
   student: boolean;
   copyright: boolean;
-  /** The minimum wage as the chip prints it — whole złote, already formatted. */
-  minimumWageText: string;
   /** The largest amount this unit will take, already formatted. */
   maxAmountText: string;
   /** What the current answers mean, already interpolated. May be empty. */
@@ -67,7 +63,6 @@ export function GrossCard({
   under26,
   student,
   copyright,
-  minimumWageText,
   maxAmountText,
   consequences,
   onGrossText,
@@ -89,36 +84,59 @@ export function GrossCard({
       .filter((id) => id !== null)
       .join(' ') || undefined;
 
+  // §2.1: the label IS the current direction, so the two halves of the settled
+  // string are split off the arrow the same way the two segments were.
+  const [before = '', after = ''] = t(lang, `dir.${direction}`)
+    .split('→')
+    .map((part) => part.trim());
+
   // The card carries no aria-label: one here would collide with the input's own
   // label and make "the gross field" ambiguous to a screen reader.
   return (
     <section className={s.card}>
       <div>
         {/* §3: its own row, immediately above the label — a control is read
-            before the field whose meaning it changes. The arrow is decoration
-            for a screen reader; the group's own label carries the meaning. */}
+            before the field whose meaning it changes.
+
+            ONE button whose name IS the current mode, and no second state
+            channel: no aria-pressed, no role="switch", no aria-checked. The
+            accessible name carries purpose and current value together, and a
+            `pressed` state beside a name that already states the mode asserts
+            it twice and can be read out in conflict. The arrow is decoration,
+            as it was in slice 3; `dir.group` survives as the visually-hidden
+            purpose prefix now that no group label carries it. */}
         <div className={s.dirRow}>
           <span>{t(lang, 'dir.label')}</span>
-          <div className={s.dir} role="radiogroup" aria-label={t(lang, 'dir.group')}>
-            {DIRECTIONS.map((option) => {
-              const [before = '', after = ''] = t(lang, `dir.${option}`).split('→');
-              return (
-                <button
-                  key={option}
-                  type="button"
-                  role="radio"
-                  data-testid={`dir-${option}`}
-                  aria-checked={direction === option}
-                  className={`${s.dirSeg} ${direction === option ? s.active : ''}`}
-                  onClick={() => onDirection(option)}
-                >
-                  {before}
-                  <span aria-hidden="true">→</span>
-                  {after}
-                </button>
-              );
-            })}
-          </div>
+          <button
+            type="button"
+            className={s.dirToggle}
+            data-testid="dir-toggle"
+            data-direction={direction}
+            onClick={() => onDirection(direction === 'g2n' ? 'n2g' : 'g2n')}
+          >
+            <span className="visually-hidden">{t(lang, 'dir.group')}: </span>
+            {before}
+            <span aria-hidden="true">{'→'}</span>
+            {after}
+            {/* The swap mark is chrome and the arrow is content; the colour is
+                what says which is which. At ink they read as one cluster. */}
+            <svg
+              className={s.dirSwap}
+              aria-hidden="true"
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+            >
+              <path
+                d="M1.5 4h9M8.5 1.5 11 4 8.5 6.5M10.5 8h-9M3.5 5.5 1 8l2.5 2.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
         </div>
 
         <label className={s.label} htmlFor="gross">
@@ -215,14 +233,12 @@ export function GrossCard({
           </>
         ) : null}
         <div className={s.quickWrap}>
-          {/* It states what it is and sets everything it asserts: the amount,
-              the unit and the direction. Each of the three is something the
-              cited figure genuinely says, and setting them is what makes the
-              label true. */}
+          {/* The amount is gone from the label and NOT from the click: it still
+              sets the amount, the unit and the direction, which is what keeps
+              P2-L closed. The label is now narrower than its effect, which is
+              the recorded cost of the stakeholder's shorter label. */}
           <button type="button" className={s.quick} onClick={onQuickFill}>
-            <span className={s.quickChip}>
-              {t(lang, 'field.gross.quickfill', { year, amount: minimumWageText })}
-            </span>
+            <span className={s.quickChip}>{t(lang, 'field.gross.quickfill', { year })}</span>
           </button>
         </div>
       </div>

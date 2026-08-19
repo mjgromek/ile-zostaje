@@ -3,7 +3,9 @@ import { computeContract } from './engine/contract';
 import { solveGross } from './engine/solve';
 import { RATES_2026 } from './engine/rates-2026';
 import type { ContractKind } from './engine/rates';
-import { formatMoney, formatRate, formatZloty, t, type Lang } from './i18n/strings';
+// `formatZloty` is NOT imported here any more — the quick-fill chip's amount
+// slot died with slice 4b item 2. The helper itself stays: Sources.tsx uses it.
+import { formatMoney, formatRate, t, type Lang } from './i18n/strings';
 import { MAX_GROSS_GROSZ, parseGross } from './state/gross';
 import { loadEntries, saveEntries, type Direction } from './state/storage';
 import {
@@ -204,6 +206,13 @@ export function App() {
     }
   }
 
+  // §5.1's trigger set, and ONLY this set, in one place because three groups
+  // read it. Typing is excluded by DESIGN-SLICE-1 §3, the unit because the
+  // monthly answer often does not move, the under-26 and student answers
+  // because §4's band re-form already owns that moment — the two must never
+  // co-fire — and the language because it is not a change of the answer.
+  const swapKey = `${contract}|${direction}`;
+
   // Statement substitution: the answer is live, it changed nothing, and the
   // screen says why. Disabling the control would be a dead end the user cannot
   // interrogate; hiding it would make the app look as if it had ignored them.
@@ -246,7 +255,6 @@ export function App() {
               hoursText={hoursText}
               hoursError={hoursError}
               conversion={conversion}
-              minimumWageText={formatZloty(rates.minimumWageMonthlyGrosz.value, lang)}
               maxAmountText={formatMoney(maxTypedGrosz, lang)}
               onGrossText={setGrossText}
               onDirection={setDirection}
@@ -274,15 +282,25 @@ export function App() {
                 direction={direction}
                 unit={unit}
                 perUnitGrosz={perUnitGrosz}
+                swapKey={swapKey}
               />
             </div>
-            <Band lang={lang} year={rates.year} result={result} />
+            {/* The key is on the component here and INSIDE the section in
+                Answer, for the one reason §6 gives: only the answer block holds
+                a live region, and a live region that is destroyed and recreated
+                does not reliably announce. The band and the ladder hold none.
+
+                Each key is PREFIXED because these two are siblings: keyed with
+                the bare swapKey they collide, and React's reconciler keeps one
+                of the two old subtrees in the DOM forever — MEASURED, three
+                bands on screen after two swaps. */}
+            <Band key={`band-${swapKey}`} lang={lang} year={rates.year} result={result} />
             {substitution ? (
               <p className={css.note} data-testid="note-substitution">
                 {t(lang, substitution)}
               </p>
             ) : null}
-            <Ladder lang={lang} result={result} rates={rates} />
+            <Ladder key={`ladder-${swapKey}`} lang={lang} result={result} rates={rates} />
           </div>
 
           {/* Last on a phone, under the card on a desktop: provenance sits

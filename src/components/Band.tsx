@@ -18,7 +18,7 @@ type Props = {
 export function Band({ lang, year, result }: Props) {
   if (result === null || result.grossGrosz === 0) {
     return (
-      <div className={s.wrap}>
+      <div className={`${s.wrap} swap`}>
         <p className={s.empty}>{t(lang, 'empty.band')}</p>
       </div>
     );
@@ -28,7 +28,7 @@ export function Band({ lang, year, result }: Props) {
   const netShare = result.netGrosz / gross;
 
   return (
-    <div className={s.wrap}>
+    <div className={`${s.wrap} swap`}>
       <div className={s.band} data-testid="band">
         <div
           className={`${s.segment} ${s.net}`}

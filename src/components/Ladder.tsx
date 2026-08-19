@@ -74,7 +74,7 @@ export function Ladder({ lang, result, rates }: Props) {
   const reliefOnPit = result.reliefApplies && result.pitWithoutReliefGrosz > 0;
 
   return (
-    <table className={css.table} data-testid="ladder">
+    <table className={`${css.table} swap`} data-testid="ladder">
       <caption className="visually-hidden">{t(lang, 'ladder.caption')}</caption>
       <thead className={css.head}>
         <tr>

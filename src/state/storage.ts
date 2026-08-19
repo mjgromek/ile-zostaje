@@ -32,6 +32,14 @@ export type Entries = {
   hoursPerWeek: string;
 };
 
+/**
+ * What a browser with no record of its own opens on. A worked example, not a
+ * claim about the user: visible, editable and obviously round. It survives
+ * exactly one page load, because the write-on-mount effect turns the first
+ * paint into a record — so there is no second first run.
+ */
+export const FIRST_RUN_GROSS = '5000';
+
 export function loadEntries(): Entries {
   const fallback: Entries = {
     gross: '',
@@ -44,9 +52,15 @@ export function loadEntries(): Entries {
     unit: 'month',
     hoursPerWeek: DEFAULT_HOURS_PER_WEEK,
   };
+  // Declared outside the try so the catch can tell the two failures apart: a
+  // record we never obtained is a first run, and a record we obtained and could
+  // not read is somebody's entry we must not write over. The distinction is
+  // drawn on the RAW string, because the parsed field cannot carry it — "no
+  // record" and "a record whose amount is empty" both arrive as ''.
+  let raw: string | null | undefined;
   try {
-    const raw = globalThis.localStorage?.getItem(KEY);
-    if (!raw) return fallback;
+    raw = globalThis.localStorage?.getItem(KEY) ?? null;
+    if (raw === null || raw === '') return { ...fallback, gross: FIRST_RUN_GROSS };
     const parsed = JSON.parse(raw) as Partial<Entries>;
     const flag = (value: unknown, fall: boolean) => (typeof value === 'boolean' ? value : fall);
     return {
@@ -77,7 +91,9 @@ export function loadEntries(): Entries {
     };
   } catch {
     // A corrupted or unavailable store must not take the screen down with it.
-    return fallback;
+    // `fallback.gross` stays '': a record that failed to parse is a person's
+    // own entry, and handing them an example instead is inventing their number.
+    return raw === undefined ? { ...fallback, gross: FIRST_RUN_GROSS } : fallback;
   }
 }
 

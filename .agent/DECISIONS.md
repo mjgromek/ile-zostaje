@@ -389,3 +389,32 @@ Rules out: Grading it as a 4b regression, and any future assumption that a fix t
      visible surface reaches the audio one.
 Level: 1 — folded in on DESIGN-SLICE-4 §2's precedent, where rendering found the missing
      `select` in the focus list and the one-word fix shipped with the slice that found it.
+
+## 2026-08-19 — The swap key is prefixed per group; sibling keys alike leak a subtree
+What: The band and the ladder are keyed `band-${swapKey}` and `ladder-${swapKey}`. The
+     bare swapKey on both is a duplicate key among siblings.
+Why: MEASURED in a real browser — with the bare key one flip left TWO bands in the DOM
+     and two flips left three, because React maps the remaining children by key and a
+     collision drops one of them from the deletion pass. The e2e suite caught it as four
+     unrelated strict-mode violations, never as an animation defect.
+Rules out: Keying two sibling groups on one shared trigger string. Level 0 — a fix.
+
+## 2026-08-19 — The 320 px EN card overflow is closed, and the measurement closes it
+What: The BACKLOG entry the designer raised at slice 4 is DELETED. MEASURED with the
+     card's own scrollWidth/clientWidth at 320 in Chromium: **286/286 against v0.4.0's
+     299/286** — the same 13 px the entry named, reproduced red before the change.
+Why: Item 1 closes it for free: one toggle is 65 px narrower in EN than two segments were.
+     A closed entry needs the number, not the assertion that it is closed.
+Rules out: Re-raising it without a fresh measurement of the CARD, not the document.
+Level: 0 — the criterion names the action and the instrument reproduced the old figure.
+
+## 2026-08-19 — Two test instruments were wrong about the artifact and were replaced
+What: getComputedStyle reports `1px` for a 1.5 px border at DPR 1, so the chip's outline
+     is compared to the TOGGLE's with one instrument, not to a number. And sampling
+     playState 20 ms after a gesture read `finished` for a 180 ms animation that HAD
+     fired, because one evaluate round trip under a parallel run outlasts it; an
+     animationstart listener has no window to miss.
+Why: Both would have failed against a correct artifact. An instrument that cannot produce
+     the finding is not evidence, in either direction.
+Rules out: Asserting a fractional CSS length through computed style, and sampling a
+     running animation instead of recording its start. Level 0.

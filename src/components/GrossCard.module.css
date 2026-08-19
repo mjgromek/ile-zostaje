@@ -8,9 +8,9 @@
   gap: var(--s5);
 }
 
-/* §3 and §9: d-dirRow / d-dir / d-dirSeg. Its own row above the amount label,
-   46 px on a phone, and it costs the card 58 px — measured when variant B was
-   picked, against the 90 px the cut lede refunded. */
+/* §3 and §9: d-dirRow. Its own row above the amount label, 46 px on a phone.
+   `.dir` and `.dirSeg` are GONE with the two segments — slice 4b puts one
+   button in the row, and its min-height is what holds the 46 px. */
 .dirRow {
   display: flex;
   align-items: center;
@@ -30,18 +30,19 @@
   color: var(--ink-muted);
 }
 
-.dir {
+/* Slice 4b §2.4. OUTLINED, never ink-filled: the filled treatment means "this
+   one of several is selected", and there is no longer a several. A control that
+   shows only its own current value reads as a caption unless something carries
+   the affordance, and here it is the ink pill and the swap glyph — not colour. */
+.dirToggle {
   flex: 0 0 auto;
-  display: flex;
-  border: 1.5px solid var(--ink);
-  border-radius: var(--r-pill);
-  overflow: hidden;
-}
-
-.dirSeg {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s2);
   min-height: 44px;
   padding: 0 var(--s3);
-  border: 0;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r-pill);
   background: var(--surface);
   font-family: var(--face-body);
   font-size: 14px;
@@ -53,9 +54,15 @@
   transition: background var(--dur-fast) var(--ease);
 }
 
-.active {
-  background: var(--ink);
-  color: var(--honey);
+.dirToggle:hover {
+  background: var(--paper);
+}
+
+/* --ink-muted, not --ink: at ink the → and the ⇄ read as one four-arrow
+   cluster. 6.47:1 on surface, and it carries nothing colour alone must carry. */
+.dirSwap {
+  flex: 0 0 auto;
+  color: var(--ink-muted);
 }
 
 .label {
@@ -217,8 +224,13 @@
   align-items: center;
   min-height: 36px;
   padding: 0 var(--s3);
-  border: 1px solid var(--line);
-  border-radius: var(--r-chip);
+  /* §3: with the amount gone the chip is 97 px shorter, and a 1 px --line box
+     at that width is the header's year chip at a larger size rather than a
+     thing you can tap. It takes the toggle's outline, so the card has ONE
+     visual language for a control: an ink pill, outlined when it acts and
+     filled when it shows a selection. */
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r-pill);
   background: var(--surface);
   font-family: var(--face-body);
   font-size: 13px;

@@ -129,12 +129,6 @@ Format:
   `maxlength="12"` is in the DOM on `#gross` — so only the STORED value is still unbounded
   — Urgent when: any URL param, share link or cross-origin path can write the entry.
   Raised by the checker at slice 3's security gate.
-- At 320 px in ENGLISH the card's content box is 299 px against a 286 px client box — a
-  13 px horizontal overflow, forced by the slice 3 direction row's `gross → net` /
-  `net → gross` nowrap. MEASURED at slice 4's design pass, identical on the HEAD tree and
-  the patched tree in all six width×language combinations, so it is pre-existing and not
-  slice 4's — Urgent when: any slice touches the direction row's copy or its layout, or a
-  320 px device is reported. Raised by the designer at slice 4.
 - A unit-aware quick-fill, filling the statutory minimalna stawka godzinowa under the hour
   unit — rejected for slice 4 because it needs a second citation AND exists for zlecenie
   but not for etat, which would make the chip contract-dependent — Urgent when: the hourly

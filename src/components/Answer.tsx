@@ -19,6 +19,13 @@ type Props = {
    * App from the monthly grosz, once, never chained through the typed amount.
    */
   perUnitGrosz: number | null;
+  /**
+   * §5.1's trigger set, computed once in App and closed: a contract or a
+   * direction change and nothing else. It is a React key, so the subtree it
+   * sits on is destroyed and recreated — which is why it sits INSIDE the
+   * section and excludes the live region.
+   */
+  swapKey: string;
 };
 
 const DELTA_MS = 6_000;
@@ -31,7 +38,7 @@ const DELTA_MS_REDUCED = 10_000;
  */
 type Delta = { key: string; amountGrosz: number };
 
-export function Answer({ lang, result, direction, unit, perUnitGrosz }: Props) {
+export function Answer({ lang, result, direction, unit, perUnitGrosz, swapKey }: Props) {
   const [delta, setDelta] = useState<Delta | null>(null);
   const [live, setLive] = useState('');
   const announced = useRef<string | null>(null);
@@ -40,6 +47,7 @@ export function Answer({ lang, result, direction, unit, perUnitGrosz }: Props) {
   const under26 = result?.under26 ?? false;
   const student = result?.student ?? false;
   const netGrosz = result?.netGrosz ?? null;
+  const grossGrosz = result?.grossGrosz ?? null;
   const reliefCovers = result?.reliefCovers ?? false;
   const reliefApplies = result?.reliefApplies ?? false;
   const reliefWorth = result?.reliefWorthGrosz ?? 0;
@@ -81,8 +89,15 @@ export function Answer({ lang, result, direction, unit, perUnitGrosz }: Props) {
             amount: formatMoney(perUnitGrosz, lang),
             per: t(lang, `unit.per.${unit}`),
           })}`;
-    const sentence =
-      t(lang, 'answer.live', { net: formatMoney(netGrosz, lang) }) + extra + echo;
+    // The region says the figure the SCREEN says. Announcing the typed net
+    // under the other direction's eyebrow is the P1-J shape App.tsx's own
+    // comment says the sticky mini-bar was fixed for, surviving in the one
+    // place a screen-reader user has no other channel. PRE-EXISTING at v0.4.0.
+    const headline =
+      direction === 'n2g' && grossGrosz !== null
+        ? t(lang, 'answer.live.gross', { gross: formatMoney(grossGrosz, lang) })
+        : t(lang, 'answer.live', { net: formatMoney(netGrosz, lang) });
+    const sentence = headline + extra + echo;
 
     if (answered) {
       setLive(sentence);
@@ -92,6 +107,7 @@ export function Answer({ lang, result, direction, unit, perUnitGrosz }: Props) {
     return () => clearTimeout(id);
   }, [
     netGrosz,
+    grossGrosz,
     result?.contract,
     under26,
     student,
@@ -163,49 +179,61 @@ export function Answer({ lang, result, direction, unit, perUnitGrosz }: Props) {
 
   return (
     <section className={s.answer} data-testid="answer">
-      <p className={s.eyebrow}>
-        {t(lang, direction === 'n2g' ? 'answer.eyebrow.gross' : 'answer.eyebrow')}
-      </p>
+      {/* The swap group. The furniture and the live region are deliberately
+          OUTSIDE it: this is a changing React key, and a live region that is
+          destroyed and recreated does not reliably announce the content it is
+          created holding — silently, on exactly the gesture it exists for.
+          The eyebrow is INSIDE, because its text changes with the direction and
+          leaving it behind tears the block in two. */}
+      <div className="swap" key={swapKey} data-testid="answer-swap">
+        <p className={s.eyebrow}>
+          {t(lang, direction === 'n2g' ? 'answer.eyebrow.gross' : 'answer.eyebrow')}
+        </p>
 
-      {result === null ? (
-        <p className={s.empty}>{t(lang, 'empty.answer')}</p>
-      ) : (
-        <>
-          {/* The figure is the answer to the question that was asked: what
-              lands in the account, or what has to be on the contract for it
-              to. Same computation, read from the other end. */}
-          <p className={s.figure} aria-hidden="true" data-testid="net-amount">
-            {formatMoney(direction === 'n2g' ? result.grossGrosz : result.netGrosz, lang)} zł
+        {result === null ? (
+          // Direction-aware: a netto user must not be told to type a gross over
+          // a field whose own label asks what they want in their account.
+          <p className={s.empty}>
+            {t(lang, direction === 'n2g' ? 'empty.answer.net' : 'empty.answer')}
           </p>
-          <p className={s.from}>
-            {direction === 'n2g'
-              ? t(lang, 'answer.from.net', { net: formatMoney(result.netGrosz, lang) })
-              : t(lang, 'answer.from', { gross: formatMoney(result.grossGrosz, lang) })}
-          </p>
-          {/* The unit ends at the field's edge; this is the one place it
-              reaches the answer, and it is secondary to the monthly figure.
-              `≈` is doing real work — the division does not close exactly. */}
-          {perUnitGrosz !== null ? (
-            <p className={s.perUnit} data-testid="answer-perunit">
-              {t(lang, direction === 'n2g' ? 'answer.perunit.gross' : 'answer.perunit', {
-                amount: formatMoney(perUnitGrosz, lang),
-                per: t(lang, `unit.per.${unit}`),
-              })}
+        ) : (
+          <>
+            {/* The figure is the answer to the question that was asked: what
+                lands in the account, or what has to be on the contract for it
+                to. Same computation, read from the other end. */}
+            <p className={s.figure} aria-hidden="true" data-testid="net-amount">
+              {formatMoney(direction === 'n2g' ? result.grossGrosz : result.netGrosz, lang)} zł
             </p>
-          ) : null}
-          {delta ? (
-            <p className={s.delta} data-testid="delta-chip">
-              {t(lang, delta.key, { amount: formatMoney(delta.amountGrosz, lang) })}
+            <p className={s.from}>
+              {direction === 'n2g'
+                ? t(lang, 'answer.from.net', { net: formatMoney(result.netGrosz, lang) })
+                : t(lang, 'answer.from', { gross: formatMoney(result.grossGrosz, lang) })}
             </p>
-          ) : null}
-          {result.zusExempt ? (
-            <p className={s.persistent}>{t(lang, 'answer.student.persistent')}</p>
-          ) : null}
-          {result.reliefApplies ? (
-            <p className={s.persistent}>{t(lang, 'answer.relief.persistent')}</p>
-          ) : null}
-        </>
-      )}
+            {/* The unit ends at the field's edge; this is the one place it
+                reaches the answer, and it is secondary to the monthly figure.
+                `≈` is doing real work — the division does not close exactly. */}
+            {perUnitGrosz !== null ? (
+              <p className={s.perUnit} data-testid="answer-perunit">
+                {t(lang, direction === 'n2g' ? 'answer.perunit.gross' : 'answer.perunit', {
+                  amount: formatMoney(perUnitGrosz, lang),
+                  per: t(lang, `unit.per.${unit}`),
+                })}
+              </p>
+            ) : null}
+            {delta ? (
+              <p className={s.delta} data-testid="delta-chip">
+                {t(lang, delta.key, { amount: formatMoney(delta.amountGrosz, lang) })}
+              </p>
+            ) : null}
+            {result.zusExempt ? (
+              <p className={s.persistent}>{t(lang, 'answer.student.persistent')}</p>
+            ) : null}
+            {result.reliefApplies ? (
+              <p className={s.persistent}>{t(lang, 'answer.relief.persistent')}</p>
+            ) : null}
+          </>
+        )}
+      </div>
 
       <div className={s.furniture}>
         <p>{t(lang, 'furniture.estimate')}</p>

@@ -787,7 +787,9 @@ test('slice 3, criterion 2 — netto mode changes the words, never the arithmeti
 
   await amountField(page).fill('4600');
   await expect(page.getByTestId('net-amount')).toHaveText(/6\D?263,06/);
-  await expect(page.getByText('Kwota na umowie')).toBeVisible();
+  // `exact`, because slice 4b's criterion 10 fix puts the same words in the
+  // live region: the eyebrow is the whole string, the announcement is longer.
+  await expect(page.getByText('Kwota na umowie', { exact: true })).toBeVisible();
   await expect(page.getByText(/miesięcznie, żeby na konto trafiło 4\D?600,00 zł/)).toBeVisible();
 
   // Band, ladder and total row are the same screen the gross produced.
@@ -1003,6 +1005,11 @@ test('slice 4, criterion 1 — the unit lives inside the field, and costs the de
   ).toBe('gross');
 
   // Zero cost in the default state: the card is the height v0.3.0 shipped.
+  // The field is CLEARED first, which slice 4b makes necessary and does not
+  // weaken: these four figures were cut against an empty card, and item 3's
+  // first-run 5000 under the hour unit is 866 666 zł a month, which trips the
+  // ZUS-ceiling consequence line and adds 93 px of prose to the card.
+  await amountField(page).fill('');
   const cardHeight = () => page.locator('section').filter({ has: page.locator('#gross') }).boundingBox();
   expect(Math.round((await cardHeight())!.height), 'the month card grew').toBe(282);
   for (const [unit, height] of [['week', 309], ['year', 309], ['hour', 361]] as const) {
@@ -1215,14 +1222,22 @@ test('slice 4, criterion 8 — the quick-fill sets everything it asserts', async
   // still sets all three, which is what keeps P2-L closed.
   await expect(quick).toHaveText(/^Płaca minimalna 2026$/);
   // §3: with the amount gone the chip is 97 px shorter and a 1 px --line box at
-  // that width is the header's year chip, not a control. It takes the toggle's
-  // ink outline, measured in ink rather than asserted from the stylesheet.
-  const chipInk = await quick.locator('span').first().evaluate((el) => {
-    const style = getComputedStyle(el);
-    return { width: style.borderTopWidth, color: style.borderTopColor };
-  });
-  expect(chipInk.width, 'the chip does not carry the 1.5 px ink outline').toBe('1.5px');
+  // that width is the header's year chip, not a control. It takes THE TOGGLE'S
+  // outline — so the two are read with one instrument and compared to each
+  // other, rather than to a number. `getComputedStyle` reports a used border
+  // width rounded to whole device pixels, so at DPR 1 it cannot tell 1.5 px
+  // from 1 px: asserting '1.5px' would be asserting something the instrument
+  // cannot produce. The colour it can, and --line is not --ink.
+  const outline = (locator: ReturnType<typeof page.locator>) =>
+    locator.evaluate((el) => {
+      const style = getComputedStyle(el);
+      return { width: style.borderTopWidth, color: style.borderTopColor };
+    });
+  const chipInk = await outline(quick.locator('span').first());
   expect(chipInk.color, 'the chip outline is not the ink colour').toBe('rgb(43, 33, 28)');
+  expect(chipInk, 'the chip does not carry the toggle outline').toEqual(
+    await outline(dirToggle(page)),
+  );
   const box = await target(quick);
   expect(box.height, 'the chip is under the 44 px floor').toBeGreaterThanOrEqual(44);
   await page.mouse.click(box.x + box.width / 2, box.y + 4);
@@ -1366,28 +1381,46 @@ const SIX_TRIGGERS: [name: string, run: (page: Page) => Promise<void>][] = [
   ['a language switch', async (page) => langButton(page, 'en').click()],
 ];
 
+type SwapWindow = Window & { __swaps?: string[] };
+
 /**
- * The play state of the swap animation on each of §5.2's three groups. Filtered
- * by animation NAME: the band's segments carry width transitions and the delta
- * chip its own keyframes, and `getAnimations()` returns those too.
+ * Records every swap animation that STARTS, by group, until it is read.
+ *
+ * Sampling `getAnimations()[i].playState` a few milliseconds after the gesture
+ * was the first instrument and it is unsound: the animation is 180 ms long and
+ * one `page.evaluate` round trip under a parallel run can outlast it, so a
+ * gesture that fired reads back `finished` and the test fails for the machine's
+ * load. An `animationstart` listener has no window to miss — the record is
+ * still there whenever it is read. Filtered by NAME, because the band's
+ * segments carry width transitions and the delta chip its own keyframes.
  */
-async function swapAnimations(page: Page): Promise<Record<string, string[]>> {
+async function watchSwaps(page: Page) {
+  await page.evaluate(() => {
+    const w = window as SwapWindow;
+    w.__swaps = [];
+    document.addEventListener(
+      'animationstart',
+      (event) => {
+        const animation = event as AnimationEvent;
+        if (animation.animationName !== 'answerSwap') return;
+        const el = animation.target as HTMLElement;
+        w.__swaps?.push(
+          el.dataset.testid ??
+            (el.querySelector('[data-testid="band"]') !== null ? 'band-swap' : el.tagName),
+        );
+      },
+      true,
+    );
+  });
+}
+
+/** Every group that started a swap since the last read, sorted, then cleared. */
+async function swapsSince(page: Page): Promise<string[]> {
   return page.evaluate(() => {
-    const nodes: [string, Element | null | undefined][] = [
-      ['answer', document.querySelector('[data-testid="answer-swap"]')],
-      ['band', document.querySelector('[data-testid="band"]')?.parentElement],
-      ['ladder', document.querySelector('[data-testid="ladder"]')],
-    ];
-    const out: Record<string, string[]> = {};
-    for (const [name, node] of nodes) {
-      out[name] = node
-        ? node
-            .getAnimations()
-            .filter((a) => (a as CSSAnimation).animationName === 'answerSwap')
-            .map((a) => a.playState)
-        : ['NO ELEMENT'];
-    }
-    return out;
+    const w = window as SwapWindow;
+    const seen = [...(w.__swaps ?? [])].sort();
+    w.__swaps = [];
+    return seen;
   });
 }
 
@@ -1519,20 +1552,17 @@ test('slice 4b, criterion 7 — the swap fires on a contract or a direction chan
   await page.goto('/');
   await amountField(page).fill('6000');
   await expect(page.getByTestId('net-amount')).toHaveText(/4\D?420,43/);
+  await watchSwaps(page);
+
+  // §5.2: three groups move as one gesture — the answer block, the band and the
+  // whole ladder, with no stagger. The card does not: it is where the finger is.
+  const ALL_THREE = ['answer-swap', 'band-swap', 'ladder'];
 
   for (const [name, run] of SIX_TRIGGERS) {
-    // Long enough for the previous 180 ms gesture to be over, so a `running`
-    // reading below is this trigger's and not the last one's.
-    await page.waitForTimeout(300);
     await run(page);
-    await page.waitForTimeout(20);
+    await page.waitForTimeout(250);
     const fires = name === 'a direction change' || name === 'a contract change';
-    for (const [group, states] of Object.entries(await swapAnimations(page))) {
-      expect(
-        states.includes('running'),
-        `${group} on ${name}: ${JSON.stringify(states)}`,
-      ).toBe(fires);
-    }
+    expect(await swapsSince(page), `on ${name}`).toEqual(fires ? ALL_THREE : []);
     if (name === 'a direction change') {
       // §5.4: a fade-in on swap. The old answer is gone the instant the mode
       // changes, so two money figures are never on screen together.
@@ -1562,6 +1592,7 @@ test('slice 4b, criterion 8 — reduced motion degrades to instant and announces
   await amountField(page).fill('6000');
   await expect(page.getByTestId('net-amount')).toHaveText(/4\D?420,43/);
   await installLiveProbe(page, '[data-testid="live"]');
+  await watchSwaps(page);
 
   await dirToggle(page).click();
   const style = await page.getByTestId('answer-swap').evaluate((el) => {
@@ -1579,10 +1610,8 @@ test('slice 4b, criterion 8 — reduced motion degrades to instant and announces
 
   for (const [name, run] of SIX_TRIGGERS) {
     await run(page);
-    await page.waitForTimeout(20);
-    for (const [group, states] of Object.entries(await swapAnimations(page))) {
-      expect(states, `${group} animated on ${name} under prefers-reduced-motion`).toEqual([]);
-    }
+    await page.waitForTimeout(250);
+    expect(await swapsSince(page), `${name} animated under prefers-reduced-motion`).toEqual([]);
   }
 });
 

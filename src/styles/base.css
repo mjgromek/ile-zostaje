@@ -25,6 +25,40 @@ body {
   outline-offset: 2px;
 }
 
+/* Slice 4b §5. ONE rule and one set of keyframes for all three swap groups —
+   the answer block, the band and the ladder — because CSS Modules cannot share
+   @keyframes across files and the alternative is the same eight lines three
+   times. The 4 px rise is not a new gesture: it is the delta chip's own `rise`
+   on a second trigger.
+
+   §5.6 constrains where it may go: a transform creates a containing block and
+   silently kills `position: sticky` in a descendant, so this class never wraps
+   or ancestors one — and never the live region, which does not reliably
+   announce content it is created holding. */
+.swap {
+  animation: answerSwap var(--dur-answer) var(--ease) both;
+}
+
+@keyframes answerSwap {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Belt and braces beside the 0 ms token: a rule that says none cannot be
+   broken by a later edit of the token. Nothing is substituted — the label, the
+   eyebrow and the figure all state the new mode in text. */
+@media (prefers-reduced-motion: reduce) {
+  .swap {
+    animation: none;
+  }
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
