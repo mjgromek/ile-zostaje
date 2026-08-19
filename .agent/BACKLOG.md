@@ -231,3 +231,14 @@ Format:
   `v0.4.0`, so pre-existing — Urgent when: slice 6 points this suite at the LIVE URL. The
   one test protecting "nothing leaves the device" will then fail for the wrong reason, or be
   edited under deadline pressure. Raised by the checker at slice 4b.
+- **The live-region sentence has no seam, and that one fact explains three separate
+  findings.** `Answer.tsx:57-95` assembles the announcement — headline, relief clause, unit
+  echo — inside a `useEffect`, so no unit test can reach it without a render. MEASURED at
+  slice 4b's architecture gate, and corroborated twice over: mutating the headline's
+  direction test left Vitest 40/40 green (slice 4b's probe 1), and slice 4's P2-2 is the
+  same shape one layer down. The simpler form is a pure `liveSentence(result, direction,
+  unit, lang)` beside the component, which would make every announcement assertable without
+  a browser. NOT applied: the tree sat at a checked PASS and the tag asserts that SHA —
+  Urgent when: any slice touches the announcement contract, which the first-run-audio entry
+  above will force. It merges with P2-2 and with P2-A. Raised by the architecture gate at
+  slice 4b.
