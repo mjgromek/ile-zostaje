@@ -2,11 +2,10 @@
 
 # STATE
 
-Run 4. **Slice 4 RELEASED at `b7e726c` / `v0.4.0`**, both confirmed on `origin` with
-`git ls-remote` — `refs/heads/main` and `refs/tags/v0.4.0^{}` are the same SHA. Slice 3 at
-`8a5b3d8` / `v0.3.0`, slice 2 at `e6be6b6` / `v0.2.0`, slice 1 at `f8fdf09` / `v0.1.0`.
-**Pipeline upstream SHA: none — this clone has one remote, `origin`, and no upstream
-pipeline remote to name.**
+Run 4. **Slice 4b RELEASED at `669027b` / `v0.5.0`**, both confirmed on `origin` with
+`git ls-remote` — `refs/heads/main` and `refs/tags/v0.5.0^{}` are the same SHA. Earlier:
+`b7e726c`/`v0.4.0`, `8a5b3d8`/`v0.3.0`, `e6be6b6`/`v0.2.0`, `f8fdf09`/`v0.1.0`. **Pipeline
+upstream SHA: none — one remote, `origin`, and no upstream pipeline remote to name.**
 
 **Every shell command starts with `export PATH="/opt/homebrew/bin:$PATH"`.** Node 25.9.0
 and npm 11.12.1 live there and are NOT on the agent's default Bash PATH; without it you get
@@ -15,28 +14,19 @@ and npm 11.12.1 live there and are NOT on the agent's default Bash PATH; without
 **Port 5180 is the stakeholder's dev server and 5184 is their LIVE PREVIEW.** Neither is
 ever bound or killed by an agent; every agent uses 5181–5183 and releases them.
 
-## Current slice — 4b, the card's first impression
+## Current slice
 
-Phase-start **`589ea02`**; FILES CHANGED from `git diff --stat 589ea02..HEAD`. Built to
-`.agent/DESIGN-SLICE-4B.md`, a settled spec. Four stakeholder items, no escalation, plus one
-pre-existing P1-class fix folded in.
+None. **Slice 5 is next and is NOT started** — the leftover layer, rent and food subtracted
+from the net. It is the last heavy Definition-of-Done clause and the one that turns a net
+calculator into this product. It ships a user-visible interface, so the designer runs first.
 
-### Acceptance criteria
-
-**Settled — all twelve PASS.** They live verbatim in `.agent/LAST_CHECK.md` beside the
-measurement that closed each one, and their detail in `.agent/DESIGN-SLICE-4B.md`. Two are
-worth carrying forward because a later slice can undo them:
-
-- **Criterion 5's byte-level wording was CORRECTED after the security gate.** It said an
-  unparseable record is "never overwritten". MEASURED false: the field stays empty, but
-  `App.tsx:47`'s unconditional write-on-mount persists the fallback over the damaged bytes
-  one paint later. The user-visible guarantee holds; the storage one does not.
-- **Criterion 10 was a FIX of a defect predating this slice**, confirmed three times, last
-  by the checker serving the extracted `v0.4.0` tag. Never re-grade it as a regression.
+Two BACKLOG entries name slice 5 as their urgency condition and should be read before it is
+sliced: cross-tab last-writer-wins (slice 5 multiplies what a stale tab reverts), and the
+netto solver's keystroke cost (a second solved field shares the screen).
 
 ## In flight
 
-Slice 4b checked PASS. Gates, then README and the v0.5.0 release.
+Nothing.
 
 ## Blocked
 
