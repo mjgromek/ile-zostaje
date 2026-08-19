@@ -2,66 +2,26 @@
 
 # STATE
 
-Run 4, slice 2. Phase-start SHA 1bbffef. FILES CHANGED is generated from
-`git diff --stat 1bbffef..HEAD`. Slice 1 shipped at f8fdf09, tagged `v0.1.0`.
+Run 4. **Slice 2 SHIPPED at `e6be6b6`, tagged `v0.2.0`, both on `origin`.** Slice 1 shipped
+at `f8fdf09`, tagged `v0.1.0`. The next slice sets its own phase-start SHA before any code;
+FILES CHANGED is generated from `git diff --stat <phase-start>..HEAD`.
 
 **Every shell command starts with `export PATH="/opt/homebrew/bin:$PATH"`.** Node and npm
 are there and are NOT on the agent's default Bash PATH; without it you get `command not
 found`, which reads as "not installed" and is wrong. R4-F3.
 
+**Port 5180 is the stakeholder's dev server**, run with `--strictPort`. Never bound, never
+killed by an agent; every agent uses 5181+.
+
 ## Current slice
 
-**Slice 2 — umowa zlecenie and umowa o dzieło, with student status on zlecenie.**
-
-The contract control's two disabled slots come alive. Zlecenie has its own ZUS rules and,
-for a student under 26, no ZUS at all — the biggest number this audience will see change.
-Dzieło has no ZUS and no health contribution, and koszty uzyskania przychodu at 20% or
-50%, where 50% turns on transfer of copyright and is capped annually.
-
-The screen becomes **variant B**, chosen by the stakeholder from three rendered layouts:
-the contract bar above everything, one card holding the amount and the Nie/Tak questions,
-the answer directly below. The lede sentence is CUT — "to wiadomo" — not shortened, not
-moved, never reintroduced under another name. theme-factory is closed: type as shipped.
-
-Not in this slice: the brutto/netto toggle and its reverse calculation — slice 3, NOT
-dropped. A new engine capability, not a label, with its own verification surface.
-
-## Acceptance criteria
-
-Checked in a real browser against the running app, not against the diff.
-
-1. All three contract slots are selectable. Choosing zlecenie or dzieło recomputes the net
-   with no reload, and umowa o pracę returns the same figures as `v0.1.0` for the same
-   inputs — the checker compares against the tagged release, not against a memory.
-2. A student control is offered where it applies. For a student under 26 on zlecenie,
-   every ZUS line vanishes from band and ladder and the net rises to match. Both states
-   are observed on screen, and the source for the exemption is cited on the page.
-3. Dzieło shows no ZUS and no health line. Koszty uzyskania przychodu are selectable
-   between 20% and 50%; the 50% option is presented as the condition that earns it —
-   transfer of copyright — not as a bare percentage. Its annual cap comes from the data
-   file, never from a branch.
-4. The under-26 PIT relief applies to exactly the contract types the cited source lists.
-   Where a selected contract is outside that list, the interface says so in the active
-   language rather than silently ignoring the control. A rule hidden in an if-branch is a
-   defect this criterion exists to catch.
-5. Every new rate, threshold and cap is in the year data file with an official source URL,
-   an effective date, and a quote that is genuinely printed on that page. Slice 1's
-   carried-forward entries are re-fetched and re-verified, not assumed clean because they
-   passed once.
-6. The ladder's lines sum to the gross to the grosz for all three contracts, with the
-   student control on and off, and at both 20% and 50% — checked by adding the numbers on
-   the rendered page.
-7. Both languages are complete for every new string, with no untranslated or missing key.
-   The settled exception stands: `Zlecenie` and `Dzieło` remain Polish in the EN build.
-8. The screen is variant B: the contract bar sits above everything, the amount and the
-   Nie/Tak questions share one card, the answer is directly below. The lede sentence is
-   gone from both languages, and no sentence has replaced it that restates it.
-9. Evidence: the engine's cases are hand-computed per contract and per relief state, each
-   naming its source; Playwright drives a real browser for criteria 1, 2, 3 and 4.
+None. Slice 2 — umowa zlecenie, umowa o dzieło and student status on layout B — is done.
+Its nine acceptance criteria and every verdict against them are in `.agent/LAST_CHECK.md`;
+its design is in `DESIGN-SLICE-2`. Slice 3 below is next and has NOT started.
 
 ## In flight
 
-Nothing. Slice 2 is done and tagged; slice 3 has not started.
+Nothing.
 
 ## Blocked
 
@@ -69,9 +29,12 @@ Nothing.
 
 ## Last verification result
 
-Measured 2026-08-19 14:54, slice 2, the P1-J re-check at cb189dc — **PASS**, nine criteria
-in the browser, Δ = 0 (visible 45/45, held-out 5/5), P1-J CLOSED, no open P0 or P1, four
-P2 in BACKLOG. Verbatim in `.agent/LAST_CHECK.md`.
+Measured 2026-08-19 14:54, the P1-J re-check at `cb189dc` — **PASS**, nine criteria in a
+real browser, Δ = 0 (visible 45/45, held-out 5/5), P1-J CLOSED on the first fix attempt, no
+open P0 or P1, four P2 in BACKLOG. Verbatim in `.agent/LAST_CHECK.md`.
+
+Gates, all reported: security-gate PASS (one P2, no CSP), architecture gate NO CHANGE,
+release check PASS.
 
 ## Next slices, in order
 
@@ -89,24 +52,20 @@ P2 in BACKLOG. Verbatim in `.agent/LAST_CHECK.md`.
 
 ## Checkpoints
 
-- 2026-08-18 22:48 — builder handed over df2b307..d75fe30. Port 5180 is the stakeholder's;
-  every agent used 5181+.
-- 2026-08-18 23:04 — check 1: 1 P1 + 3 P2, Δ 20; 23:11 fix 1 dee069f..bbd5899 closed all
-  three, a red test each first. 23:28 check 2: new P1-E, the same false claim from a stale
-  chip. 23:37 fix 2, the final attempt on that root cause: P1-E closed at c316bbe.
-- 2026-08-18 23:55 — check 3: P1-E CLOSED, nine criteria PASS, Δ 0 (41/41, 5/5). New P1-F:
-  §8's immediate announcement dropped for contract and copyright, 579/581 ms vs 79/85 ms.
-- 2026-08-19 00:02 — P1-F fix 01389cd: the announce key names all four answers. Latencies
-  11-25 ms, typing still 503.7 ms. playwright 14 -> 16.
-- 2026-08-19 00:21 — release check PASS. Architecture gate: NO CHANGE, one deferral.
-  Probe opened on the `Nie` delta chip above the relief's monthly limit — inferred from
-  code, NOT measured.
-- 2026-08-19 00:24 — security-gate, trigger USER-SUPPLIED INPUT: PASS, one P2 (no CSP, in
-  BACKLOG). No innerHTML path, input bounded, storage holds only what was typed, the built
-  artifact's nine requests are all same-origin, deps unchanged.
-- 2026-08-19 00:26 — PROBE CONFIRMED, P1-J: the `Nie` delta chip prints the whole PIT advance as the
-  relief worth, overstating it above ~10 319 zl/month — 37% at 20 000. Release BLOCKED,
-  tag held. First cycle on this root cause.
-- 2026-08-19 14:39 — fix cycle 1 on P1-J: red test 9ae3b38, fix cb189dc. `reliefWorthGrosz`
-  is now the counterfactual `core(under26: true)` on both sides; `pitWithoutReliefGrosz`
-  untouched, so the ladder is unaffected. Builder's sweep: `under26: true` identical.
+- 2026-08-18 22:48 — builder handed slice 2 over, `df2b307..d75fe30`.
+- 2026-08-18 23:04 to 2026-08-19 00:02 — four check-and-fix cycles: P1-A, P2-B, P2-C, then
+  P1-E (a false claim from a stale chip) at `c316bbe`, then P1-F (§8's immediate
+  announcement dropped for contract and copyright) at `01389cd`. A red test led each.
+- 2026-08-19 00:21 — release check PASS, Δ 0. Architecture gate NO CHANGE, one deferral.
+- 2026-08-19 00:24 — security-gate, trigger USER-SUPPLIED INPUT: PASS, one P2 (no CSP).
+- 2026-08-19 00:26 — PROBE CONFIRMED, P1-J: the `Nie` delta chip printed the whole PIT
+  advance as the relief's worth, overstating above ~10 319 zł/month — 37% at 20 000.
+  Release BLOCKED. The orchestrator instance then died on a 600 s harness stall.
+- 2026-08-19 14:39 — fix cycle 1 of a permitted 2 on P1-J: red test `9ae3b38`, fix
+  `cb189dc`. `reliefWorthGrosz` became the counterfactual on both sides;
+  `pitWithoutReliefGrosz` untouched, so the ladder was unaffected.
+- 2026-08-19 14:54 — checker: P1-J CLOSED, nine criteria PASS, Δ 0. New P2-K to BACKLOG:
+  the chip's zero-guard survives a behaviour-bearing mutant.
+- 2026-08-19 14:57 — README at v0.2.0 (`b9d3080`), state committed (`e6be6b6`), pushed,
+  annotated tag `v0.2.0` pushed. Both verified with `git ls-remote`: `refs/heads/main` and
+  `refs/tags/v0.2.0` -> `4369a46`, peeling to `e6be6b6`.

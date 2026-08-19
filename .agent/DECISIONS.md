@@ -157,3 +157,12 @@ Why: DESIGN-SLICE-2 §6 names exactly one substitution instance and §10 gives e
      substitution string. A question with no possible effect and no sentence explaining
      that would be the dead end §6 forbids, and inventing strings reopens a closed spec.
 Level: 0 — the spec settles it; recorded because the reading, not the rule, was the choice.
+
+## 2026-08-19 — The relief's worth is a counterfactual, not the tax it happened to remove
+What: `reliefWorthGrosz` is `core(gross, { ...answers, under26: true })` netted against the
+     current answer, on BOTH sides of the flip, the way `studentWorthGrosz` already was.
+Why: The `Nie` chip read `pitWithoutReliefGrosz`, which with `under26: false` is the WHOLE
+     PIT advance — right below the relief's monthly limit and wrong above it, by 37% at
+     20 000 zł (P1-J). Four checker cycles missed it because every figure was at 6 000 zł.
+Rules out: Pricing any answer from a field computed under the other answer's branch, and
+     any chip figure not obtained by running the engine with the answer flipped. Level 1.

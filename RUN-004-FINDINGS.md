@@ -247,3 +247,32 @@ so the commit still ends with the trailer the contract names.
 commit-msg hook's rule A requires it, ordered above `Agent:`" — so the next builder does
 not adjudicate a contract against a hook. Do NOT implement here: contract edits in this
 run are the stakeholder's call (R4-F1).
+
+## R4-F12 — the board's prescribed `printf` mangles a literal `%` in the NOW sentence
+
+**Observed.**
+**Evidence:** at `1fde72d`, `.agent/PROGRESS.md:2` reads `... overstates the relief by 37%%
+at 20 000 zł ...`. The doubled sign is not in any source text; it is what `printf` emits
+when the sentence is placed in the FORMAT string, where `%%` is the escape for one `%`.
+`.claude/policies/progress.md` prescribes `printf 'NOW: %s   [%s]\n' "<the sentence>"
+"$(date '+%H:%M')"`, which is correct — the sentence belongs in an ARGUMENT — but the
+literal `<the sentence>` placeholder sits inside quotes that read as part of the format,
+and an agent that inlines it there gets a mangled board and a zero exit code.
+**Who it hits:** every run whose NOW sentence contains a percent sign — that is, most runs
+reporting a measured error — in any project using this template.
+**Proposed fix:** one line in `progress.md`: the sentence is an argument, never the format;
+a `%` in the format is doubled. Do NOT implement — the template is upstream's.
+
+## R4-F13 — INFERRED: a 600 s no-output window kills the orchestrator, but duration alone is not the trigger
+
+**INFERRED for the cause; the death itself is second-hand, reported to this instance in its
+brief and corroborated by the repository.**
+**Evidence:** the previous orchestrator instance died on a harness stall — "no progress for
+600 s" — immediately after writing `PROBE CONFIRMED` (`ad59f08`, `1fde72d`), with the tree
+clean and nothing wrong with its work. AGAINST the simple reading: this instance's two
+delegations blocked for 661 655 ms and 911 374 ms in single `Agent` calls, both past 600 s,
+and neither stalled it. So a long-running subagent is NOT sufficient to trigger it, and the
+next instance should not shorten its delegations on that theory.
+**Who it hits:** this run only, as far as anything observed shows.
+**Proposed fix:** none — the trigger is not identified. What would confirm it: the harness's
+own stall log for the killed session, which the repository does not contain.
