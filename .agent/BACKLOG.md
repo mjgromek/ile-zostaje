@@ -117,3 +117,13 @@ Format:
   which is why it is not P1 — Urgent when: slice 4 adds hour/week/month/year to the same
   button, or the minimum wage appears anywhere with a `brutto` qualifier. Either makes the
   shortcut assert something its source does not. Raised by the checker at slice 3's check.
+- The netto solve runs on every keystroke — about 4 000 engine calls, MEASURED at ~10 ms
+  at full speed and ~157 ms per keystroke under 6x CPU throttling, against brutto's 92 ms
+  — Urgent when: a second solved field shares the screen (slice 5's rent and food, or
+  slice 4's units multiplying the entries), or measured keystroke latency passes 100 ms on
+  a mid-range phone. The fix is a debounce or a memo on the answers, not a faster solver.
+  Raised by the architecture gate at slice 3.
+- Ponytail says REMOVE on the i18n key `field.gross.label`, now rendered nowhere. It was
+  NOT removed at slice 3's gate: the tree sat at a checked PASS and the tag asserts that
+  SHA — Urgent when: the next slice touches `strings.ts` for any other reason, which makes
+  the deletion free. Merges with the builder's entry above. Raised by ponytail at slice 3.
