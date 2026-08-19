@@ -84,3 +84,43 @@ Ports 5181/5182 released; **5180 and 5184 never bound.** The held-out suite ran 
 - **P2-C — `error.range` prints two full stops in PL**, confirmed in the live DOM; EN is
   clean. Spec-literal, so shipping it was right. Plus two untested paths the checker also
   confirms: `parseGross`'s `maxGrosz`, and the `hoursError → POSITIVE_INFINITY` cap.
+
+## Security gate — received and written 2026-08-19, at HEAD `59d4e05`
+
+**VERDICT — PASS · no P0, no P1 · three P2 (P2-1, P2-2, P2-3, all in BACKLOG).** Triggers
+fired: a second user-supplied field feeding the conversion that feeds the solver, and two
+more persisted storage fields. Reported verbatim by the checker, unprompted: **the built-in
+`/security-review` did NOT run — no agent can execute a slash command.**
+
+- **The range gate holds in all four units, driven on the BUILT artifact.** The monthly
+  gross the engine actually received was read off the ladder total's why-line, not inferred.
+  At each unit's stated maximum the engine got **exactly 1 000 000,00 zł**; one grosz more
+  was refused with `error.range`. The tightest probe — the hour unit at **0,1 h/week** with
+  2 307 692,30 zł typed — lands on the cap dead-on. **Nothing reached the engine above
+  `MAX_GROSS_GROSZ` in any unit.**
+- **`hoursError` → `POSITIVE_INFINITY` is safe by a SECOND guard, not by the first.**
+  `typedMonthlyGrosz` also requires `!hoursError` (`App.tsx:97`), so the disabled range
+  check never reaches the solver. Twelve drives of invalid hours against a 12-digit amount:
+  no `Infinity`, no `∞`, no `NaN` in body text or in localStorage.
+- **Overflow is not reachable.** Worst intermediate in `toMonthlyGrosz`, swept over four
+  units × eight hour values at each gate maximum: **1.25e11** against `MAX_SAFE_INTEGER`
+  9.0e15 — 72 000× of headroom. The gate makes `amountGrosz × hoursTenths` self-limiting,
+  so shrinking hours cannot buy a larger product.
+- **16 hostile localStorage payloads, none got through.** `unit` as number, object, array,
+  an XSS string and `__proto__` all fall back to `month` via the `UNITS.includes` allowlist;
+  `hoursPerWeek` as number, object and array fall back to `40`. The XSS payload rendered as
+  a text node and the `window.alert` hook never fired. `Object.prototype.polluted` stayed
+  undefined. A storage-restored triple is gated identically to a typed one.
+- **18 requests on load plus a full drive: zero non-origin requests.** The new ZUS citation
+  URL renders only as an `<a href>` with `rel="noreferrer noopener"` and is never fetched.
+  No secrets, tokens or key material in the diff.
+- **Mutation probe — the precise security regression, and it was CAUGHT.**
+  `src/state/gross.ts:27` `grosz > maxGrosz` → `grosz > MAX_GROSS_GROSZ`, ignoring the
+  per-unit cap, was caught by `e2e/app.spec.ts:1059`. **But only there — all 39 Vitest tests
+  stayed green.** That asymmetry is P2-2 and it is about this pipeline, not the product.
+
+**Not a finding, and the checker said why rather than burying it:** no CSP,
+`X-Content-Type-Options` or `Referrer-Policy` on the responses — but that was read off
+`vite preview`, which says nothing about a production host. The instrument cannot produce a
+claim about a deployed artifact. The measurable part — `index.html` carries no CSP meta —
+belongs to slice 6, not to this diff.

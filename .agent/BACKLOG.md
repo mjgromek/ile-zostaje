@@ -181,3 +181,27 @@ Format:
   this is not a defect — it is the shape that lets one form. Merges with the untested
   `maxGrosz` entry above — Urgent when: a second caller appears. Raised by the architecture
   gate at slice 4.
+- P2-1: a stored `hoursPerWeek` has no length bound and destroys the layout.
+  `storage.ts:75` type-checks it but does not bound it; `App.tsx:156` interpolates it into
+  `conv.hour`. MEASURED at slice 4's security gate: `documentElement.scrollWidth` =
+  **1 473 360** at a 390 viewport with a 200 000-char stored value, against 390 baseline on
+  the same instrument in the same run. Not remotely reachable — no URL param, no
+  `postMessage`, and `maxLength={4}` blocks typing and paste — so robustness, not an
+  exploit. It silently voids criterion 1's measured no-overflow invariant — Urgent when:
+  any slice adds a URL-param, share-link or import path that can seed storage; slice 6 is
+  the natural moment. Raised by the checker at slice 4's security gate.
+- P2-2: **the input range gate's only regression net is the browser suite.** MEASURED at
+  slice 4's security gate — mutating `src/state/gross.ts:27` from `grosz > maxGrosz` to
+  `grosz > MAX_GROSS_GROSZ`, the exact security regression, left **all 39 Vitest tests
+  green**; only Playwright caught it. `npm test` alone reports green on a broken input
+  gate, and no unit test anywhere exercises `parseGross` under a non-default `maxGrosz` —
+  Urgent when: CI or any gate runs `npm test` without `npm run e2e`, or e2e is ever
+  quarantined as flaky. Raised by the checker at slice 4's security gate.
+- P2-3: `formatMoney(Infinity)` is computed on every invalid-hours render — with
+  `unit === 'hour'` and bad hours, `maxInUnitGrosz(..., 0)` divides by zero and
+  `maxAmountText` becomes the string `∞`, passed live into `GrossCard`. It stays off screen
+  only because the `Infinity` cap makes `error.range` impossible and `error.digits` happens
+  not to interpolate `{max}`. MEASURED: `∞` never appeared in body text across twelve
+  invalid-hours drives, so this is a latent coupling and NOT an observed defect — Urgent
+  when: anyone adds `{max}` to `error.digits`, or renders `maxAmountText` outside the error
+  branch. Two files, no test binds them. Raised by the checker at slice 4's security gate.
