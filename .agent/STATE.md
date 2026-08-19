@@ -26,8 +26,8 @@ pre-existing P1-class fix folded in.
 Detail lives in `DESIGN-SLICE-4B.md`; § refs are to it. Twelve falsifiable claims.
 
 1. **The toggle's ARIA shape is §2.2's exactly** — plain `<button>`, `data-testid`,
-   `data-direction`, and NO `aria-pressed` / `role="switch"` / `aria-checked`. Accessible
-   name is the literal four strings in §2.2, arrow excluded. `Space` and `Enter` activate.
+   `data-direction`, NO `aria-pressed`/`role="switch"`/`aria-checked`, accessible name the
+   literal four §2.2 strings with the arrow excluded, `Space` and `Enter` both activating.
    The radiogroup, both segments and `.dir`/`.dirSeg`/`.active` are DELETED.
 2. **The e2e migration is state-aware** — a toggle is not idempotent, so every direction
    call site reads `data-direction` and clicks only if it must. The 18 direction lines
@@ -38,26 +38,28 @@ Detail lives in `DESIGN-SLICE-4B.md`; § refs are to it. Twelve falsifiable clai
 4. **The 320 px EN overflow closes** — `scrollWidth`/`clientWidth` 286/286 where `v0.4.0`
    measured 299/286. Its BACKLOG entry is deleted with that measurement quoted.
 5. **First run is decided on the RAW string, never the parsed field** — §4's six cases.
-   Load-bearing: **a record with `gross: ""` leaves the field EMPTY**, unparseable is never
-   overwritten, and clear + reload stays empty. Plus a Vitest case for raw-`null` vs
-   raw-unparseable, covered by neither existing storage test.
+   Load-bearing: **a record with `gross: ""` leaves the field EMPTY**, an unparseable record
+   never yields a prefill, and clear + reload stays empty. Plus a Vitest case for raw-`null`
+   vs raw-unparseable, covered by neither existing storage test.
+   **CORRECTED after the security gate:** this criterion first said an unparseable record is
+   "never overwritten". MEASURED false at the byte level — the field stays empty, but
+   `App.tsx:47`'s unconditional write-on-mount then persists the fallback over the damaged
+   bytes one paint later. What holds is the user-visible guarantee, not the storage one.
 6. **The empty state is direction-aware** — new `empty.answer.net`, PL and EN, so a `netto`
    user is not told to type a gross over a field labelled `Ile chcesz mieć na koncie`.
-7. **The animation fires on contract and direction ONLY** — `getAnimations()` running on
-   those two, not re-firing on a typed digit, a unit change, an under-26 flip or a language
-   switch. 180 ms, fade-in on swap: the two figures are NEVER on screen together.
+7. **The animation fires on contract and direction ONLY** — not on a typed digit, a unit
+   change, an under-26 flip or a language switch. 180 ms, fade-in on swap: the two figures
+   are NEVER on screen together.
 8. **`prefers-reduced-motion: reduce` degrades to instant** — `animation-name: none`, `0s`,
    `opacity: 1`, `transform: none`, no animation on any of the six triggers, announcement
    unchanged.
 9. **The live region survives the swap** — the `key` sits on a wrapper INSIDE the section,
    excluding the furniture and the region; a held reference to the live `<p>` is the same
-   node after all six triggers. `.swap` never wraps or ancestors a `position: sticky`
-   element.
+   node after all six triggers. `.swap` never wraps or ancestors a sticky element.
 10. **The P1-class live-region defect is FIXED and it PREDATES this slice.** At `v0.4.0`,
     `netto` with `6000` announces `Na konto: 6 000,00 zł` while the screen reads
-    `Kwota na umowie 8 317,21 zł` — CONFIRMED twice, by the designer in a browser and by
-    the orchestrator reading `Answer.tsx:85` against `:178`. **Grade it a fix, not a
-    regression.**
+    `Kwota na umowie 8 317,21 zł` — CONFIRMED three times, last by the checker serving the
+    extracted tag. **Graded a fix, not a regression.**
 11. **Key parity holds** — `strings.test.ts:176` pins the old quick-fill text and must be
     updated; MEASURED as the ONLY unit failure against the patched tree.
 12. **Nothing else regressed** — every other test passes, and the default screen on all
@@ -73,14 +75,17 @@ Nothing.
 
 ## Last verification result
 
-Slice 4 at `944a4b6` — **PASS**, Δ = 0 (68/68, held-out 5/5), no P0 or P1, two mutants
-caught. Security gate **PASS**, three P2. Architecture **NO CHANGE**; ponytail one SIMPLIFY,
-deferred. Verbatim in `.agent/LAST_CHECK.md`. The built-in `/security-review` has NOT been
-typed for slice 4.
+Slice 4b at `4e213c1` — **PASS**, Δ = 0 (77/77 visible, 5/5 held-out), no P0 or P1, two
+mutants caught. The checker verified the `v0.4.0` claim rather than accepting it: it served
+the extracted tag and reproduced the live-region defect there before grading the fix.
+Security gate — **PASS**, three P2, two mutants caught. Architecture **NO CHANGE** with one
+structural deferral. Verbatim in `.agent/LAST_CHECK.md`.
 
-**One P2 governs how every future gate runs.** P2-2: mutating the input range gate at
-`src/state/gross.ts:27` left all 39 Vitest tests green — only Playwright caught it. **No
-gate may treat `npm test` as sufficient.** The README says so out loud.
+**Two P2 govern how future gates run.** (a) `npm test` alone is never sufficient — measured
+three times now that a broken gate leaves Vitest fully green. (b) The live-region sentence
+has no seam, which is the single cause behind three separate findings.
+
+**The built-in `/security-review` has NOT been typed for slice 4 or 4b.**
 
 ## Next slices, in order
 

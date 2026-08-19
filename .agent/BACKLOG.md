@@ -242,3 +242,29 @@ Format:
   Urgent when: any slice touches the announcement contract, which the first-run-audio entry
   above will force. It merges with P2-2 and with P2-A. Raised by the architecture gate at
   slice 4b.
+- **An unparseable record IS overwritten, one paint later — the criterion and the code
+  comment both assert more than the artifact delivers.** MEASURED at slice 4b's security
+  gate on the built artifact: seed `{"gross": "6000"` (damaged JSON), reload → field
+  correctly empty, but `localStorage` afterwards holds `{"gross":"","contract":"uop",…}`.
+  `loadEntries` refuses to invent a number and then `App.tsx:47`'s unconditional
+  write-on-mount persists the fallback over the raw bytes. The user-visible guarantee holds;
+  `storage.ts:94`'s comment and STATE's criterion 5 did not, and both are corrected —
+  Urgent when: any migration wants to recover a damaged record, or the key namespace is
+  bumped. Raised by the checker at slice 4b's security gate.
+- An asymmetric storage failure lets the prefill destroy a whole entry. `storage.ts:62`
+  assigns `raw` inside the `try`, so a THROWING `getItem` leaves `raw === undefined` and is
+  read as a first run. MEASURED: record `{gross:"9999", zlecenie, n2g, week, under26:true}`,
+  `getItem` overridden to throw with `setItem` intact → the record became
+  `{"gross":"5000","contract":"uop",…}`; the whole entry was lost. **Instrument caveat
+  stated by the checker itself: it manufactured that asymmetry by monkeypatching, and every
+  real disabled-storage mode it could name throws on BOTH sides and writes nothing** — which
+  is why this is P2 and not P1 — Urgent when: a storage shim or wrapper, a second
+  `loadEntries` call site, or a move to an async store (IndexedDB, Storage Buckets), each of
+  which makes read-fails-write-succeeds ordinary. Raised at slice 4b's security gate.
+- Cross-tab last-writer-wins clobbers a sibling tab. MEASURED with two tabs in one context:
+  tab B typed `12345` and it persisted; tab A, loaded earlier, then clicked the direction
+  toggle and rewrote `gross` back to `9999`. Every effect at `App.tsx:47` writes the WHOLE
+  record, so any control in a stale tab restores its own snapshot. Pre-existing —
+  `saveEntries` and the effect are unchanged in the slice 4b diff — Urgent when: slice 5
+  adds rent and food, which multiplies what a stale tab silently reverts. Raised at slice
+  4b's security gate.
