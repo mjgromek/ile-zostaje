@@ -155,3 +155,20 @@ Format:
   but not for etat, which would make the chip contract-dependent — Urgent when: the hourly
   minimum is quoted anywhere on screen, or a contract-specific quick-fill is asked for.
   Raised by the designer at slice 4.
+- `error.range` prints two full stops under hour, week and month
+  (`…5 769,23 zł / godz..`) — `unit.*` carries its own period and `error.range` ends with
+  one. Spec-literal per DESIGN-SLICE-4 §5, so the builder shipped it rather than silently
+  diverging — Urgent when: any copy pass touches the error strings. Raised by the builder
+  at slice 4.
+- The provenance row for the minimum wage prints the figure twice
+  (`4 806,00 zł  Płaca minimalna 2026 — 4 806 zł brutto`), because
+  `field.gross.quickfill` now interpolates `{amount}` and `Sources.tsx` reuses that key as
+  a label — Urgent when: a `sources.*` label pass happens, or a `sources.minimumWage` key
+  is wanted. Raised by the builder at slice 4.
+- `parseGross`'s new `maxGrosz` parameter has no direct unit test — it is covered through
+  the browser and through `maxInUnitGrosz` — Urgent when: a second caller appears, which is
+  the same shape as P2-S1 and closes with it. Raised by the builder at slice 4.
+- Criterion 5's screen-comparison test needs `test.setTimeout(180_000)`: 45 real screens
+  with a scroll each. It is slow because it is thorough, not because it is broken — Urgent
+  when: anyone trims the timeout, or the screen count grows again. Raised by the builder at
+  slice 4.
