@@ -7,6 +7,9 @@
 
 ## VERDICT — PASS · Δ = 0 · one P2 · no P0, no P1
 
+<!-- The security gate ran later, at the end of this file: PASS, three further P2. -->
+
+
 Visible 56/56 = 100%. Held-out 5/5 = 100%. **Δ = 0.**
 
 ## State file validated first
@@ -99,3 +102,37 @@ click `Płaca minimalna 2026`.
   throttling netto costs ~157 ms per keystroke against brutto's ~92 ms.
 - Criterion 3 structurally: `rates-2026.ts` is untouched in `git diff 6b6787a..HEAD`, and
   `solve.ts` holds no rate literal — its only constant is the scan window.
+
+## Security gate — received and written 2026-08-19 16:21, at HEAD `b1ceca9`
+
+**VERDICT — PASS · no P0, no P1 · three P2 (P2-S1, P2-S2, P2-S3, all in BACKLOG).**
+Triggers fired: user-supplied input driving the solver loop, and storage access — the
+persisted `direction` field. Reported verbatim by the checker, unprompted: **the built-in
+`/security-review` did NOT run — no agent can execute a slash command.** The human runs it.
+
+- **The scan is not attacker-influenceable.** `WINDOW_GROSZ` is a compile-time constant and
+  bisection is ≤ 27 steps, so ~4 028 engine calls is the cost of EVERY input, not a worst
+  case. Input→render MEASURED 3–11 ms in real Chromium against `dist`; zero `longtask`
+  entries, worst rAF gap 30 ms. Hostile inputs — `-500`, `NaN`, `Infinity`, `1e308`,
+  `0x1p100`, 20 / 10 000 / 100 000 digits — never reach the solver: `parseGross`'s
+  `^\d+(\.\d{0,2})?$` whitelist rejects them first, each settling in 26–51 ms.
+- **A 1 000 000-digit paste settled in 358 ms with two long tasks.** A visible stall, not a
+  hang, and on the pre-existing parser path rather than anything slice 3 added.
+- **18 hand-crafted localStorage entries, fresh context each, all booted clean.** A
+  pre-slice-3 entry with no `direction` loads as `g2n`; bogus string, number, object and
+  array all fall back; `__proto__` and `constructor.prototype` payloads left
+  `({}).polluted === null`. XSS payloads in `gross` rendered as the input's `value`
+  property — `window.__pwned === null`, no injected `img` or `script` node.
+- **9 requests, all to `localhost:5181`**: document, JS, CSS and six self-hosted woff2.
+  No WebSocket, `document.cookie` empty, `sessionStorage` empty. No `innerHTML`,
+  `dangerouslySetInnerHTML`, `eval`, `new Function`, `fetch`, `XHR`, `sendBeacon` anywhere
+  in `src`, `index.html` or `vite.config.ts`. The 12 remote URLs in `dist` are `href`
+  citations to zus.pl and podatki.gov.pl plus XML namespaces, never fetched. No key, token
+  or credential in the diff. PROJECT.md's third invariant holds, measured not assumed.
+- **Four mutants, run in a `cp -R` sandbox outside the repo.** Storage's `direction`
+  allowlist and the lowest-match rule were both CAUGHT. The negative-target clamp was not
+  (P2-S1), and the scan window was caught only by the suite hanging (P2-S2).
+- **Instrument check.** Latency came from three independent clocks — a `longtask`
+  PerformanceObserver, a rAF gap recorder and in-page `performance.now()` — which agreed,
+  and the 1M-digit paste is the positive control proving they could have shown a stall.
+  The network log is CDP `context.on('request')`, which fires before a request leaves.

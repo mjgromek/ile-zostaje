@@ -211,3 +211,18 @@ Why: Net is not monotone in gross, so bisection alone can land in a hole; and a 
      set spans up to 129 grosz WITH GAPS INSIDE IT, so its bounds cannot be walked
      outwards from the first match either. The scan is what makes "lowest" and "from lo to
      hi" true. 4 000 engine calls, ~7 ms — a keystroke's worth of work. Level 1.
+
+## 2026-08-19 — Slice 3's measured thresholds are kept here, not in STATE
+What: The three thresholds every criterion straddled, MEASURED at 15:00 with the shipped
+     `computeContract` before the criteria were written, moved out of STATE at slice close.
+
+| threshold | bites at gross | measured on |
+| --- | --- | --- |
+| ulga dla młodych monthly limit | 7 127,33 zł | uop, zlecenie |
+| PIT 32% (base > 10 000 zł/mies.) | uop 11 880 · zlecenie 14 087 · dzieło 12 501 | all three |
+| 50% KUP annual cap (10 000 zł/mies. of costs) | 20 001 zł | dzieło + prawa autorskie |
+
+Why: Slice 4's hour/week/month/year units multiply every one of these, and re-measuring
+     them costs a run. Non-monotonicity, same instrument: net FALLS on 118 one-grosz steps
+     over gross 5 000–5 300 on uop, 61 on zlecenie, 18 on dzieło+50%, 0 on student zlecenie.
+Rules out: Treating a threshold in a later slice as a fresh unknown, or as a round number.

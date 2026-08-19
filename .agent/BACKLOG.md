@@ -127,3 +127,20 @@ Format:
   NOT removed at slice 3's gate: the tree sat at a checked PASS and the tag asserts that
   SHA — Urgent when: the next slice touches `strings.ts` for any other reason, which makes
   the deletion free. Merges with the builder's entry above. Raised by ponytail at slice 3.
+- P2-S1: the solver's negative-target clamp is untested. `src/engine/solve.ts:47`
+  `Math.max(0, Math.round(targetNetGrosz))` — removing it leaves 33/33 Vitest green,
+  MEASURED in a sandboxed copy at slice 3's security gate. No live exposure: the only
+  caller is `App.tsx` and `parseGross`'s `^\d+(\.\d{0,2})?$` cannot yield a negative —
+  Urgent when: any second caller feeds `solveGross` a value that did not pass `parseGross`.
+  Raised by the checker at slice 3's security gate.
+- P2-S2: nothing asserts the solver's work bound. `WINDOW_GROSZ = 2_000` is enforced only
+  by itself; widened to a full-range scan the suite did not return within 180 s — caught by
+  hanging, never by an assertion. MEASURED in a sandboxed copy at slice 3's security gate —
+  Urgent when: the window, the input cap or `maxGrossGrosz` becomes derived from input
+  rather than constant. Raised by the checker at slice 3's security gate.
+- P2-S3: `gross` read from localStorage is validated for type but not for length.
+  `src/state/storage.ts:44` accepts any `typeof === 'string'`; a 5 MB stored value MEASURED
+  830 ms to first paint against a ~95 ms baseline. Same-origin write only, so self-
+  inflicted, and the `#gross` input likewise has no `maxLength` — Urgent when: any URL
+  param, share link or cross-origin path can write the entry. Raised by the checker at
+  slice 3's security gate.

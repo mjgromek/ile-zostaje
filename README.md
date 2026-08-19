@@ -2,11 +2,12 @@
 
 <p align="center">
   <strong>Wpisujesz, ile masz brutto. Widzisz, ile naprawdę wpłynie na konto.</strong><br />
+  Albo odwrotnie: mówisz, ile chcesz mieć na koncie, a dostajesz kwotę na umowę.<br />
   Kalkulator wynagrodzeń dla młodych i studentów w Polsce.
 </p>
 
 <p align="center">
-  <img alt="Wersja" src="https://img.shields.io/badge/wersja-v0.2.0-e0a23c?style=flat-square" />
+  <img alt="Wersja" src="https://img.shields.io/badge/wersja-v0.3.0-e0a23c?style=flat-square" />
   <img alt="Rok podatkowy" src="https://img.shields.io/badge/dane-2026-e0a23c?style=flat-square" />
   <img alt="Języki" src="https://img.shields.io/badge/j%C4%99zyk-PL%20%2F%20EN-e0a23c?style=flat-square" />
   <img alt="Bez serwera" src="https://img.shields.io/badge/dane-tylko%20w%20przegl%C4%85darce-4a2f4a?style=flat-square" />
@@ -62,6 +63,26 @@ wieku po prostu nie wie.
 
 ---
 
+## W drugą stronę
+
+Rozmowa o pracę rzadko zaczyna się od brutto. Zaczyna się od „potrzebuję 5 000 zł na
+życie". Przełącznik **kierunku** nad polem odwraca pytanie: wpisujesz kwotę, która ma
+wpłynąć na konto, a aplikacja podaje brutto, które ją produkuje.
+
+Nie jest to mnożnik ani drugi wzór. Odpowiedź jest **wyszukiwana przez ten sam silnik**,
+który liczy w drugą stronę — więc nie może się z nim rozjechać. Rozbicie, pasmo i drabina
+pod spodem są co do grosza tym samym ekranem, co przy wpisaniu tego brutto ręcznie.
+
+I jedna rzecz, którą inne kalkulatory przemilczają: **netto nie rośnie równo z brutto.**
+Zaokrąglenia podstaw sprawiają, że na odcinku 5 000–5 300 zł brutto na etacie netto
+*spada* przy 118 krokach o grosz, a to samo netto potrafi wyjść z kilku różnych brutto.
+Przy 4 600 zł na konto (etat) pasuje pięć wartości — 6 263,06, 6 263,08, 6 264,33,
+6 264,34 i 6 264,35 zł — i nie jest to ciągły przedział, tylko pięć osobnych kwot.
+Aplikacja pokazuje **najniższą** i mówi wprost, że jest ich więcej, zamiast udawać,
+że odpowiedź jest jedna.
+
+---
+
 ## Zasady, na których to stoi
 
 **Twoje dane nie opuszczają przeglądarki.** Nie ma serwera, konta, logowania ani analityki.
@@ -95,8 +116,9 @@ nie złoży PIT-u i nie jest niczym, co urząd potraktuje jako wiążące.
 | **Student do 26 lat na zleceniu** — bez ZUS, wszystkie składki znikają | ✅ `v0.2.0` |
 | **Umowa o dzieło** — bez ZUS i bez zdrowotnej, koszty 20% albo 50% | ✅ `v0.2.0` |
 | **Ulga dla młodych tylko tam, gdzie sięga** — ekran mówi, gdzie nie sięga | ✅ `v0.2.0` |
-| Przeliczanie netto → brutto | 🔨 w budowie |
-| Jednostki: godzina, tydzień, miesiąc, rok | 📋 zaplanowane |
+| **Przeliczanie netto → brutto** — przez ten sam silnik, nie przez mnożnik | ✅ `v0.3.0` |
+| **Uczciwość przy wielu odpowiedziach** — ekran mówi, że brutto jest więcej niż jedno | ✅ `v0.3.0` |
+| Jednostki: godzina, tydzień, miesiąc, rok | 🔨 następne |
 | **Ile zostaje po czynszu i jedzeniu** | 📋 zaplanowane |
 | Publiczny adres | 📋 zaplanowane |
 
@@ -138,6 +160,7 @@ nie zarobiły na swoje miejsce.
 ```
 src/engine/       silnik liczący — czysty, bez UI
 src/engine/rates-2026.ts   stawki na rok, każda ze źródłem i datą
+src/engine/solve.ts        odwrotność silnika, szukana jego własnymi wywołaniami
 src/i18n/         wszystkie napisy, PL i EN
 src/components/   pasmo, drabina, karta wejścia, panel źródeł
 src/state/        localStorage i nic poza nim
@@ -207,16 +230,19 @@ official source with an effective date, and a rate that cannot be cited does not
 tax year is data, not code: a rule buried in an `if` branch is treated as a defect. The
 result is an estimate, not tax advice.
 
-**Today** (`v0.2.0`): all three contracts — employment (*umowa o pracę*), *umowa zlecenie*
+**Today** (`v0.3.0`): all three contracts — employment (*umowa o pracę*), *umowa zlecenie*
 with its own ZUS rules, and *umowa o dzieło* with no ZUS, no health contribution and
 deductible costs at 20% or 50% where copyright transfers, capped annually. A student under
 26 on a *zlecenie* pays no ZUS at all, and every contribution line disappears from the
 screen. The under-26 income-tax relief applies only to the contracts the cited source
 lists, and where it does not reach, the interface says so instead of ignoring the control.
 Plus, from `v0.1.0`: the under-26 relief, a full Polish and English interface, localStorage
-persistence and cited sources with effective dates. **In progress:** a net→gross direction,
-so you can ask what gross pay leaves you 5 000 on hand. **Planned:** hour/week/month/year
-input units, the rent-and-food leftover layer, and a public URL.
+persistence and cited sources with effective dates. New in `v0.3.0`: a **direction toggle** —
+name the amount you want to land on and get the gross pay that produces it. The inverse is
+searched through the same engine rather than approximated by a multiplier, and because net
+is not monotone in gross, where several gross figures yield the entered net the app shows
+the lowest and says so on screen. **Next:** hour/week/month/year input units. **Planned:**
+the rent-and-food leftover layer, and a public URL.
 
 Run it with `npm install && npm run dev`. Tests: `npm test` for the engine,
 `npm run e2e` for a real browser.
