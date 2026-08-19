@@ -103,3 +103,11 @@ Format:
   Urgent when: the chip's amount derivation changes again, or the relief becomes worth zero
   on a covered contract. With nothing pinning it, that regression lands silently, which is
   exactly how P1-J survived four cycles. Raised by the checker at slice 2's P1-J re-check.
+- `field.gross.label` is now rendered nowhere — the direction row supplies both labels —
+  and was kept because DESIGN-SLICE-2 §10's deletion list does not name it — Urgent when:
+  anything renders it again, or the two EN gross labels drift apart, at which point one of
+  them is dead copy pretending to be live. Raised by the builder in slice 3.
+- `data-testid="net-amount"` carries the GROSS in netto mode, because the element is the
+  answer figure and the answer figure changes meaning with the direction — Urgent when:
+  any test or checker reads that id as proof that the figure is a net. Renaming it later
+  costs one line; misreading it once costs a false PASS. Raised by the builder in slice 3.

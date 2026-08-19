@@ -65,8 +65,10 @@ every net is unreachable, and that is the one case `dir.unreachable` can be test
    net the app shows the LOWEST and prints `dir.ambiguous` with the measured `{lo}`/`{hi}`
    in the field's status slot, `role="status"`, NOT `aria-invalid` — ambiguity is not an
    error. Where none does, `dir.unreachable` with the closest gross. Both carry numbers
-   computed from THIS entry. Verified in the browser: 6 000 zł net on uop is ambiguous;
-   a student under 26 on a zlecenie is 1:1 and prints neither message.
+   computed from THIS entry. Verified in the browser on **4 600 zł net, uop** — five gross
+   values, 6 263,06…6 264,35 zł. **CORRECTED 15:31:** this criterion first named 6 000 zł
+   net on uop, which the builder measured by exhaustive scan as UNIQUE (8 317,21 zł). The
+   example was wrong, the criterion is not. A student under 26 on a zlecenie is 1:1.
 6. **The P1-J family cannot come back.** No figure anywhere on screen — chip, why-line,
    live region, ambiguity message — is computed under an answer other than the one shown.
    Checked in netto mode at a net produced by gross **12 000** and by gross **20 000**,
@@ -85,7 +87,7 @@ every net is unreachable, and that is the one case `dir.unreachable` can be test
 
 ## In flight
 
-Nothing yet. Builder not dispatched.
+Slice 3 built at `8531b01`, with the checker.
 
 ## Blocked
 
@@ -93,9 +95,8 @@ Nothing.
 
 ## Last verification result
 
-Measured 2026-08-19 14:54, slice 2's P1-J re-check at `cb189dc` — **PASS**, nine criteria
-in a real browser, Δ = 0 (visible 45/45, held-out 5/5), no open P0 or P1. Verbatim in
-`.agent/LAST_CHECK.md`, which slice 3's first checker report overwrites.
+Measured 2026-08-19 14:54, slice 2 at `cb189dc` — PASS, Δ = 0, no open P0 or P1.
+Slice 3 has not been checked yet.
 
 ## Next slices, in order
 
@@ -112,3 +113,8 @@ in a real browser, Δ = 0 (visible 45/45, held-out 5/5), no open P0 or P1. Verba
 - 2026-08-19 15:00 — slice 3 thresholds and non-monotonicity measured with the shipped
   engine before any criterion was written. Table above.
 - 2026-08-19 15:04 — slice 3 and its ten criteria written. Phase-start `6b6787a`.
+- 2026-08-19 15:30 — builder handed over: `3676565` test: (5 Vitest, 6 Playwright red),
+  `8531b01` feat:, `f8ff553` docs. 33 Vitest and 23 Playwright green, 11 tests added.
+- 2026-08-19 15:31 — criterion 5's example corrected on the builder's measurement; two
+  deferrals to BACKLOG. The DECISIONS per-entry cap caught one of my own entries at 9
+  lines and it was trimmed — R4-F8's known workaround, not a new finding.

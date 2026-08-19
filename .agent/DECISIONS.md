@@ -176,7 +176,7 @@ Why: The standing rule is that a slice RESHAPING the screen shows rendered varia
 Rules out: A second placement round, and any deviation from §3's copy table.
 Level: 0 — executing a settled spec.
 
-## 2026-08-19 — Flipping the direction REINTERPRETS the amount, never converts or clears it
+## 2026-08-19 — Flipping the direction REINTERPRETS the amount; it never clears it
 What: The number in the field stays; the control above it changes what that number means.
      6 000 brutto becomes 6 000 wanted on hand, and the answer changes accordingly.
 Why: The control sits above the field precisely to be read before it (§3). Converting
